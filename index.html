@@ -17,104 +17,128 @@
         line-height: 1.6;
         color: #333;
         background-color: #f5f5f5;
+        overflow: hidden;
       }
 
-      .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 20px;
-      }
-
-      header {
-        background-color: #2e86ab;
-        color: white;
-        padding: 2rem 0;
-        text-align: center;
-        margin-bottom: 2rem;
-      }
-
-      h1 {
-        font-size: 2.5rem;
-        margin-bottom: 0.5rem;
-      }
-
-      .subtitle {
-        font-size: 1.1rem;
-        opacity: 0.9;
-      }
-
-      .content {
-        background-color: white;
-        padding: 2rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        margin-bottom: 2rem;
-      }
-
-      h2 {
-        color: #2e86ab;
-        margin-bottom: 1rem;
-        font-size: 1.8rem;
-      }
-
-      p {
-        margin-bottom: 1rem;
-        font-size: 1.1rem;
-      }
-
-      footer {
-        text-align: center;
-        padding: 2rem 0;
-        color: #666;
-      }
-
-      /* Scrollytelling Styles */
-      .scrolly-section {
-        background-color: #f5f5f5;
-        padding: 4rem 0;
-      }
-
-      .scrolly-container {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 2rem;
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 0 2rem;
-      }
-
-      .scrolly-viz {
-        position: sticky;
-        top: 0;
+      .slides-container {
+        width: 100vw;
         height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: white;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+        background-color: #f5f5f5;
       }
 
-      .scrolly-viz-content {
+      .slide {
         width: 100%;
         height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        padding: 4rem;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateX(0);
+        transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+          visibility 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+          transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        background-color: #f5f5f5;
+        will-change: opacity, transform;
       }
 
-      .scrolly-viz-content h3 {
+      .slide.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(0);
+        z-index: 10;
+      }
+
+      .slide.prev {
+        opacity: 0;
+        visibility: hidden;
+        transform: translateX(-20px);
+        z-index: 1;
+      }
+
+      .slide.next {
+        opacity: 0;
+        visibility: hidden;
+        transform: translateX(20px);
+        z-index: 1;
+      }
+
+      .slide-content {
+        max-width: 1200px;
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+        align-items: center;
+      }
+
+      .slide-text {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      .slide-number {
+        display: inline-block;
+        background-color: #2e86ab;
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 50px;
+        font-weight: bold;
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+      }
+
+      .slide h2 {
+        color: #2e86ab;
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .slide p {
+        font-size: 1.3rem;
+        line-height: 1.8;
+        color: #333;
+      }
+
+      .slide .highlight {
+        color: #a23b72;
+        font-weight: 600;
+      }
+
+      .slide-viz {
+        width: 100%;
+        height: 500px;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+      }
+
+      .slide-viz h3 {
         color: #2e86ab;
         font-size: 1.5rem;
         margin-bottom: 1rem;
         text-align: center;
       }
 
-      .scrolly-viz-placeholder {
+      .slide-viz-placeholder {
         width: 100%;
-        height: 400px;
+        height: 100%;
         background-color: #f0f0f0;
         border: 2px dashed #ccc;
         border-radius: 4px;
@@ -123,172 +147,152 @@
         justify-content: center;
         color: #999;
         font-size: 1rem;
-        transition: opacity 0.3s ease;
-      }
-
-      .scrolly-viz-placeholder.fade-out {
-        opacity: 0;
-      }
-
-      .viz-chart-container {
-        width: 100%;
-        height: 400px;
-        position: relative;
-      }
-
-      .viz-chart {
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        transition: opacity 0.5s ease;
-        position: absolute;
-        top: 0;
-        left: 0;
-      }
-
-      .viz-chart.active {
-        opacity: 1;
-      }
-
-      .scrolly-steps {
-        padding: 2rem 0;
-      }
-
-      .step {
-        min-height: 60vh;
+        text-align: center;
         padding: 2rem;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        background-color: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        margin-bottom: 2rem;
-        opacity: 0.3;
-        transition: opacity 0.5s ease;
       }
 
-      .step.is-active {
-        opacity: 1;
+      .title-slide {
+        background: linear-gradient(135deg, #2e86ab 0%, #1a5490 100%);
+        color: white;
+        text-align: center;
       }
 
-      .step h2 {
-        color: #2e86ab;
-        font-size: 2rem;
-        margin-bottom: 1.5rem;
-      }
-
-      .step p {
-        font-size: 1.2rem;
-        line-height: 1.8;
+      .title-slide h1 {
+        font-size: 4rem;
         margin-bottom: 1rem;
-        color: #333;
+        color: white;
       }
 
-      .step .step-number {
-        display: inline-block;
+      .title-slide .subtitle {
+        font-size: 1.5rem;
+        opacity: 0.9;
+        margin-bottom: 2rem;
+      }
+
+      .title-slide .authors {
+        font-size: 1.2rem;
+        margin-top: 3rem;
+      }
+
+      .navigation {
+        position: fixed;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 1rem;
+        z-index: 1000;
+      }
+
+      .nav-button {
         background-color: #2e86ab;
         color: white;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        text-align: center;
-        line-height: 40px;
-        font-weight: bold;
-        margin-bottom: 1rem;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: background-color 0.3s ease, opacity 0.3s ease;
       }
 
-      .step .highlight {
-        color: #a23b72;
-        font-weight: 600;
+      .nav-button:hover:not(:disabled) {
+        background-color: #1a5490;
+      }
+
+      .nav-button:disabled {
+        background-color: rgba(0, 0, 0, 0.2);
+        color: rgba(255, 255, 255, 0.6);
+        cursor: not-allowed;
+      }
+
+      .slide-indicator {
+        position: fixed;
+        bottom: 6rem;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 0.75rem;
+        z-index: 1000;
+        align-items: center;
+      }
+
+      .indicator-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: rgba(0, 0, 0, 0.25);
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+      }
+
+      .indicator-dot:hover {
+        background-color: rgba(0, 0, 0, 0.4);
+        transform: scale(1.2);
+      }
+
+      .indicator-dot.active {
+        background-color: #2e86ab;
+        width: 12px;
+        height: 12px;
       }
 
       @media (max-width: 968px) {
-        .scrolly-container {
+        .slide-content {
           grid-template-columns: 1fr;
         }
 
-        .scrolly-viz {
-          position: relative;
-          height: 400px;
-          margin-bottom: 2rem;
+        .slide-viz {
+          height: 300px;
+        }
+
+        .title-slide h1 {
+          font-size: 2.5rem;
         }
       }
     </style>
-    <script src="https://unpkg.com/scrollama"></script>
   </head>
   <body>
-    <header>
-      <div class="container">
+    <div class="slides-container">
+      <!-- Title Slide -->
+      <div class="slide active title-slide">
         <h1>Rainfall 2100: America's Climate Future</h1>
-        <p class="subtitle">
+        <p class="subtitle">The History of U.S. Rainfall</p>
+        <p class="authors">
           Claudine Handali, Sharon Tey, Charles Zhang, Jeremy Cheng
         </p>
       </div>
-    </header>
 
-    <div class="container">
-      <div class="content">
-        <h2>About This Project</h2>
-        <p>
-          This project analyzes historical and future precipitation data across
-          different regions of the United States, including the Midwest,
-          Northeast, South, and West regions.
-        </p>
-        <p>
-          The analysis includes projections for different emission scenarios,
-          comparing low emission (SSP1-2.6) and high emission (SSP 5-8.5)
-          scenarios to understand potential climate impacts.
-        </p>
-      </div>
-    </div>
-
-    <section class="scrolly-section">
-      <div class="scrolly-container">
-        <figure class="scrolly-viz">
-          <div class="scrolly-viz-content">
-            <h3 id="viz-title">The History of U.S. Rainfall</h3>
-            <div class="viz-chart-container" id="viz-container">
-              <div class="scrolly-viz-placeholder" id="viz-placeholder">
-                Chart will appear here
-              </div>
-              <div
-                class="viz-chart"
-                id="chart-evolving-line"
-                data-chart-type="line"
-              ></div>
-              <div
-                class="viz-chart"
-                id="chart-heavy-rainfall"
-                data-chart-type="bar"
-              ></div>
-              <div
-                class="viz-chart"
-                id="chart-atmospheric-rivers"
-                data-chart-type="map"
-              ></div>
-              <div
-                class="viz-chart"
-                id="chart-regional-map"
-                data-chart-type="map"
-              ></div>
-              <div
-                class="viz-chart"
-                id="chart-comparison"
-                data-chart-type="comparison"
-              ></div>
+      <!-- About Slide -->
+      <div class="slide">
+        <div class="slide-content">
+          <div class="slide-text">
+            <span class="slide-number">1</span>
+            <h2>About This Project</h2>
+            <p>
+              This project analyzes historical and future precipitation data
+              across different regions of the United States, including the
+              Midwest, Northeast, South, and West regions.
+            </p>
+            <p>
+              The analysis includes projections for different emission
+              scenarios, comparing low emission (SSP1-2.6) and high emission
+              (SSP 5-8.5) scenarios to understand potential climate impacts.
+            </p>
+          </div>
+          <div class="slide-viz">
+            <div class="slide-viz-placeholder">
+              Project overview visualization
             </div>
           </div>
-        </figure>
+        </div>
+      </div>
 
-        <article class="scrolly-steps">
-          <div
-            class="step"
-            data-step="0"
-            data-viz-type="evolving"
-            data-viz-state="intro"
-          >
-            <span class="step-number">1</span>
+      <!-- Step 1: Before Industrial Revolution -->
+      <div class="slide">
+        <div class="slide-content">
+          <div class="slide-text">
+            <span class="slide-number">2</span>
             <h2>Before the Industrial Revolution</h2>
             <p>
               Pre-industrial precipitation patterns and natural variability.
@@ -297,274 +301,276 @@
               Introduction to how human activity has altered these patterns.
             </p>
           </div>
+          <div class="slide-viz">
+            <h3>Historical Context</h3>
+            <div class="slide-viz-placeholder">
+              Historical context visualization
+            </div>
+          </div>
+        </div>
+      </div>
 
-          <div
-            class="step"
-            data-step="1"
-            data-viz-type="evolving"
-            data-viz-state="annual-trends"
-          >
-            <span class="step-number">2</span>
+      <!-- Step 2: Long-Term Trends -->
+      <div class="slide">
+        <div class="slide-content">
+          <div class="slide-text">
+            <span class="slide-number">3</span>
             <h2>Long-Term Trends in Annual Precipitation</h2>
             <p>
               Overall changes in annual precipitation since pre-industrial era.
             </p>
+            <p>Regional variations and divergence patterns.</p>
             <p>
-              <span class="highlight">Evolving visualization:</span> Start with
-              annual average line chart.
+              <span class="highlight">Visualization:</span> Line chart showing
+              annual precipitation trends since 1900.
             </p>
           </div>
+          <div class="slide-viz">
+            <h3>Annual Precipitation Trends</h3>
+            <div class="slide-viz-placeholder">
+              Line chart: Annual precipitation trends since 1900
+            </div>
+          </div>
+        </div>
+      </div>
 
-          <div
-            class="step"
-            data-step="2"
-            data-viz-type="evolving"
-            data-viz-state="seasonal-breakdown"
-          >
-            <span class="step-number">3</span>
+      <!-- Step 3: Seasonal Patterns -->
+      <div class="slide">
+        <div class="slide-content">
+          <div class="slide-text">
+            <span class="slide-number">4</span>
             <h2>Shifts in Seasonal Rainfall Patterns</h2>
             <p>Changes in when rain falls throughout the year.</p>
+            <p>Impact on seasons: spring, summer, fall, winter patterns.</p>
             <p>
-              <span class="highlight">Evolving visualization:</span> Add
-              seasonal breakdowns (spring, summer, fall, winter) to the same
-              chart.
+              <span class="highlight">Visualization:</span> Line chart with
+              seasonal breakdowns (spring, summer, fall, winter).
             </p>
           </div>
+          <div class="slide-viz">
+            <h3>Seasonal Pattern Shifts</h3>
+            <div class="slide-viz-placeholder">
+              Line chart with seasonal breakdowns: Spring, Summer, Fall, Winter
+            </div>
+          </div>
+        </div>
+      </div>
 
-          <div
-            class="step"
-            data-step="3"
-            data-viz-type="separate"
-            data-viz-chart="heavy-rainfall"
-          >
-            <span class="step-number">4</span>
+      <!-- Step 4: Heavy Rainfall -->
+      <div class="slide">
+        <div class="slide-content">
+          <div class="slide-text">
+            <span class="slide-number">5</span>
             <h2>Increase in Heavy Rainfall Days</h2>
             <p>Frequency and intensity of extreme precipitation events.</p>
+            <p>Trends in heavy rainfall days over time.</p>
             <p>
-              <span class="highlight">Separate visualization:</span> Bar chart
-              showing frequency of heavy rainfall days over time.
+              <span class="highlight">Visualization:</span> Bar chart showing
+              frequency of extreme precipitation days.
             </p>
           </div>
+          <div class="slide-viz">
+            <h3>Heavy Rainfall Events</h3>
+            <div class="slide-viz-placeholder">
+              Bar chart: Frequency of extreme precipitation days
+            </div>
+          </div>
+        </div>
+      </div>
 
-          <div
-            class="step"
-            data-step="4"
-            data-viz-type="separate"
-            data-viz-chart="atmospheric-rivers"
-          >
-            <span class="step-number">5</span>
+      <!-- Step 5: Atmospheric Rivers -->
+      <div class="slide">
+        <div class="slide-content">
+          <div class="slide-text">
+            <span class="slide-number">6</span>
             <h2>Intensifying Atmospheric Rivers</h2>
             <p>
               Evidence of intensifying atmospheric rivers, particularly West
               Coast.
             </p>
+            <p>Frequency and intensity trends over time.</p>
             <p>
-              <span class="highlight">Separate visualization:</span> Map showing
+              <span class="highlight">Visualization:</span> Map showing
               atmospheric river frequency and intensity.
             </p>
           </div>
+          <div class="slide-viz">
+            <h3>Atmospheric Rivers</h3>
+            <div class="slide-viz-placeholder">
+              Map: Atmospheric river frequency and intensity
+            </div>
+          </div>
+        </div>
+      </div>
 
-          <div
-            class="step"
-            data-step="5"
-            data-viz-type="evolving"
-            data-viz-state="regional-national"
-          >
-            <span class="step-number">6</span>
+      <!-- Step 6: Regional Extremes -->
+      <div class="slide">
+        <div class="slide-content">
+          <div class="slide-text">
+            <span class="slide-number">7</span>
             <h2>Regional Extremes: East vs. West</h2>
             <p>East drying vs. West wetting patterns.</p>
+            <p>Regional divergence and extreme differences.</p>
             <p>
-              <span class="highlight">Evolving visualization:</span> Start with
-              national view, then highlight regional differences.
+              <span class="highlight">Visualization:</span> Map showing East vs.
+              West precipitation changes.
             </p>
           </div>
+          <div class="slide-viz">
+            <h3>Regional Divergence</h3>
+            <div class="slide-viz-placeholder">
+              Map: East vs. West precipitation changes
+            </div>
+          </div>
+        </div>
+      </div>
 
-          <div
-            class="step"
-            data-step="6"
-            data-viz-type="comparison"
-            data-viz-chart="human-fingerprint"
-          >
-            <span class="step-number">7</span>
+      <!-- Step 7: Human Fingerprint -->
+      <div class="slide">
+        <div class="slide-content">
+          <div class="slide-text">
+            <span class="slide-number">8</span>
             <h2>The Human Fingerprint</h2>
             <p>
               Evidence that human activity has altered precipitation patterns.
             </p>
+            <p>Transition to future projections section.</p>
             <p>
-              <span class="highlight">Comparison visualization:</span>
-              Side-by-side or overlay of observed vs. modeled changes.
+              <span class="highlight">Visualization:</span> Comparison of
+              observed vs. modeled changes.
             </p>
           </div>
-        </article>
+          <div class="slide-viz">
+            <h3>Observed vs. Modeled</h3>
+            <div class="slide-viz-placeholder">
+              Comparison: Observed vs. Modeled changes
+            </div>
+          </div>
+        </div>
       </div>
-    </section>
+    </div>
+
+    <!-- Navigation -->
+    <div class="slide-indicator" id="slide-indicator"></div>
+    <div class="navigation">
+      <button class="nav-button" id="prev-btn" onclick="previousSlide()">
+        Previous
+      </button>
+      <button class="nav-button" id="next-btn" onclick="nextSlide()">
+        Next
+      </button>
+    </div>
 
     <script>
-      const scroller = scrollama();
+      let currentSlide = 0;
+      const slides = document.querySelectorAll(".slide");
+      const totalSlides = slides.length;
 
-      scroller
-        .setup({
-          step: ".step",
-          offset: 0.5,
-          progress: true,
-        })
-        .onStepEnter((response) => {
-          const stepIndex = response.index;
-          const step = response.element;
+      // Create slide indicators
+      const indicatorContainer = document.getElementById("slide-indicator");
+      for (let i = 0; i < totalSlides; i++) {
+        const dot = document.createElement("div");
+        dot.className = "indicator-dot";
+        if (i === 0) dot.classList.add("active");
+        dot.addEventListener("click", () => goToSlide(i));
+        indicatorContainer.appendChild(dot);
+      }
 
-          // Add active class to current step
-          document.querySelectorAll(".step").forEach((s) => {
-            s.classList.remove("is-active");
-          });
-          step.classList.add("is-active");
-
-          // Update visualization based on step
-          updateVisualization(stepIndex);
-        })
-        .onStepExit((response) => {
-          // Optional: handle step exit
-        })
-        .onStepProgress((response) => {
-          // Optional: handle progress for smooth animations
+      function updateSlide() {
+        slides.forEach((slide, index) => {
+          slide.classList.remove("active", "prev", "next");
+          if (index === currentSlide) {
+            slide.classList.add("active");
+          } else if (index < currentSlide) {
+            slide.classList.add("prev");
+          } else {
+            slide.classList.add("next");
+          }
         });
 
-      function updateVisualization(stepIndex) {
-        const step = document.querySelector(`[data-step="${stepIndex}"]`);
-        const vizType = step.getAttribute("data-viz-type");
-        const vizState = step.getAttribute("data-viz-state");
-        const vizChart = step.getAttribute("data-viz-chart");
-        const vizTitle = document.getElementById("viz-title");
-        const vizPlaceholder = document.getElementById("viz-placeholder");
-        const allCharts = document.querySelectorAll(".viz-chart");
+        // Update indicators
+        document.querySelectorAll(".indicator-dot").forEach((dot, index) => {
+          dot.classList.toggle("active", index === currentSlide);
+        });
 
-        // Hide all charts first
-        allCharts.forEach((chart) => chart.classList.remove("active"));
-        vizPlaceholder.classList.remove("fade-out");
+        // Update navigation buttons - no longer disable, allow looping
+        document.getElementById("prev-btn").disabled = false;
+        document.getElementById("next-btn").disabled = false;
+      }
 
-        // Update title
-        const titles = {
-          0: "The History of U.S. Rainfall",
-          1: "Long-Term Annual Trends",
-          2: "Seasonal Pattern Shifts",
-          3: "Heavy Rainfall Events",
-          4: "Atmospheric Rivers",
-          5: "Regional Divergence",
-          6: "The Human Fingerprint",
-        };
-        vizTitle.textContent = titles[stepIndex] || "Visualization";
+      let isTransitioning = false;
 
-        // Handle different visualization types
-        if (vizType === "evolving") {
-          // Evolving visualization - same chart, different states
-          if (vizState === "regional-national") {
-            // Special case: regional map evolution
-            const regionalMap = document.getElementById("chart-regional-map");
-            vizPlaceholder.classList.add("fade-out");
-            setTimeout(() => {
-              regionalMap.classList.add("active");
-              updateEvolvingChart(vizState, stepIndex);
-            }, 300);
-          } else {
-            // Line chart evolution
-            const evolvingChart = document.getElementById(
-              "chart-evolving-line"
-            );
-            vizPlaceholder.classList.add("fade-out");
-            setTimeout(() => {
-              evolvingChart.classList.add("active");
-              updateEvolvingChart(vizState, stepIndex);
-            }, 300);
-          }
-        } else if (vizType === "separate") {
-          // Separate visualization - switch to different chart
-          const chartId = `chart-${vizChart}`;
-          const separateChart = document.getElementById(chartId);
-          vizPlaceholder.classList.add("fade-out");
+      function nextSlide() {
+        if (!isTransitioning) {
+          isTransitioning = true;
+          currentSlide = (currentSlide + 1) % totalSlides;
+          updateSlide();
           setTimeout(() => {
-            separateChart.classList.add("active");
-            updateSeparateChart(vizChart, stepIndex);
-          }, 300);
-        } else if (vizType === "comparison") {
-          // Comparison visualization
-          const comparisonChart = document.getElementById("chart-comparison");
-          vizPlaceholder.classList.add("fade-out");
-          setTimeout(() => {
-            comparisonChart.classList.add("active");
-            updateComparisonChart(vizChart, stepIndex);
-          }, 300);
+            isTransitioning = false;
+          }, 600);
         }
       }
 
-      function updateEvolvingChart(state, stepIndex) {
-        let chartContainer;
+      function previousSlide() {
+        if (!isTransitioning) {
+          isTransitioning = true;
+          currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+          updateSlide();
+          setTimeout(() => {
+            isTransitioning = false;
+          }, 600);
+        }
+      }
 
-        // Determine which container to update
-        if (state === "regional-national") {
-          chartContainer = document.getElementById("chart-regional-map");
+      function goToSlide(index) {
+        if (index !== currentSlide && !isTransitioning) {
+          isTransitioning = true;
+          currentSlide = index;
+          updateSlide();
+          setTimeout(() => {
+            isTransitioning = false;
+          }, 600);
+        }
+      }
+
+      // Keyboard navigation
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" || e.key === " ") {
+          e.preventDefault();
+          nextSlide();
+        } else if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          previousSlide();
+        }
+      });
+
+      // Click navigation on left/right sides of screen
+      const slidesContainer = document.querySelector(".slides-container");
+      slidesContainer.addEventListener("click", (e) => {
+        // Don't navigate if clicking on interactive elements
+        if (
+          e.target.closest(".nav-button") ||
+          e.target.closest(".indicator-dot") ||
+          e.target.closest(".slide-viz") ||
+          e.target.closest("button") ||
+          e.target.closest("a")
+        ) {
+          return;
+        }
+
+        const clickX = e.clientX;
+        const windowWidth = window.innerWidth;
+        const leftHalf = clickX < windowWidth / 2;
+
+        if (leftHalf) {
+          previousSlide();
         } else {
-          chartContainer = document.getElementById("chart-evolving-line");
+          nextSlide();
         }
+      });
 
-        // Placeholder for evolving chart logic
-        // Step 1: Show annual average line
-        // Step 2: Add seasonal breakdowns
-        switch (state) {
-          case "intro":
-            chartContainer.innerHTML =
-              "<p style='text-align: center; padding: 2rem;'>Historical context - prepare for data visualization</p>";
-            break;
-          case "annual-trends":
-            chartContainer.innerHTML =
-              "<p style='text-align: center; padding: 2rem;'>Line chart: Annual precipitation trends since 1900<br><small>Ready to add seasonal data...</small></p>";
-            break;
-          case "seasonal-breakdown":
-            chartContainer.innerHTML =
-              "<p style='text-align: center; padding: 2rem;'>Line chart with seasonal breakdowns<br>Spring, Summer, Fall, Winter patterns<br><small>Same chart, now showing seasonal data</small></p>";
-            break;
-          case "regional-national":
-            chartContainer.innerHTML =
-              "<p style='text-align: center; padding: 2rem;'>Map: National view of precipitation changes<br><small>Evolving to highlight regions (East vs West)...</small></p>";
-            break;
-          default:
-            chartContainer.innerHTML =
-              "<p style='text-align: center; padding: 2rem;'>Evolving chart state: " +
-              state +
-              "</p>";
-        }
-      }
-
-      function updateSeparateChart(chartType, stepIndex) {
-        const chartId = `chart-${chartType}`;
-        const chartContainer = document.getElementById(chartId);
-
-        // Placeholder for separate chart logic
-        switch (chartType) {
-          case "heavy-rainfall":
-            chartContainer.innerHTML =
-              "<p style='text-align: center; padding: 2rem;'>Bar chart: Frequency of extreme precipitation days<br><small>Separate visualization from line chart</small></p>";
-            break;
-          case "atmospheric-rivers":
-            chartContainer.innerHTML =
-              "<p style='text-align: center; padding: 2rem;'>Map: Atmospheric river frequency and intensity<br><small>Different visualization type - map</small></p>";
-            break;
-          default:
-            chartContainer.innerHTML =
-              "<p style='text-align: center; padding: 2rem;'>Chart: " +
-              chartType +
-              "</p>";
-        }
-      }
-
-      function updateComparisonChart(chartType, stepIndex) {
-        const chartContainer = document.getElementById("chart-comparison");
-
-        // Placeholder for comparison chart logic
-        chartContainer.innerHTML =
-          "<p style='text-align: center; padding: 2rem;'>Comparison: Observed vs. Modeled changes<br><small>Side-by-side or overlay visualization</small></p>";
-      }
-
-      // Handle window resize
-      window.addEventListener("resize", scroller.resize);
+      // Initialize
+      updateSlide();
     </script>
   </body>
 </html>
