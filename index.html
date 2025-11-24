@@ -174,41 +174,9 @@
         margin-top: 3rem;
       }
 
-      .navigation {
-        position: fixed;
-        bottom: 2rem;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        gap: 1rem;
-        z-index: 1000;
-      }
-
-      .nav-button {
-        background-color: #2e86ab;
-        color: white;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 1rem;
-        font-weight: 500;
-        transition: background-color 0.3s ease, opacity 0.3s ease;
-      }
-
-      .nav-button:hover:not(:disabled) {
-        background-color: #1a5490;
-      }
-
-      .nav-button:disabled {
-        background-color: rgba(0, 0, 0, 0.2);
-        color: rgba(255, 255, 255, 0.6);
-        cursor: not-allowed;
-      }
-
       .slide-indicator {
         position: fixed;
-        bottom: 6rem;
+        bottom: 2rem;
         left: 50%;
         transform: translateX(-50%);
         display: flex;
@@ -452,14 +420,6 @@
 
     <!-- Navigation -->
     <div class="slide-indicator" id="slide-indicator"></div>
-    <div class="navigation">
-      <button class="nav-button" id="prev-btn" onclick="previousSlide()">
-        Previous
-      </button>
-      <button class="nav-button" id="next-btn" onclick="nextSlide()">
-        Next
-      </button>
-    </div>
 
     <script>
       let currentSlide = 0;
@@ -492,10 +452,6 @@
         document.querySelectorAll(".indicator-dot").forEach((dot, index) => {
           dot.classList.toggle("active", index === currentSlide);
         });
-
-        // Update navigation buttons - no longer disable, allow looping
-        document.getElementById("prev-btn").disabled = false;
-        document.getElementById("next-btn").disabled = false;
       }
 
       let isTransitioning = false;
@@ -549,7 +505,6 @@
       slidesContainer.addEventListener("click", (e) => {
         // Don't navigate if clicking on interactive elements
         if (
-          e.target.closest(".nav-button") ||
           e.target.closest(".indicator-dot") ||
           e.target.closest(".slide-viz") ||
           e.target.closest("button") ||
