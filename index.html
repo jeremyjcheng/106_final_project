@@ -67,7 +67,155 @@
         padding: 2rem 0;
         color: #666;
       }
+
+      /* Scrollytelling Styles */
+      .scrolly-section {
+        background-color: #f5f5f5;
+        padding: 4rem 0;
+      }
+
+      .scrolly-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+      }
+
+      .scrolly-viz {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+      }
+
+      .scrolly-viz-content {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .scrolly-viz-content h3 {
+        color: #2e86ab;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        text-align: center;
+      }
+
+      .scrolly-viz-placeholder {
+        width: 100%;
+        height: 400px;
+        background-color: #f0f0f0;
+        border: 2px dashed #ccc;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #999;
+        font-size: 1rem;
+        transition: opacity 0.3s ease;
+      }
+
+      .scrolly-viz-placeholder.fade-out {
+        opacity: 0;
+      }
+
+      .viz-chart-container {
+        width: 100%;
+        height: 400px;
+        position: relative;
+      }
+
+      .viz-chart {
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+
+      .viz-chart.active {
+        opacity: 1;
+      }
+
+      .scrolly-steps {
+        padding: 2rem 0;
+      }
+
+      .step {
+        min-height: 60vh;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        opacity: 0.3;
+        transition: opacity 0.5s ease;
+      }
+
+      .step.is-active {
+        opacity: 1;
+      }
+
+      .step h2 {
+        color: #2e86ab;
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .step p {
+        font-size: 1.2rem;
+        line-height: 1.8;
+        margin-bottom: 1rem;
+        color: #333;
+      }
+
+      .step .step-number {
+        display: inline-block;
+        background-color: #2e86ab;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 40px;
+        font-weight: bold;
+        margin-bottom: 1rem;
+      }
+
+      .step .highlight {
+        color: #a23b72;
+        font-weight: 600;
+      }
+
+      @media (max-width: 968px) {
+        .scrolly-container {
+          grid-template-columns: 1fr;
+        }
+
+        .scrolly-viz {
+          position: relative;
+          height: 400px;
+          margin-bottom: 2rem;
+        }
+      }
     </style>
+    <script src="https://unpkg.com/scrollama"></script>
   </head>
   <body>
     <header>
@@ -94,5 +242,329 @@
         </p>
       </div>
     </div>
+
+    <section class="scrolly-section">
+      <div class="scrolly-container">
+        <figure class="scrolly-viz">
+          <div class="scrolly-viz-content">
+            <h3 id="viz-title">The History of U.S. Rainfall</h3>
+            <div class="viz-chart-container" id="viz-container">
+              <div class="scrolly-viz-placeholder" id="viz-placeholder">
+                Chart will appear here
+              </div>
+              <div
+                class="viz-chart"
+                id="chart-evolving-line"
+                data-chart-type="line"
+              ></div>
+              <div
+                class="viz-chart"
+                id="chart-heavy-rainfall"
+                data-chart-type="bar"
+              ></div>
+              <div
+                class="viz-chart"
+                id="chart-atmospheric-rivers"
+                data-chart-type="map"
+              ></div>
+              <div
+                class="viz-chart"
+                id="chart-regional-map"
+                data-chart-type="map"
+              ></div>
+              <div
+                class="viz-chart"
+                id="chart-comparison"
+                data-chart-type="comparison"
+              ></div>
+            </div>
+          </div>
+        </figure>
+
+        <article class="scrolly-steps">
+          <div
+            class="step"
+            data-step="0"
+            data-viz-type="evolving"
+            data-viz-state="intro"
+          >
+            <span class="step-number">1</span>
+            <h2>Before the Industrial Revolution</h2>
+            <p>
+              Pre-industrial precipitation patterns and natural variability.
+            </p>
+            <p>
+              Introduction to how human activity has altered these patterns.
+            </p>
+          </div>
+
+          <div
+            class="step"
+            data-step="1"
+            data-viz-type="evolving"
+            data-viz-state="annual-trends"
+          >
+            <span class="step-number">2</span>
+            <h2>Long-Term Trends in Annual Precipitation</h2>
+            <p>
+              Overall changes in annual precipitation since pre-industrial era.
+            </p>
+            <p>
+              <span class="highlight">Evolving visualization:</span> Start with
+              annual average line chart.
+            </p>
+          </div>
+
+          <div
+            class="step"
+            data-step="2"
+            data-viz-type="evolving"
+            data-viz-state="seasonal-breakdown"
+          >
+            <span class="step-number">3</span>
+            <h2>Shifts in Seasonal Rainfall Patterns</h2>
+            <p>Changes in when rain falls throughout the year.</p>
+            <p>
+              <span class="highlight">Evolving visualization:</span> Add
+              seasonal breakdowns (spring, summer, fall, winter) to the same
+              chart.
+            </p>
+          </div>
+
+          <div
+            class="step"
+            data-step="3"
+            data-viz-type="separate"
+            data-viz-chart="heavy-rainfall"
+          >
+            <span class="step-number">4</span>
+            <h2>Increase in Heavy Rainfall Days</h2>
+            <p>Frequency and intensity of extreme precipitation events.</p>
+            <p>
+              <span class="highlight">Separate visualization:</span> Bar chart
+              showing frequency of heavy rainfall days over time.
+            </p>
+          </div>
+
+          <div
+            class="step"
+            data-step="4"
+            data-viz-type="separate"
+            data-viz-chart="atmospheric-rivers"
+          >
+            <span class="step-number">5</span>
+            <h2>Intensifying Atmospheric Rivers</h2>
+            <p>
+              Evidence of intensifying atmospheric rivers, particularly West
+              Coast.
+            </p>
+            <p>
+              <span class="highlight">Separate visualization:</span> Map showing
+              atmospheric river frequency and intensity.
+            </p>
+          </div>
+
+          <div
+            class="step"
+            data-step="5"
+            data-viz-type="evolving"
+            data-viz-state="regional-national"
+          >
+            <span class="step-number">6</span>
+            <h2>Regional Extremes: East vs. West</h2>
+            <p>East drying vs. West wetting patterns.</p>
+            <p>
+              <span class="highlight">Evolving visualization:</span> Start with
+              national view, then highlight regional differences.
+            </p>
+          </div>
+
+          <div
+            class="step"
+            data-step="6"
+            data-viz-type="comparison"
+            data-viz-chart="human-fingerprint"
+          >
+            <span class="step-number">7</span>
+            <h2>The Human Fingerprint</h2>
+            <p>
+              Evidence that human activity has altered precipitation patterns.
+            </p>
+            <p>
+              <span class="highlight">Comparison visualization:</span>
+              Side-by-side or overlay of observed vs. modeled changes.
+            </p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <script>
+      const scroller = scrollama();
+
+      scroller
+        .setup({
+          step: ".step",
+          offset: 0.5,
+          progress: true,
+        })
+        .onStepEnter((response) => {
+          const stepIndex = response.index;
+          const step = response.element;
+
+          // Add active class to current step
+          document.querySelectorAll(".step").forEach((s) => {
+            s.classList.remove("is-active");
+          });
+          step.classList.add("is-active");
+
+          // Update visualization based on step
+          updateVisualization(stepIndex);
+        })
+        .onStepExit((response) => {
+          // Optional: handle step exit
+        })
+        .onStepProgress((response) => {
+          // Optional: handle progress for smooth animations
+        });
+
+      function updateVisualization(stepIndex) {
+        const step = document.querySelector(`[data-step="${stepIndex}"]`);
+        const vizType = step.getAttribute("data-viz-type");
+        const vizState = step.getAttribute("data-viz-state");
+        const vizChart = step.getAttribute("data-viz-chart");
+        const vizTitle = document.getElementById("viz-title");
+        const vizPlaceholder = document.getElementById("viz-placeholder");
+        const allCharts = document.querySelectorAll(".viz-chart");
+
+        // Hide all charts first
+        allCharts.forEach((chart) => chart.classList.remove("active"));
+        vizPlaceholder.classList.remove("fade-out");
+
+        // Update title
+        const titles = {
+          0: "The History of U.S. Rainfall",
+          1: "Long-Term Annual Trends",
+          2: "Seasonal Pattern Shifts",
+          3: "Heavy Rainfall Events",
+          4: "Atmospheric Rivers",
+          5: "Regional Divergence",
+          6: "The Human Fingerprint",
+        };
+        vizTitle.textContent = titles[stepIndex] || "Visualization";
+
+        // Handle different visualization types
+        if (vizType === "evolving") {
+          // Evolving visualization - same chart, different states
+          if (vizState === "regional-national") {
+            // Special case: regional map evolution
+            const regionalMap = document.getElementById("chart-regional-map");
+            vizPlaceholder.classList.add("fade-out");
+            setTimeout(() => {
+              regionalMap.classList.add("active");
+              updateEvolvingChart(vizState, stepIndex);
+            }, 300);
+          } else {
+            // Line chart evolution
+            const evolvingChart = document.getElementById(
+              "chart-evolving-line"
+            );
+            vizPlaceholder.classList.add("fade-out");
+            setTimeout(() => {
+              evolvingChart.classList.add("active");
+              updateEvolvingChart(vizState, stepIndex);
+            }, 300);
+          }
+        } else if (vizType === "separate") {
+          // Separate visualization - switch to different chart
+          const chartId = `chart-${vizChart}`;
+          const separateChart = document.getElementById(chartId);
+          vizPlaceholder.classList.add("fade-out");
+          setTimeout(() => {
+            separateChart.classList.add("active");
+            updateSeparateChart(vizChart, stepIndex);
+          }, 300);
+        } else if (vizType === "comparison") {
+          // Comparison visualization
+          const comparisonChart = document.getElementById("chart-comparison");
+          vizPlaceholder.classList.add("fade-out");
+          setTimeout(() => {
+            comparisonChart.classList.add("active");
+            updateComparisonChart(vizChart, stepIndex);
+          }, 300);
+        }
+      }
+
+      function updateEvolvingChart(state, stepIndex) {
+        let chartContainer;
+
+        // Determine which container to update
+        if (state === "regional-national") {
+          chartContainer = document.getElementById("chart-regional-map");
+        } else {
+          chartContainer = document.getElementById("chart-evolving-line");
+        }
+
+        // Placeholder for evolving chart logic
+        // Step 1: Show annual average line
+        // Step 2: Add seasonal breakdowns
+        switch (state) {
+          case "intro":
+            chartContainer.innerHTML =
+              "<p style='text-align: center; padding: 2rem;'>Historical context - prepare for data visualization</p>";
+            break;
+          case "annual-trends":
+            chartContainer.innerHTML =
+              "<p style='text-align: center; padding: 2rem;'>Line chart: Annual precipitation trends since 1900<br><small>Ready to add seasonal data...</small></p>";
+            break;
+          case "seasonal-breakdown":
+            chartContainer.innerHTML =
+              "<p style='text-align: center; padding: 2rem;'>Line chart with seasonal breakdowns<br>Spring, Summer, Fall, Winter patterns<br><small>Same chart, now showing seasonal data</small></p>";
+            break;
+          case "regional-national":
+            chartContainer.innerHTML =
+              "<p style='text-align: center; padding: 2rem;'>Map: National view of precipitation changes<br><small>Evolving to highlight regions (East vs West)...</small></p>";
+            break;
+          default:
+            chartContainer.innerHTML =
+              "<p style='text-align: center; padding: 2rem;'>Evolving chart state: " +
+              state +
+              "</p>";
+        }
+      }
+
+      function updateSeparateChart(chartType, stepIndex) {
+        const chartId = `chart-${chartType}`;
+        const chartContainer = document.getElementById(chartId);
+
+        // Placeholder for separate chart logic
+        switch (chartType) {
+          case "heavy-rainfall":
+            chartContainer.innerHTML =
+              "<p style='text-align: center; padding: 2rem;'>Bar chart: Frequency of extreme precipitation days<br><small>Separate visualization from line chart</small></p>";
+            break;
+          case "atmospheric-rivers":
+            chartContainer.innerHTML =
+              "<p style='text-align: center; padding: 2rem;'>Map: Atmospheric river frequency and intensity<br><small>Different visualization type - map</small></p>";
+            break;
+          default:
+            chartContainer.innerHTML =
+              "<p style='text-align: center; padding: 2rem;'>Chart: " +
+              chartType +
+              "</p>";
+        }
+      }
+
+      function updateComparisonChart(chartType, stepIndex) {
+        const chartContainer = document.getElementById("chart-comparison");
+
+        // Placeholder for comparison chart logic
+        chartContainer.innerHTML =
+          "<p style='text-align: center; padding: 2rem;'>Comparison: Observed vs. Modeled changes<br><small>Side-by-side or overlay visualization</small></p>";
+      }
+
+      // Handle window resize
+      window.addEventListener("resize", scroller.resize);
+    </script>
   </body>
 </html>
