@@ -92,6 +92,11 @@ function updateSlide() {
     s.classList.remove("active");
     if (i === currentSlide) s.classList.add("active");
   });
+
+  // Restore selected state when updating slide (only if slides are created)
+  if (slides.length > 0) {
+    restoreSelectedState();
+  }
 }
 
 function nextSlide() {
@@ -104,8 +109,55 @@ function nextSlide() {
 }
 
 function prevSlide() {
-  if (currentSlide > 0) currentSlide--;
-  updateSlide();
+  if (currentSlide > 0) {
+    currentSlide--;
+    updateSlide();
+    // Restore selected state for the previous slide's category
+    restoreSelectedState();
+  }
+}
+
+function restoreSelectedState() {
+  // Get the current slide's category
+  const slideIndex = currentSlide;
+  const categoryKeys = Object.keys(categories);
+
+  // Only restore if we're on a question slide (not title or results)
+  // Note: slides array includes title slide at index 0, so question slides start at 1
+  // But we need to account for the fact that createSlides() creates slides after the title
+  // So the first question slide in the slides array is at index 1 (after title slide)
+  if (slideIndex > 0 && slideIndex <= categoryKeys.length) {
+    // Adjust index: slideIndex 1 = first category, slideIndex 2 = second category, etc.
+    const categoryIndex = slideIndex - 1;
+    if (categoryIndex >= 0 && categoryIndex < categoryKeys.length) {
+      const category = categoryKeys[categoryIndex];
+      const selectedChoice = userChoices[category];
+
+      if (selectedChoice) {
+        // Find and select the button for this choice
+        const slide = slides[slideIndex];
+        if (slide) {
+          const buttons = slide.querySelectorAll(".choice-button");
+          buttons.forEach((btn) => {
+            if (btn.getAttribute("data-choice") === selectedChoice) {
+              btn.classList.add("selected");
+            } else {
+              btn.classList.remove("selected");
+            }
+          });
+        }
+      } else {
+        // Clear all selections if no choice was made
+        const slide = slides[slideIndex];
+        if (slide) {
+          const buttons = slide.querySelectorAll(".choice-button");
+          buttons.forEach((btn) => {
+            btn.classList.remove("selected");
+          });
+        }
+      }
+    }
+  }
 }
 
 // Initialize start game
@@ -117,6 +169,8 @@ d3.select("#start-game").on("click", () => {
 // Generate slides for each category
 function createSlides() {
   const container = d3.select(".slides-container");
+  let slideIndex = 0;
+
   for (const category in categories) {
     const slide = container.append("div").attr("class", "slide");
     slide.append("h2").text(categories[category]);
@@ -146,6 +200,20 @@ function createSlides() {
         nextSlide();
       });
     });
+
+    // Add back button to each question slide (not the first one)
+    if (slideIndex > 0) {
+      const backBtn = slide
+        .append("button")
+        .attr("class", "back-button")
+        .text("← Back");
+
+      backBtn.on("click", () => {
+        prevSlide();
+      });
+    }
+
+    slideIndex++;
   }
 
   // Add final slide for total emissions
@@ -156,8 +224,23 @@ function createSlides() {
     .attr("class", "emissions-output")
     .attr("id", "final-emissions");
 
+  // Add button container for results slide
+  const buttonContainer = resultSlide
+    .append("div")
+    .attr("class", "result-buttons");
+
+  // Add Back button to results slide
+  const backBtn = buttonContainer
+    .append("button")
+    .attr("class", "back-button")
+    .text("← Back");
+
+  backBtn.on("click", () => {
+    prevSlide();
+  });
+
   // Add Start Over button
-  const startOverBtn = resultSlide
+  const startOverBtn = buttonContainer
     .append("button")
     .attr("class", "start-over-button")
     .attr("id", "start-over-btn")
