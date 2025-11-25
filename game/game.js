@@ -254,8 +254,14 @@ function createSlides() {
 
   // keyboard navigation
   document.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowRight") nextSlide();
-    else if (e.key === "ArrowLeft") prevSlide();
+    if (e.key === "ArrowRight") {
+      nextSlide();
+    } else if (e.key === "ArrowLeft") {
+      // Prevent going back from title slide (index 0)
+      if (currentSlide > 0) {
+        prevSlide();
+      }
+    }
   });
 }
 
