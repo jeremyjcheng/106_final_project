@@ -1,0 +1,65 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .game-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 1rem;
+    text-align: center;
+  }
+  
+  h1 {
+    color: #2e86ab;
+    margin-bottom: 1rem;
+  }
+  
+  .option-button {
+    display: inline-block;
+    margin: 10px;
+    padding: 10px;
+    width: 140px;
+    background-color: #f5f5f5;
+    border: 2px solid #ccc;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .option-button:hover {
+    border-color: #2e86ab;
+    background-color: #eaf4fb;
+    transform: translateY(-3px);
+  }
+  
+  .option-button img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto 5px;
+  }
+  
+  button.start-btn, button.restart-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    background-color: #2e86ab;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 1rem;
+  }
+  
+  button.start-btn:hover, button.restart-btn:hover {
+    background-color: #1a5490;
+  }
+  
+  #results p {
+    margin: 0.5rem 0;
+  }
+  
