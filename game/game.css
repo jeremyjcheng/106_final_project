@@ -35,17 +35,29 @@ body {
     visibility: visible;
   }
   
+  .buttons {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: 100%;
+    width: 100%;
+    padding: 0 1rem;
+  }
+  
   .choice-button {
-    display: inline-block;
-    width: 220px;       /* square size */
-    height: 220px;
-    margin: 0.5rem;
+    flex: 1 1 auto;
+    max-width: 150px;
+    min-width: 110px;
+    width: 150px;
+    height: 150px;
+    margin: 0;
     border: 2px solid #ccc;
     border-radius: 12px;
     background-color: white;
     overflow: hidden;
     cursor: pointer;
-    vertical-align: top;
   }
   
   .choice-button.selected {
