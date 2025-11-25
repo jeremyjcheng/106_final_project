@@ -4,221 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Rainfall 2100: America's Climate Future</title>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Oxygen, Ubuntu, Cantarell, sans-serif;
-        line-height: 1.6;
-        color: #333;
-        background-color: #f5f5f5;
-        overflow: hidden;
-      }
-
-      .slides-container {
-        width: 100vw;
-        height: 100vh;
-        position: relative;
-        overflow: hidden;
-        background-color: #f5f5f5;
-      }
-
-      .slide {
-        width: 100%;
-        height: 100%;
-        position: absolute;
-        top: 0;
-        left: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 4rem;
-        opacity: 0;
-        visibility: hidden;
-        transform: translateX(0);
-        transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-          visibility 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-          transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        background-color: #f5f5f5;
-        will-change: opacity, transform;
-      }
-
-      .slide.active {
-        opacity: 1;
-        visibility: visible;
-        transform: translateX(0);
-        z-index: 10;
-      }
-
-      .slide.prev {
-        opacity: 0;
-        visibility: hidden;
-        transform: translateX(-20px);
-        z-index: 1;
-      }
-
-      .slide.next {
-        opacity: 0;
-        visibility: hidden;
-        transform: translateX(20px);
-        z-index: 1;
-      }
-
-      .slide-content {
-        max-width: 1200px;
-        width: 100%;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 3rem;
-        align-items: center;
-      }
-
-      .slide-text {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-      }
-
-      .slide-number {
-        display: inline-block;
-        background-color: #2e86ab;
-        color: white;
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        text-align: center;
-        line-height: 50px;
-        font-weight: bold;
-        font-size: 1.2rem;
-        margin-bottom: 1rem;
-      }
-
-      .slide h2 {
-        color: #2e86ab;
-        font-size: 2.5rem;
-        margin-bottom: 1rem;
-      }
-
-      .slide p {
-        font-size: 1.3rem;
-        line-height: 1.8;
-        color: #333;
-      }
-
-      .slide .highlight {
-        color: #a23b72;
-        font-weight: 600;
-      }
-
-      .slide-viz {
-        width: 100%;
-        height: 500px;
-        background-color: white;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 2rem;
-      }
-
-      .slide-viz h3 {
-        color: #2e86ab;
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
-        text-align: center;
-      }
-
-      .slide-viz-placeholder {
-        width: 100%;
-        height: 100%;
-        background-color: #f0f0f0;
-        border: 2px dashed #ccc;
-        border-radius: 4px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #999;
-        font-size: 1rem;
-        text-align: center;
-        padding: 2rem;
-      }
-
-      .title-slide {
-        background: linear-gradient(135deg, #2e86ab 0%, #1a5490 100%);
-        color: white;
-        text-align: center;
-      }
-
-      .title-slide h1 {
-        font-size: 4rem;
-        margin-bottom: 1rem;
-        color: white;
-      }
-
-      .title-slide .subtitle {
-        font-size: 1.5rem;
-        opacity: 0.9;
-        margin-bottom: 2rem;
-      }
-
-      .title-slide .authors {
-        font-size: 1.2rem;
-        margin-top: 3rem;
-      }
-
-      .slide-indicator {
-        position: fixed;
-        bottom: 2rem;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        gap: 0.75rem;
-        z-index: 1000;
-        align-items: center;
-      }
-
-      .indicator-dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background-color: rgba(0, 0, 0, 0.25);
-        cursor: pointer;
-        transition: background-color 0.3s ease, transform 0.2s ease;
-      }
-
-      .indicator-dot:hover {
-        background-color: rgba(0, 0, 0, 0.4);
-        transform: scale(1.2);
-      }
-
-      .indicator-dot.active {
-        background-color: #2e86ab;
-        width: 12px;
-        height: 12px;
-      }
-
-      @media (max-width: 968px) {
-        .slide-content {
-          grid-template-columns: 1fr;
-        }
-
-        .slide-viz {
-          height: 300px;
-        }
-
-        .title-slide h1 {
-          font-size: 2.5rem;
-        }
-      }
-    </style>
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <div class="slides-container">
@@ -416,116 +202,80 @@
           </div>
         </div>
       </div>
+
+      <!-- Step 8: Choose Our Future -->
+      <div class="slide">
+        <div
+          class="slide-content"
+          style="grid-template-columns: 1fr; max-width: 1000px; gap: 1rem"
+        >
+          <div class="slide-text" style="text-align: center">
+            <span class="slide-number">9</span>
+            <h2>Choose Our Future</h2>
+            <p style="font-size: 1.1rem; margin-bottom: 1rem">
+              The choices we make today will determine our climate future.
+              Select a path to see how different emission scenarios will affect
+              precipitation patterns.
+            </p>
+          </div>
+          <div class="scenario-chooser">
+            <div class="scenario-option" data-scenario="low">
+              <div class="scenario-card">
+                <div class="scenario-icon">🌱</div>
+                <h3>Low Emissions (SSP1-2.6)</h3>
+                <p class="scenario-description">
+                  Aggressive climate action: rapid transition to renewable
+                  energy, reduced emissions, sustainable practices.
+                </p>
+                <div class="scenario-outcome">
+                  <p><strong>Projected Impact:</strong></p>
+                  <p>Moderate changes in precipitation patterns</p>
+                </div>
+              </div>
+            </div>
+            <div class="scenario-divider">
+              <span>OR</span>
+            </div>
+            <div class="scenario-option" data-scenario="high">
+              <div class="scenario-card">
+                <div class="scenario-icon">🔥</div>
+                <h3>High Emissions (SSP5-8.5)</h3>
+                <p class="scenario-description">
+                  Business as usual: continued fossil fuel use, limited climate
+                  action, high emissions growth.
+                </p>
+                <div class="scenario-outcome">
+                  <p><strong>Projected Impact:</strong></p>
+                  <p>Significant changes in precipitation patterns</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            id="scenario-result"
+            class="scenario-result"
+            style="display: none"
+          >
+            <h3>Your Choice: <span id="selected-scenario"></span></h3>
+            <p id="scenario-details"></p>
+            <button class="reset-button">Choose Again</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 9: Climate Choices Game -->
+      <div class="slide">
+        <div class="game-slide-content">
+          <div class="game-container">
+            <iframe src="game/index.html" title="Climate Choices Game"></iframe>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Navigation -->
     <div class="slide-indicator" id="slide-indicator"></div>
 
-    <script>
-      let currentSlide = 0;
-      const slides = document.querySelectorAll(".slide");
-      const totalSlides = slides.length;
-
-      // Create slide indicators
-      const indicatorContainer = document.getElementById("slide-indicator");
-      for (let i = 0; i < totalSlides; i++) {
-        const dot = document.createElement("div");
-        dot.className = "indicator-dot";
-        if (i === 0) dot.classList.add("active");
-        dot.addEventListener("click", () => goToSlide(i));
-        indicatorContainer.appendChild(dot);
-      }
-
-      function updateSlide() {
-        slides.forEach((slide, index) => {
-          slide.classList.remove("active", "prev", "next");
-          if (index === currentSlide) {
-            slide.classList.add("active");
-          } else if (index < currentSlide) {
-            slide.classList.add("prev");
-          } else {
-            slide.classList.add("next");
-          }
-        });
-
-        // Update indicators
-        document.querySelectorAll(".indicator-dot").forEach((dot, index) => {
-          dot.classList.toggle("active", index === currentSlide);
-        });
-      }
-
-      let isTransitioning = false;
-
-      function nextSlide() {
-        if (!isTransitioning) {
-          isTransitioning = true;
-          currentSlide = (currentSlide + 1) % totalSlides;
-          updateSlide();
-          setTimeout(() => {
-            isTransitioning = false;
-          }, 600);
-        }
-      }
-
-      function previousSlide() {
-        if (!isTransitioning) {
-          isTransitioning = true;
-          currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
-          updateSlide();
-          setTimeout(() => {
-            isTransitioning = false;
-          }, 600);
-        }
-      }
-
-      function goToSlide(index) {
-        if (index !== currentSlide && !isTransitioning) {
-          isTransitioning = true;
-          currentSlide = index;
-          updateSlide();
-          setTimeout(() => {
-            isTransitioning = false;
-          }, 600);
-        }
-      }
-
-      // Keyboard navigation
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "ArrowRight" || e.key === " ") {
-          e.preventDefault();
-          nextSlide();
-        } else if (e.key === "ArrowLeft") {
-          e.preventDefault();
-          previousSlide();
-        }
-      });
-
-      // Click navigation on left/right sides of screen
-      const slidesContainer = document.querySelector(".slides-container");
-      slidesContainer.addEventListener("click", (e) => {
-        // Don't navigate if clicking on interactive elements
-        if (
-          e.target.closest(".indicator-dot") ||
-          e.target.closest(".slide-viz") ||
-          e.target.closest("button") ||
-          e.target.closest("a")
-        ) {
-          return;
-        }
-
-        const clickX = e.clientX;
-        const windowWidth = window.innerWidth;
-        const leftHalf = clickX < windowWidth / 2;
-
-        if (leftHalf) {
-          previousSlide();
-        } else {
-          nextSlide();
-        }
-      });
-
-      // Initialize
-      updateSlide();
-    </script>
+    <script src="main.js"></script>
   </body>
 </html>

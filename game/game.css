@@ -82,3 +82,19 @@ body {
     background-color: #1a5490;
   }
   
+  button.start-over-button {
+    margin-top: 2rem;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    border: none;
+    font-size: 1.2rem;
+    background-color: #2e86ab;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  button.start-over-button:hover {
+    background-color: #1a5490;
+  }
+  
