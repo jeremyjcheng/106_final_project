@@ -8,15 +8,38 @@ const emissionsData = {
   };
   
   const imagesData = {
-    "International flight": "images/flight.jpg", "Domestic flight": "images/domestic.jpg", "Multiple flights per year": "images/multiple-flights.jpg",
-    "Road trip (gas car)": "images/gas-car.jpg", "Road trip (electric vehicle)": "images/ev-car.jpg", "Train or bus vacation": "images/train.jpg",
-    "Walk/Bike": "images/walk-bike.jpg", "Public transit": "images/bus.jpg", "Drive small car": "images/small-car.jpg",
-    "Drive SUV": "images/suv.jpg", "Drive EV": "images/ev-car.jpg",
-    "Short (0–5 miles)": "images/short.jpg", "Medium (5–20 miles)": "images/medium.jpg", "Long (20–50+ miles)": "images/long.jpg",
-    "Buy frequently from global stores": "images/global.jpg", "Buy less and buy local": "images/local.jpg", "Buy second-hand": "images/second-hand.jpg",
-    "High-meat diet": "images/high-meat.jpg", "Moderate-meat diet": "images/moderate-meat.jpg", "Vegetarian": "images/vegetarian.jpg", "Vegan": "images/vegan.jpg",
-    "Apartment": "images/apartment.jpg", "Small house": "images/small-house.jpg", "Large house": "images/large-house.jpg"
+    "International flight": "../assets/flight.png",
+    "Domestic flight": "../assets/domestic.png",
+    "Multiple flights per year": "../assets/multiple.png",
+  
+    "Road trip (gas car)": "../assets/gasroad.png",
+    "Road trip (electric vehicle)": "../assets/evroad.png",
+    "Train or bus vacation": "../assets/train.png",
+  
+    "Walk/Bike": "../assets/bike.png",
+    "Public transit": "../assets/public.png",
+    "Drive small car": "../assets/small.png",
+    "Drive SUV": "../assets/suv.png",
+    "Drive EV": "../assets/ev.png",
+  
+    "Short (0–5 miles)": "../assets/short.png",
+    "Medium (5–20 miles)": "../assets/medium.png",
+    "Long (20–50+ miles)": "../assets/long.png",
+  
+    "Buy frequently from global stores": "../assets/online.png",
+    "Buy less and buy local": "../assets/local.png",
+    "Buy second-hand": "../assets/second.png",
+  
+    "High-meat diet": "../assets/meat.png",
+    "Moderate-meat diet": "../assets/modmeat.png",
+    "Vegetarian": "../assets/vege.png",
+    "Vegan": "../assets/vegan.png",
+  
+    "Apartment": "../assets/multi.png",
+    "Small house": "../assets/house.png",
+    "Large house": "../assets/largehouse.png"
   };
+  
   
   let userChoices = { vacation: null, commute: null, distance: null, shopping: null, diet: null, housing: null };
   

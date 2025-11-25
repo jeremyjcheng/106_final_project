@@ -34,8 +34,8 @@ body {
   
   .choice-button {
     display: inline-block;
-    width: 200px;
-    height: 150px;
+    width: 220px;       /* square size */
+    height: 220px;
     margin: 0.5rem;
     border: 2px solid #ccc;
     border-radius: 12px;
@@ -52,15 +52,15 @@ body {
   
   .choice-button img {
     width: 100%;
-    height: 100px;
-    object-fit: cover;
-    border-bottom: 1px solid #ccc;
+    height: 100%;
+    object-fit: cover;  /* fills the square button */
   }
   
+  /* remove the span since description is in the image */
   .choice-button span {
-    display: block;
-    padding: 0.5rem;
+    display: none;
   }
+  
   
   .emissions-output {
     margin-top: 1.5rem;
