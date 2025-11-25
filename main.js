@@ -29,18 +29,22 @@ function nextSlide() {
     updateSlide();
     setTimeout(() => {
       isTransitioning = false;
-    }, 600);
+    }, 250);
   }
 }
 
 function previousSlide() {
   if (!isTransitioning) {
+    // Prevent going back from the first slide
+    if (currentSlide === 0) {
+      return;
+    }
     isTransitioning = true;
     currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
     updateSlide();
     setTimeout(() => {
       isTransitioning = false;
-    }, 600);
+    }, 250);
   }
 }
 
@@ -51,7 +55,7 @@ function goToSlide(index) {
     updateSlide();
     setTimeout(() => {
       isTransitioning = false;
-    }, 600);
+    }, 250);
   }
 }
 
@@ -163,8 +167,16 @@ document.addEventListener("DOMContentLoaded", () => {
         e.target.closest(".indicator-dot") ||
         e.target.closest(".slide-viz") ||
         e.target.closest("button") ||
-        e.target.closest("a")
+        e.target.closest("a") ||
+        e.target.closest(".game-container") ||
+        e.target.closest("iframe")
       ) {
+        return;
+      }
+
+      // Don't navigate if clicking inside the game slide
+      const gameSlide = document.querySelector(".game-slide-content");
+      if (gameSlide && gameSlide.contains(e.target)) {
         return;
       }
 
@@ -173,7 +185,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const leftHalf = clickX < windowWidth / 2;
 
       if (leftHalf) {
-        previousSlide();
+        // Prevent going back from the first slide
+        if (currentSlide > 0) {
+          previousSlide();
+        }
       } else {
         nextSlide();
       }
