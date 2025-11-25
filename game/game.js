@@ -1,126 +1,110 @@
-const gameArea = d3.select("#game-area");
-
-const questions = [
-  {
-    question: "What type of vacation will you take?",
-    info: "Flights use much more energy than ground travel, especially long-haul trips.",
-    options: [
-      { text: "International flight", img: "images/intl_flight.png" },
-      { text: "Domestic flight", img: "images/domestic_flight.png" },
-      { text: "Multiple flights per year", img: "images/multiple_flights.png" },
-      { text: "Road trip (gas car)", img: "images/road_gas.png" },
-      { text: "Road trip (electric vehicle)", img: "images/road_ev.png" },
-      { text: "Train or bus vacation", img: "images/train_bus.png" },
-    ]
-  },
-  {
-    question: "How do you commute to work or school?",
-    info: "Walking or biking uses the least energy, public transit comes next, and driving alone emits the most—especially if the vehicle is large or not electric.",
-    options: [
-      { text: "Walk/Bike", img: "images/walk.png" },
-      { text: "Public transit", img: "images/transit.png" },
-      { text: "Drive a small car", img: "images/small_car.png" },
-      { text: "Drive an SUV or large vehicle", img: "images/suv.png" },
-      { text: "Drive an EV", img: "images/ev_car.png" },
-    ]
-  },
-  {
-    question: "How far is your commute to work or school?",
-    info: "Longer distances require more energy unless self-powered.",
-    options: [
-      { text: "Short (0–5 miles)", img: "images/short_distance.png" },
-      { text: "Medium (5–20 miles)", img: "images/medium_distance.png" },
-      { text: "Long (20–50+ miles)", img: "images/long_distance.png" },
-    ]
-  },
-  {
-    question: "What will your shopping habits be?",
-    info: "Buying less, choosing local sources, and extending product life reduces emissions.",
-    options: [
-      { text: "Buy frequently from global stores", img: "images/global_shopping.png" },
-      { text: "Buy less and buy local", img: "images/local_shopping.png" },
-      { text: "Buy second-hand", img: "images/second_hand.png" },
-    ]
-  },
-  {
-    question: "What will your diet be?",
-    info: "Animal agriculture produces significantly more greenhouse gases than plant-based foods.",
-    options: [
-      { text: "High-meat diet", img: "images/high_meat.png" },
-      { text: "Moderate-meat diet", img: "images/moderate_meat.png" },
-      { text: "Vegetarian", img: "images/vegetarian.png" },
-      { text: "Vegan", img: "images/vegan.png" },
-    ]
-  },
-  {
-    question: "Where will you live?",
-    info: "Larger homes require more materials and energy to heat/cool.",
-    options: [
-      { text: "Apartment or multi-unit housing", img: "images/apartment.png" },
-      { text: "Small house", img: "images/small_house.png" },
-      { text: "Large house", img: "images/large_house.png" },
-    ]
-  }
-];
-
-let currentQuestion = -1;
-let userChoices = [];
-
-function renderStartScreen() {
-  gameArea.html("");
-  gameArea.append("div")
-    .attr("id", "start-screen")
-    .append("button")
-    .text("Start Game")
-    .attr("class", "start-btn")
-    .on("click", () => {
-      currentQuestion = 0;
-      userChoices = [];
-      renderQuestion(currentQuestion);
+const emissionsData = {
+    vacation: { "International flight": 1000, "Domestic flight": 300, "Multiple flights per year": 2000, "Road trip (gas car)": 150, "Road trip (electric vehicle)": 50, "Train or bus vacation": 30 },
+    commute: { "Walk/Bike": 0, "Public transit": 20, "Drive small car": 150, "Drive SUV": 300, "Drive EV": 50 },
+    distance: { "Short (0–5 miles)": 10, "Medium (5–20 miles)": 50, "Long (20–50+ miles)": 200 },
+    shopping: { "Buy frequently from global stores": 100, "Buy less and buy local": 30, "Buy second-hand": 10 },
+    diet: { "High-meat diet": 500, "Moderate-meat diet": 250, "Vegetarian": 100, "Vegan": 50 },
+    housing: { "Apartment": 100, "Small house": 200, "Large house": 400 }
+  };
+  
+  const imagesData = {
+    "International flight": "images/flight.jpg", "Domestic flight": "images/domestic.jpg", "Multiple flights per year": "images/multiple-flights.jpg",
+    "Road trip (gas car)": "images/gas-car.jpg", "Road trip (electric vehicle)": "images/ev-car.jpg", "Train or bus vacation": "images/train.jpg",
+    "Walk/Bike": "images/walk-bike.jpg", "Public transit": "images/bus.jpg", "Drive small car": "images/small-car.jpg",
+    "Drive SUV": "images/suv.jpg", "Drive EV": "images/ev-car.jpg",
+    "Short (0–5 miles)": "images/short.jpg", "Medium (5–20 miles)": "images/medium.jpg", "Long (20–50+ miles)": "images/long.jpg",
+    "Buy frequently from global stores": "images/global.jpg", "Buy less and buy local": "images/local.jpg", "Buy second-hand": "images/second-hand.jpg",
+    "High-meat diet": "images/high-meat.jpg", "Moderate-meat diet": "images/moderate-meat.jpg", "Vegetarian": "images/vegetarian.jpg", "Vegan": "images/vegan.jpg",
+    "Apartment": "images/apartment.jpg", "Small house": "images/small-house.jpg", "Large house": "images/large-house.jpg"
+  };
+  
+  let userChoices = { vacation: null, commute: null, distance: null, shopping: null, diet: null, housing: null };
+  
+  const categories = {
+    vacation: "What type of vacation will you take?",
+    commute: "How do you commute to work or school?",
+    distance: "How far is your commute to work or school?",
+    shopping: "What will your shopping habits be?",
+    diet: "What will your diet be?",
+    housing: "Where will you live?"
+  };
+  
+  let currentSlide = 0;
+  let slides = [];
+  
+  function updateSlide() {
+    slides.forEach((s, i) => {
+      s.classList.remove("active");
+      if(i===currentSlide) s.classList.add("active");
     });
-}
-
-function renderQuestion(index) {
-  const q = questions[index];
-  gameArea.html("");
-
-  gameArea.append("h2").text(q.question);
-  gameArea.append("p").text(q.info);
-
-  const optionsDiv = gameArea.append("div").attr("class", "game-options");
-
-  optionsDiv.selectAll("div")
-    .data(q.options)
-    .join("div")
-    .attr("class", "option-button")
-    .on("click", d => {
-      userChoices.push(d.text);
-      if (currentQuestion < questions.length - 1) {
-        currentQuestion++;
-        renderQuestion(currentQuestion);
-      } else {
-        renderResults();
-      }
-    })
-    .html(d => `<img src="${d.img}" alt="${d.text}" /><span>${d.text}</span>`);
-}
-
-function renderResults() {
-  gameArea.html("");
-
-  gameArea.append("h2").text("Game Results");
-
-  const resultsDiv = gameArea.append("div").attr("id", "results");
-  resultsDiv.selectAll("p")
-    .data(userChoices)
-    .join("p")
-    .text((d, i) => `Q${i + 1}: ${d}`);
-
-  gameArea.append("button")
-    .text("Play Again")
-    .attr("class", "restart-btn")
-    .on("click", renderStartScreen);
-}
-
-// Initialize
-renderStartScreen();
+  }
+  
+  function nextSlide() {
+    if(currentSlide < slides.length -1) currentSlide++;
+    // If last slide, calculate total emissions
+    if(currentSlide === slides.length -1){
+      showTotalEmissions();
+    }
+    updateSlide();
+  }
+  
+  function prevSlide() {
+    if(currentSlide >0) currentSlide--;
+    updateSlide();
+  }
+  
+  // Initialize start game
+  d3.select("#start-game").on("click", () => {
+    createSlides();
+    nextSlide();
+  });
+  
+  // Generate slides for each category
+  function createSlides() {
+    const container = d3.select(".slides-container");
+    for(const category in categories) {
+      const slide = container.append("div").attr("class","slide");
+      slide.append("h2").text(categories[category]);
+  
+      const btnDiv = slide.append("div").attr("class","buttons");
+      const options = emissionsData[category];
+  
+      Object.keys(options).forEach(choice=>{
+        const btn = btnDiv.append("div").attr("class","choice-button")
+          .attr("data-category", category)
+          .attr("data-choice", choice);
+  
+        btn.append("img").attr("src", imagesData[choice] || "images/placeholder.jpg").attr("alt",choice);
+        btn.append("span").text(choice);
+  
+        btn.on("click", function(){
+          d3.select(this.parentNode).selectAll(".choice-button").classed("selected",false);
+          d3.select(this).classed("selected",true);
+          userChoices[category]=choice;
+          nextSlide();
+        });
+      });
+    }
+  
+    // Add final slide for total emissions
+    const resultSlide = container.append("div").attr("class","slide");
+    resultSlide.append("h2").text("Your Total Emissions");
+    resultSlide.append("div").attr("class","emissions-output").attr("id","final-emissions");
+  
+    slides = document.querySelectorAll(".slide");
+  
+    // keyboard navigation
+    document.addEventListener("keydown", e=>{
+      if(e.key==="ArrowRight") nextSlide();
+      else if(e.key==="ArrowLeft") prevSlide();
+    });
+  }
+  
+  function showTotalEmissions(){
+    let total = 0;
+    for(const cat in userChoices){
+      if(userChoices[cat]) total+=emissionsData[cat][userChoices[cat]];
+    }
+    d3.select("#final-emissions").text(`Total Emissions: ${total} kg CO₂`);
+  }
+  

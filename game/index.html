@@ -3,16 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Climate Choices Game - D3</title>
-  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <title>Climate Choices Game</title>
   <link rel="stylesheet" href="game.css" />
+  <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
-  <div class="game-container">
-    <h1>Climate Choices Game</h1>
-    <p>Make choices to see how they affect climate outcomes!</p>
-    <div id="game-area"></div>
+  <div class="slides-container">
+
+    <!-- Title Slide -->
+    <div class="slide active title-slide">
+      <h1>Climate Choices Game</h1>
+      <p class="subtitle">Make choices and see how they impact emissions</p>
+      <button id="start-game">Start Game</button>
+    </div>
+
+    <!-- Question slides will be generated here by JS -->
   </div>
+
+  <div class="slide-indicator" id="slide-indicator"></div>
   <script src="game.js"></script>
 </body>
 </html>
