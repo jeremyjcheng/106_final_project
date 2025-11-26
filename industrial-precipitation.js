@@ -1,6 +1,9 @@
 // Historical Precipitation Trends: Industrial Revolution Impact
 // This visualization shows how industrial pollution and land use changes affected seasonal precipitation
 
+// Global guard to prevent double initialization
+let industrialChartInitialized = false;
+
 function createIndustrialPrecipitationChart() {
   const container = d3.select("#industrial-precipitation-chart");
   container.selectAll("*").remove();
@@ -469,7 +472,7 @@ function createIndustrialPrecipitationChart() {
         `translate(${summerTooltipX}, ${summerTooltipY})`
       );
     })
-    .on("mouseout", function () {
+    .on("mouseleave", function () {
       verticalLine.style("opacity", 0);
       winterHoverCircle.style("opacity", 0);
       summerHoverCircle.style("opacity", 0);
@@ -480,20 +483,43 @@ function createIndustrialPrecipitationChart() {
 
 // Initialize chart when DOM is ready
 if (document.readyState === "loading") {
-  document.addEventListener(
-    "DOMContentLoaded",
-    createIndustrialPrecipitationChart
-  );
+  document.addEventListener("DOMContentLoaded", () => {
+    if (!industrialChartInitialized) {
+      const slide2 = document.querySelector(".slide:nth-child(3)");
+      if (slide2 && slide2.classList.contains("active")) {
+        createIndustrialPrecipitationChart();
+        industrialChartInitialized = true;
+      }
+    }
+  });
 } else {
-  createIndustrialPrecipitationChart();
+  if (!industrialChartInitialized) {
+    const slide2 = document.querySelector(".slide:nth-child(3)");
+    if (slide2 && slide2.classList.contains("active")) {
+      createIndustrialPrecipitationChart();
+      industrialChartInitialized = true;
+    }
+  }
 }
 
 // Recreate chart when slide becomes active (for slide transitions)
 document.addEventListener("DOMContentLoaded", () => {
   const observer = new MutationObserver(() => {
     const slide2 = document.querySelector(".slide:nth-child(3)");
-    if (slide2 && slide2.classList.contains("active")) {
-      setTimeout(createIndustrialPrecipitationChart, 100);
+    if (slide2) {
+      const isActive = slide2.classList.contains("active");
+
+      if (isActive && !industrialChartInitialized) {
+        setTimeout(() => {
+          if (!industrialChartInitialized) {
+            createIndustrialPrecipitationChart();
+            industrialChartInitialized = true;
+          }
+        }, 100);
+      } else if (!isActive && industrialChartInitialized) {
+        // Reset flag when slide becomes inactive
+        industrialChartInitialized = false;
+      }
     }
   });
 
