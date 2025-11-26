@@ -169,7 +169,15 @@ document.addEventListener("DOMContentLoaded", () => {
         e.target.closest("button") ||
         e.target.closest("a") ||
         e.target.closest(".game-container") ||
-        e.target.closest("iframe")
+        e.target.closest("iframe") ||
+        e.target.closest(".chart-container") ||
+        e.target.closest(".regional-chart-container") ||
+        e.target.closest("input") ||
+        e.target.closest(".legend-item") ||
+        e.target.closest("svg") ||
+        e.target.closest("#chartSvg") ||
+        e.target.closest(".chart-svg-wrapper") ||
+        e.target.closest("label")
       ) {
         return;
       }

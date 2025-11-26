@@ -131,6 +131,245 @@
         </div>
       </div>
 
+      <!-- Slide 4: Regional Precipitation Chart -->
+      <div class="slide scrollable">
+        <div class="slide-content regional-chart-slide">
+          <div class="slide-text regional-chart-text">
+            <span class="slide-number">4</span>
+            <h2>Regional Precipitation: Past and Future</h2>
+            <p>
+              Explore how precipitation patterns vary across different regions
+              of the United States, comparing historical data with future
+              projections under low and high emission scenarios.
+            </p>
+          </div>
+          <div class="chart-container regional-chart-container">
+            <!-- Region Navigation -->
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 1rem;
+                margin-bottom: 0.5rem;
+              "
+            >
+              <button
+                id="prevBtn"
+                style="
+                  background: #2e86ab;
+                  color: white;
+                  border: none;
+                  padding: 0.5rem 1rem;
+                  border-radius: 4px;
+                  cursor: pointer;
+                  font-size: 14px;
+                "
+              >
+                ← Prev
+              </button>
+              <div
+                id="dotsContainer"
+                style="display: flex; gap: 0.75rem; align-items: center"
+              ></div>
+              <span
+                id="regionName"
+                style="
+                  font-weight: 600;
+                  color: #2e86ab;
+                  min-width: 100px;
+                  text-align: center;
+                "
+                >Northeast</span
+              >
+              <button
+                id="nextBtn"
+                style="
+                  background: #2e86ab;
+                  color: white;
+                  border: none;
+                  padding: 0.5rem 1rem;
+                  border-radius: 4px;
+                  cursor: pointer;
+                  font-size: 14px;
+                "
+              >
+                Next →
+              </button>
+            </div>
+
+            <!-- Chart SVG -->
+            <div class="chart-svg-wrapper">
+              <svg id="chartSvg"></svg>
+            </div>
+
+            <!-- Legend -->
+            <div
+              style="
+                display: flex;
+                justify-content: center;
+                gap: 1.5rem;
+                margin-top: 0;
+                margin-bottom: 0.5rem;
+                flex-wrap: wrap;
+              "
+            >
+              <div
+                class="legend-item active"
+                data-scenario="historical"
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 0.5rem;
+                  cursor: pointer;
+                "
+              >
+                <div
+                  class="legend-box selected"
+                  style="width: 20px; height: 3px; background: #888"
+                ></div>
+                <span style="font-size: 14px">Historical</span>
+              </div>
+              <div
+                class="legend-item active"
+                data-scenario="low"
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 0.5rem;
+                  cursor: pointer;
+                "
+              >
+                <div
+                  class="legend-box selected"
+                  style="width: 20px; height: 3px; background: #1e88e5"
+                ></div>
+                <span style="font-size: 14px">Low Emissions (SSP1-2.6)</span>
+              </div>
+              <div
+                class="legend-item active"
+                data-scenario="high"
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 0.5rem;
+                  cursor: pointer;
+                "
+              >
+                <div
+                  class="legend-box selected"
+                  style="width: 20px; height: 3px; background: #e53935"
+                ></div>
+                <span style="font-size: 14px">High Emissions (SSP5-8.5)</span>
+              </div>
+              <div
+                class="legend-item"
+                id="regressionToggle"
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 0.5rem;
+                  cursor: pointer;
+                "
+              >
+                <div
+                  style="
+                    width: 20px;
+                    height: 2px;
+                    background: #999;
+                    border-top: 1px dashed #999;
+                  "
+                ></div>
+                <span style="font-size: 14px">Trend Lines</span>
+              </div>
+            </div>
+
+            <!-- Year Range Controls -->
+            <div
+              style="
+                display: flex;
+                justify-content: center;
+                gap: 0.75rem;
+                align-items: center;
+                flex-wrap: wrap;
+                margin-top: 0;
+              "
+            >
+              <label style="font-size: 14px">Year Range:</label>
+              <input
+                type="number"
+                id="yearStartInput"
+                placeholder="Start"
+                style="
+                  padding: 0.4rem;
+                  border: 1px solid #ddd;
+                  border-radius: 4px;
+                  width: 100px;
+                  font-size: 14px;
+                "
+              />
+              <span style="font-size: 14px">to</span>
+              <input
+                type="number"
+                id="yearEndInput"
+                placeholder="End"
+                style="
+                  padding: 0.4rem;
+                  border: 1px solid #ddd;
+                  border-radius: 4px;
+                  width: 100px;
+                  font-size: 14px;
+                "
+              />
+              <button
+                id="applyYearBtn"
+                style="
+                  background: #2e86ab;
+                  color: white;
+                  border: none;
+                  padding: 0.4rem 1rem;
+                  border-radius: 4px;
+                  cursor: pointer;
+                  font-size: 14px;
+                "
+              >
+                Apply
+              </button>
+              <button
+                id="resetYearBtn"
+                style="
+                  background: #999;
+                  color: white;
+                  border: none;
+                  padding: 0.4rem 1rem;
+                  border-radius: 4px;
+                  cursor: pointer;
+                  font-size: 14px;
+                "
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- Tooltip -->
+        <div
+          id="tooltip"
+          style="
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            font-size: 12px;
+            z-index: 1000;
+          "
+        ></div>
+      </div>
+
       <!-- Step 8: Climate Choices Game -->
       <div class="slide">
         <div class="game-slide-content">
@@ -199,5 +438,6 @@
 
     <script src="main.js"></script>
     <script src="industrial-precipitation.js"></script>
+    <script src="regional-precipitation.js"></script>
   </body>
 </html>
