@@ -560,16 +560,34 @@ function drawChart() {
     tooltip.classed("visible", false);
   };
 
+  // Helper function to downsample data for better visibility
+  function downsampleData(data, maxPoints = 100) {
+    if (data.length <= maxPoints) return data;
+    const step = Math.ceil(data.length / maxPoints);
+    return data.filter((d, i) => i % step === 0 || i === data.length - 1);
+  }
+
   // Historical line + invisible circles for tooltip
   if (activeScenarios.includes("historical")) {
+    const downsampledHistorical = downsampleData(filteredHistorical, 80);
     svg
       .append("path")
-      .datum(filteredHistorical)
+      .datum(downsampledHistorical)
       .attr("fill", "none")
       .attr("stroke", "#888")
-      .attr("stroke-width", 3)
+      .attr("stroke-width", 2)
       .attr("d", line)
-      .attr("opacity", 1);
+      .attr("opacity", 0.7)
+      .attr("class", "historical-line")
+      .style("cursor", "pointer")
+      .on("mouseover", function () {
+        d3.select(this).attr("opacity", 1).attr("stroke-width", 3);
+        svg.selectAll(".low-emission-line, .high-emission-line").attr("opacity", 0.3);
+      })
+      .on("mouseout", function () {
+        d3.select(this).attr("opacity", 0.7).attr("stroke-width", 2);
+        svg.selectAll(".low-emission-line, .high-emission-line").attr("opacity", 0.7);
+      });
 
     svg
       .selectAll(".historical-point")
@@ -591,20 +609,24 @@ function drawChart() {
 
   // Low emission (SSP 126)
   if (activeScenarios.includes("low")) {
+    const downsampledLow = downsampleData(lowWithConnection, 80);
     svg
       .append("path")
-      .datum(lowWithConnection)
+      .datum(downsampledLow)
       .attr("fill", "none")
       .attr("stroke", "#1e88e5")
-      .attr("stroke-width", 3)
+      .attr("stroke-width", 2)
       .attr("d", line)
-      .attr("opacity", 1)
+      .attr("opacity", 0.7)
+      .attr("class", "low-emission-line")
       .style("cursor", "pointer")
       .on("mouseover", function () {
-        d3.select(this).attr("stroke-width", 5);
+        d3.select(this).attr("opacity", 1).attr("stroke-width", 3);
+        svg.selectAll(".historical-line, .high-emission-line").attr("opacity", 0.3);
       })
       .on("mouseout", function () {
-        d3.select(this).attr("stroke-width", 3);
+        d3.select(this).attr("opacity", 0.7).attr("stroke-width", 2);
+        svg.selectAll(".historical-line, .high-emission-line").attr("opacity", 0.7);
       });
 
     svg
@@ -627,20 +649,24 @@ function drawChart() {
 
   // High emission (SSP 585)
   if (activeScenarios.includes("high")) {
+    const downsampledHigh = downsampleData(highWithConnection, 80);
     svg
       .append("path")
-      .datum(highWithConnection)
+      .datum(downsampledHigh)
       .attr("fill", "none")
       .attr("stroke", "#e53935")
-      .attr("stroke-width", 3)
+      .attr("stroke-width", 2)
       .attr("d", line)
-      .attr("opacity", 1)
+      .attr("opacity", 0.7)
+      .attr("class", "high-emission-line")
       .style("cursor", "pointer")
       .on("mouseover", function () {
-        d3.select(this).attr("stroke-width", 5);
+        d3.select(this).attr("opacity", 1).attr("stroke-width", 3);
+        svg.selectAll(".historical-line, .low-emission-line").attr("opacity", 0.3);
       })
       .on("mouseout", function () {
-        d3.select(this).attr("stroke-width", 3);
+        d3.select(this).attr("opacity", 0.7).attr("stroke-width", 2);
+        svg.selectAll(".historical-line, .low-emission-line").attr("opacity", 0.7);
       });
 
     svg
@@ -677,8 +703,9 @@ function drawChart() {
           .datum(regHist)
           .attr("fill", "none")
           .attr("stroke", "#555")
-          .attr("stroke-width", 2)
+          .attr("stroke-width", 1.5)
           .attr("stroke-dasharray", "6,4")
+          .attr("opacity", 0.6)
           .attr("d", regLine);
       }
     }
@@ -691,8 +718,9 @@ function drawChart() {
           .datum(regLow)
           .attr("fill", "none")
           .attr("stroke", "#0d47a1")
-          .attr("stroke-width", 2)
+          .attr("stroke-width", 1.5)
           .attr("stroke-dasharray", "6,4")
+          .attr("opacity", 0.6)
           .attr("d", regLine);
       }
     }
@@ -705,8 +733,9 @@ function drawChart() {
           .datum(regHigh)
           .attr("fill", "none")
           .attr("stroke", "#b71c1c")
-          .attr("stroke-width", 2)
+          .attr("stroke-width", 1.5)
           .attr("stroke-dasharray", "6,4")
+          .attr("opacity", 0.6)
           .attr("d", regLine);
       }
     }
