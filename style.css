@@ -373,6 +373,31 @@ body {
   background-color: #1a5490;
 }
 
+/* Writeup Styles */
+.writeup-section {
+  margin-bottom: 1.5rem;
+}
+
+.writeup-section:last-child {
+  margin-bottom: 0;
+}
+
+.writeup-section h3 {
+  color: #2e86ab;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.writeup-section p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #333;
+  text-align: left;
+}
+
 /* Game Slide Styles */
 .game-slide-content {
   display: flex;
