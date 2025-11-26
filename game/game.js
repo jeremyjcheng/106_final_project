@@ -580,6 +580,7 @@ function animateNumberD3(selection, targetValue) {
 }
 
 function showTotalEmissions() {
+
   let total = 0;
   for (const cat in userChoices) {
     if (userChoices[cat]) total += emissionsData[cat][userChoices[cat]];
@@ -650,6 +651,7 @@ function showTotalEmissions() {
   
   // Create CO2 equivalencies visualization
   showCO2Equivalencies(total);
+
 }
 
 function showCO2Equivalencies(total) {
@@ -776,6 +778,7 @@ function showCO2Equivalencies(total) {
       }
       // driving viz is created when user clicks button
     }, index * 200);
+    
   });
 }
 
@@ -932,7 +935,7 @@ function createDrivingViz(containerId, miles, startCity) {
           }
         });
 
-        // Add the route line with gradient effect
+        // Add the route line - solid red line
         map.addLayer({
           'id': 'route',
           'type': 'line',
@@ -942,51 +945,22 @@ function createDrivingViz(containerId, miles, startCity) {
             'line-cap': 'round'
           },
           'paint': {
-            'line-color': '#3b82f6',
+            'line-color': '#dc2626',
             'line-width': 4,
-            'line-dasharray': [0, 2],
-            'line-opacity': 0.8
+            'line-opacity': 0.9
           }
         });
 
-        // Animate the route line
-        let dashArraySequence = [
-          [0, 2],
-          [0.5, 2],
-          [1, 2],
-          [1.5, 2],
-          [2, 2],
-          [2, 0]
-        ];
-        let step = 0;
-        
-        function animateDashArray() {
-          step = (step + 1) % dashArraySequence.length;
-          map.setPaintProperty('route', 'line-dasharray', dashArraySequence[step]);
-          requestAnimationFrame(animateDashArray);
-        }
-        animateDashArray();
-
-        // Info panel with statistics
-        const infoPanel = container.append("div")
-          .style("background", "linear-gradient(135deg, #667eea 0%, #764ba2 100%)")
-          .style("color", "white")
-          .style("padding", "20px")
-          .style("border-radius", "8px")
+        // Info text below map - simpler, more visible
+        container.append("p")
+          .style("text-align", "center")
           .style("margin-top", "15px")
-          .style("box-shadow", "0 4px 6px rgba(0,0,0,0.1)");
-
-        infoPanel.append("p")
-          .style("margin", "0 0 10px 0")
-          .style("font-size", "16px")
-          .style("font-weight", "600")
-          .html(`🚗 <strong>${startCityName.split(',')[0]}</strong> → <strong>${destination.name}</strong>`);
-
-        infoPanel.append("p")
-          .style("margin", "0")
-          .style("font-size", "14px")
-          .html(`📏 Route distance: <strong>~${actualDistance.toLocaleString()} miles</strong><br>
-                 💨 CO₂ equivalent: <strong>${miles.toLocaleString()} miles of driving</strong>`);
+          .style("color", "#1f2937")
+          .style("font-size", "15px")
+          .style("line-height", "1.6")
+          .html(`🚗 That's like driving from <strong>${startCityName.split(',')[0]}</strong> to <strong>${destination.name}</strong>!<br>
+                 📏 Route distance: <strong>~${actualDistance.toLocaleString()} miles</strong> | 
+                 💨 CO₂ equivalent: <strong>${miles.toLocaleString()} miles</strong>`);
 
         // Animate car along route
         const steps = 150;
@@ -1119,3 +1093,83 @@ function generateGreatCirclePath(start, end, numPoints) {
 
   return path;
 }
+
+// food comparison
+function createFoodComparison(containerId, burgers) {
+  // DATA
+  const foods = [
+    { name: "Beef Burgers", emoji: "🍔", value: burgers, color: "#ef4444" },
+    { name: "Chicken Meals", emoji: "🍗", value: Math.round(burgers * 2.5), color: "#f97316" },
+    { name: "Vegetarian Meals", emoji: "🥗", value: Math.round(burgers * 5), color: "#22c55e" },
+  ];
+
+  // SVG SETUP
+  const width = 700;
+  const height = 300;
+
+  const svg = d3.select(containerId)
+    .html("") // clear previous render
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+  const maxValue = d3.max(foods, d => d.value);
+  const barHeight = 50;
+  const barSpacing = 80;
+
+  const xScale = d3.scaleLinear()
+    .domain([0, maxValue])
+    .range([0, width - 200]);
+
+  // DRAW EACH ROW
+  foods.forEach((food, i) => {
+    const g = svg.append("g")
+      .attr("transform", `translate(150,${i * barSpacing + 30})`);
+
+    // EMOJI
+    g.append("text")
+      .attr("x", -100)
+      .attr("y", barHeight / 2)
+      .attr("text-anchor", "middle")
+      .style("font-size", "32px")
+      .text(food.emoji);
+
+    // LABEL
+    g.append("text")
+      .attr("x", -100)
+      .attr("y", barHeight / 2 + 30)
+      .attr("text-anchor", "middle")
+      .style("font-size", "12px")
+      .style("fill", "#666")
+      .text(food.name);
+
+    // ANIMATED BAR
+    g.append("rect")
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("width", 0)
+      .attr("height", barHeight)
+      .attr("fill", food.color)
+      .attr("rx", 5)
+      .transition()
+      .duration(1500)
+      .delay(i * 200)
+      .attr("width", xScale(food.value));
+
+    // VALUE TEXT (fade in)
+    g.append("text")
+      .attr("x", 10)
+      .attr("y", barHeight / 2 + 5)
+      .style("font-size", "16px")
+      .style("font-weight", "bold")
+      .style("fill", "white")
+      .style("opacity", 0)
+      .text(food.value)
+      .transition()
+      .duration(500)
+      .delay(i * 200 + 1500)
+      .style("opacity", 1);
+  });
+}
+
+
