@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>When It Rains: America's Changing Climate</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="slides-container">
+      <!-- Title Slide -->
+      <div class="slide active title-slide">
+        <h1>When It Rains: America's Changing Climate</h1>
+        <p class="subtitle">
+          How precipitation patterns are shifting across the United States
+        </p>
+        <p class="authors">
+          Claudine Handali, Sharon Tey, Charles Zhang, Jeremy Cheng
+        </p>
+      </div>
+
+      <!-- About Slide -->
+      <div class="slide">
+        <div class="slide-content">
+          <div class="slide-text">
+            <span class="slide-number">1</span>
+            <h2>The Quiet Shift in America’s Seasons</h2>
+            <p>
+              For more than a century, the rhythm of America’s seasons has been
+              quietly shifting. Each winter storm and summer downpour carries
+              the imprint of changing climate forces—some natural, others
+              unmistakably shaped by human decisions.
+            </p>
+            <p>
+              From industrial-era pollution that once suppressed rainfall, to
+              modern warming that fuels stronger moisture cycles and more
+              extreme rain events, decades of atmospheric change are written
+              into the long-term rise and fall of seasonal precipitation.
+            </p>
+            <p>
+              By tracing these patterns across regions and through time, we can
+              see how human activity has intertwined with Earth’s natural
+              climate systems, reshaping when, where, and how much rain falls
+              each year.
+            </p>
+          </div>
+          <div class="slide-viz">
+             <img
+                src="images/avg_historical.png"
+                style="width:100%; height:100%; object-fit:contain; border-radius:10px;"
+            />
+          </div>    
+        </div>
+      </div>
+
+      <!-- Slide 2: Industrial revolution + land use texts -->
+      <div class="slide">
+        <div class="slide-content">
+          <div class="slide-text">
+            <span class="slide-number">2</span>
+            <h2>From Smoke Stacks to Plowed Fields</h2>
+            <p>
+              Since the Industrial Revolution, greenhouse gases have warmed and
+              moistened the atmosphere, allowing winter storms to carry more
+              moisture and produce heavier cold-season precipitation. At the
+              same time, early industrial sulfate pollution suppressed cloud
+              formation in summer, limiting rainfall that would otherwise have
+              increased. As air pollution declined, both winter and summer
+              precipitation began to show clearer signs of strengthening.
+            </p>
+            <p>
+              Land clearing, farming, and deforestation have altered how the
+              surface stores and releases moisture, reshaping seasonal rainfall
+              patterns. In summer, irrigation can boost humidity and enhance
+              local storms, while over-plowed drylands become hotter and drier,
+              reducing rainfall. In winter, changes to vegetation and soil
+              modify surface energy and moisture, subtly influencing storm
+              tracks and cold-season precipitation.
+            </p>
+          </div>
+          
+        </div>
+      </div>
+
+      <!-- Slide 3: Regional summer 2-month precipitation + explanatory text -->
+      <div class="slide">
+        <div class="slide-content">
+          <div class="slide-text">
+            <span class="slide-number">3</span>
+            <h2>Summer Rainfall by Region, 1850–2020</h2>
+            <p>
+              Around the 1930s, the summer rainfall in the Midwest and the South
+              dropped sharply. This was the famous Dust Bowl drought—a classic
+              case of human land use and climate working together. Over-farming
+              and poor agricultural practices broke down soil structure; dust
+              storms formed, rainfall decreased, and the region fell into years
+              of severe drought. After the New Deal introduced soil conservation
+              policies, rainfall and climate gradually recovered.
+            </p>
+            <p>
+              In the 1950s, there was another major drought, along with the
+              peak of industrial pollution. Summer rainfall in the South, the
+              West, and parts of the Midwest dropped again. After World War II,
+              industrial emissions and sulfate aerosols from coal power plants
+              rose quickly, forming a heavy pollution belt over the eastern and
+              midwestern U.S. Studies show that these aerosols created a clear
+              “drying effect” in summer and fall, partly canceling out the
+              rainfall increase that greenhouse gases would normally cause—especially
+              in the Southeast and South.
+            </p>
+          </div>
+          <div class="slide-viz">
+            <img
+                src="images/summer_precipitation.png"
+                style="width:100%; height:100%; object-fit:contain; border-radius:10px;"
+  />
+          </div>
+        </div>
+      </div>
+
+    
+
+      <!-- Step 8: Climate Choices Game -->
+      <div class="slide">
+        <div class="game-slide-content">
+          <div class="game-container">
+            <iframe src="game/index.html" title="Climate Choices Game"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="slide-indicator" id="slide-indicator"></div>
+
+    <script src="main.js"></script>
+  </body>
+</html>
