@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Climate Choices Game</title>
+  <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
+  <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+  <link rel="stylesheet" href="game.css" />
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+  <div class="slides-container">
+
+    <!-- Title Slide -->
+    <div class="slide active title-slide">
+      <h1>Climate Choices Game</h1>
+      <p class="subtitle">Make choices and see how they impact emissions</p>
+      <button id="start-game">Start Game</button>
+    </div>
+
+    <!-- Question slides will be generated here by JS -->
+    <div id="food-chart"></div>
+  </div>
+
+  
+  
+  <script src="game.js"></script>
+</body>
+</html>

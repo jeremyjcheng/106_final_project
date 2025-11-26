@@ -1,0 +1,613 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, sans-serif;
+  line-height: 1.6;
+  color: #333;
+  background-color: #f5f5f5;
+  overflow: hidden;
+}
+
+.slides-container {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background-color: #f5f5f5;
+}
+
+.slide {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(0);
+  transition: opacity 0.25s ease,
+    visibility 0.25s ease,
+    transform 0.25s ease;
+  background-color: #f5f5f5;
+  will-change: opacity, transform;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.slide.scrollable {
+  overflow-y: auto;
+  overflow-x: hidden;
+  justify-content: flex-start;
+  padding: 2rem 2rem 0.5rem 2rem;
+}
+
+.regional-chart-slide {
+  grid-template-columns: 1fr;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  gap: 0.5rem;
+}
+
+.regional-chart-text {
+  text-align: center;
+  margin-bottom: 0;
+  padding: 0;
+}
+
+.regional-chart-text h2 {
+  margin-bottom: 0.25rem;
+}
+
+.regional-chart-text p {
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 0;
+}
+
+.regional-chart-container {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  background-color: white;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.chart-svg-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  overflow: visible;
+  margin: 0;
+}
+
+#chartSvg {
+  display: block;
+  margin: 0 auto;
+}
+
+.slide.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+  z-index: 10;
+}
+
+.slide.prev {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-20px);
+  z-index: 1;
+}
+
+.slide.next {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(20px);
+  z-index: 1;
+}
+
+.slide-content {
+  max-width: 1200px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: center;
+  max-height: 100%;
+  box-sizing: border-box;
+}
+
+.slide-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.slide-number {
+  display: inline-block;
+  background-color: #2e86ab;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 40px;
+  font-weight: bold;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.slide h2 {
+  color: #2e86ab;
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.slide p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #333;
+  margin-bottom: 0.75rem;
+}
+
+.slide .highlight {
+  color: #a23b72;
+  font-weight: 600;
+}
+
+.slide-viz {
+  width: 100%;
+  height: 500px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.slide-viz h3 {
+  color: #2e86ab;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.slide-viz-placeholder {
+  width: 100%;
+  height: 100%;
+  background-color: #f0f0f0;
+  border: 2px dashed #ccc;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 1rem;
+  text-align: center;
+  padding: 2rem;
+}
+
+#industrial-precipitation-chart {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#industrial-precipitation-chart svg {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.title-slide {
+  background: linear-gradient(135deg, #1a5490 0%, #2e86ab 50%, #4a9fd8 100%);
+  color: white;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.title-slide::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.title-slide h1 {
+  font-size: 4.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: white;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  position: relative;
+  z-index: 1;
+}
+
+.title-slide .subtitle {
+  font-size: 1.6rem;
+  font-weight: 400;
+  opacity: 0.95;
+  margin-bottom: 3rem;
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.5;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.title-slide .authors {
+  font-size: 1.1rem;
+  margin-top: 4rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  position: relative;
+  z-index: 1;
+}
+
+.title-slide .authors::before {
+  content: "";
+  display: block;
+  width: 60px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.4);
+  margin: 0 auto 1.5rem;
+}
+
+.slide-indicator {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.75rem;
+  z-index: 1000;
+  align-items: center;
+}
+
+.indicator-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.indicator-dot:hover {
+  background-color: rgba(0, 0, 0, 0.4);
+  transform: scale(1.2);
+}
+
+.indicator-dot.active {
+  background-color: #2e86ab;
+  width: 12px;
+  height: 12px;
+}
+
+/* Scenario Chooser Styles */
+.scenario-chooser {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.scenario-option {
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  flex: 1;
+}
+
+.scenario-option:hover {
+  transform: translateY(-5px);
+}
+
+.scenario-card {
+  background-color: white;
+  border: 3px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.scenario-option:hover .scenario-card {
+  border-color: #2e86ab;
+  box-shadow: 0 8px 16px rgba(46, 134, 171, 0.2);
+}
+
+.scenario-option.selected .scenario-card {
+  border-color: #2e86ab;
+  background-color: #f0f7fa;
+  box-shadow: 0 8px 24px rgba(46, 134, 171, 0.3);
+}
+
+.scenario-icon {
+  font-size: 3rem;
+  margin-bottom: 0.75rem;
+}
+
+.scenario-card h3 {
+  color: #2e86ab;
+  font-size: 1.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.scenario-description {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #555;
+  margin-bottom: 1rem;
+  flex-grow: 1;
+}
+
+.scenario-outcome {
+  background-color: #f5f5f5;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-top: 0.5rem;
+}
+
+.scenario-outcome p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+}
+
+.scenario-divider {
+  text-align: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.scenario-divider span {
+  background-color: #f5f5f5;
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  font-weight: 600;
+  color: #666;
+  font-size: 1.1rem;
+  display: inline-block;
+}
+
+.scenario-result {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 12px;
+  text-align: center;
+  border: 2px solid #2e86ab;
+}
+
+.scenario-result h3 {
+  color: #2e86ab;
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.scenario-result p {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.reset-button {
+  background-color: #2e86ab;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.reset-button:hover {
+  background-color: #1a5490;
+}
+
+/* Writeup Styles */
+.writeup-section {
+  margin-bottom: 1.5rem;
+}
+
+.writeup-section:last-child {
+  margin-bottom: 0;
+}
+
+.writeup-section h3 {
+  color: #2e86ab;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.writeup-section p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #333;
+  text-align: left;
+}
+
+/* Game Slide Styles */
+.game-slide-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.game-container {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border-radius: 0;
+  overflow: hidden;
+  box-shadow: none;
+  background-color: transparent;
+}
+
+.game-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+/* Regional Precipitation Chart Styles */
+.chart-container {
+  position: relative;
+}
+
+.dot {
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #999;
+  transition: color 0.2s ease;
+  user-select: none;
+}
+
+.dot:hover {
+  color: #2e86ab;
+}
+
+.dot.active {
+  color: #2e86ab;
+}
+
+.legend-item {
+  transition: opacity 0.2s ease;
+}
+
+.legend-item:not(.active) {
+  opacity: 0.4;
+}
+
+.legend-item:not(.active):hover {
+  opacity: 0.7;
+}
+
+.legend-box {
+  transition: all 0.2s ease;
+}
+
+.legend-box.selected {
+  opacity: 1;
+}
+
+.legend-item:not(.active) .legend-box {
+  opacity: 0.4;
+}
+
+#regressionToggle.active {
+  opacity: 1;
+}
+
+#regressionToggle:not(.active) {
+  opacity: 0.5;
+}
+
+#tooltip.visible {
+  opacity: 1 !important;
+}
+
+#chartSvg {
+  background-color: white;
+  border-radius: 8px;
+}
+
+@media (max-width: 968px) {
+  .slide-content {
+    grid-template-columns: 1fr;
+  }
+
+  .slide-viz {
+    height: 300px;
+  }
+
+  .title-slide h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .title-slide .subtitle {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    padding: 0 1rem;
+  }
+
+  .title-slide .authors {
+    font-size: 1rem;
+    margin-top: 2.5rem;
+    padding: 0 1rem;
+  }
+
+  .scenario-chooser {
+    flex-direction: column;
+  }
+
+  .scenario-divider {
+    margin: 1rem 0;
+  }
+
+  .game-slide-content {
+    padding: 0;
+  }
+
+  #chartSvg {
+    width: 100% !important;
+    height: auto !important;
+  }
+}
+
+
+
+
+
