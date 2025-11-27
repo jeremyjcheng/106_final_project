@@ -44,6 +44,65 @@ body {
   overflow: hidden;
 }
 
+.slide.scrollable {
+  overflow-y: auto;
+  overflow-x: hidden;
+  justify-content: flex-start;
+  padding: 2rem 2rem 0.5rem 2rem;
+}
+
+.regional-chart-slide {
+  grid-template-columns: 1fr;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  gap: 0.5rem;
+}
+
+.regional-chart-text {
+  text-align: center;
+  margin-bottom: 0;
+  padding: 0;
+}
+
+.regional-chart-text h2 {
+  margin-bottom: 0.25rem;
+}
+
+.regional-chart-text p {
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 0;
+}
+
+.regional-chart-container {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  background-color: white;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.chart-svg-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  overflow: visible;
+  margin: 0;
+}
+
+#chartSvg {
+  display: block;
+  margin: 0 auto;
+}
+
 .slide.active {
   opacity: 1;
   visibility: visible;
@@ -149,11 +208,8 @@ body {
   padding: 2rem;
 }
 
-<<<<<<< Updated upstream
-=======
 
 
->>>>>>> Stashed changes
 .title-slide {
   background: linear-gradient(135deg, #1a5490 0%, #2e86ab 50%, #4a9fd8 100%);
   color: white;
@@ -378,6 +434,31 @@ body {
   background-color: #1a5490;
 }
 
+/* Writeup Styles */
+.writeup-section {
+  margin-bottom: 1.5rem;
+}
+
+.writeup-section:last-child {
+  margin-bottom: 0;
+}
+
+.writeup-section h3 {
+  color: #2e86ab;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.writeup-section p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #333;
+  text-align: left;
+}
+
 /* Game Slide Styles */
 .game-slide-content {
   display: flex;
@@ -406,6 +487,68 @@ body {
   height: 100%;
   border: none;
   display: block;
+}
+
+/* Regional Precipitation Chart Styles */
+.chart-container {
+  position: relative;
+}
+
+.dot {
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #999;
+  transition: color 0.2s ease;
+  user-select: none;
+}
+
+.dot:hover {
+  color: #2e86ab;
+}
+
+.dot.active {
+  color: #2e86ab;
+}
+
+.legend-item {
+  transition: opacity 0.2s ease;
+}
+
+.legend-item:not(.active) {
+  opacity: 0.4;
+}
+
+.legend-item:not(.active):hover {
+  opacity: 0.7;
+}
+
+.legend-box {
+  transition: all 0.2s ease;
+}
+
+.legend-box.selected {
+  opacity: 1;
+}
+
+.legend-item:not(.active) .legend-box {
+  opacity: 0.4;
+}
+
+#regressionToggle.active {
+  opacity: 1;
+}
+
+#regressionToggle:not(.active) {
+  opacity: 0.5;
+}
+
+#tooltip.visible {
+  opacity: 1 !important;
+}
+
+#chartSvg {
+  background-color: white;
+  border-radius: 8px;
 }
 
 @media (max-width: 968px) {
@@ -445,10 +588,13 @@ body {
   .game-slide-content {
     padding: 0;
   }
+
+  #chartSvg {
+    width: 100% !important;
+    height: auto !important;
+  }
 }
 
-<<<<<<< Updated upstream
-=======
 
 
 
@@ -485,4 +631,3 @@ body {
   opacity: 0.45;
   transition: opacity 0.2s ease;
 }
->>>>>>> Stashed changes
