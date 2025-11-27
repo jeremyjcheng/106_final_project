@@ -33,16 +33,15 @@
               unmistakably shaped by human decisions.
             </p>
             <p>
-              From industrial-era pollution that once suppressed rainfall, to
-              modern warming that fuels stronger moisture cycles and more
-              extreme rain events, decades of atmospheric change are written
-              into the long-term rise and fall of seasonal precipitation.
+              Human activities since the Industrial Revolution changed seasonal rainfall.
+              Greenhouse gases made the air warmer and wetter, leading to heavier winter precipitation.
+              But early industrial sulfate pollution reduced summer rainfall by suppressing clouds.
+              As pollution later decreased, both winter and summer rainfall began to increase more clearly.
             </p>
             <p>
-              By tracing these patterns across regions and through time, we can
-              see how human activity has intertwined with Earth’s natural
-              climate systems, reshaping when, where, and how much rain falls
-              each year.
+              Land clearing, farming, and deforestation changed how the land holds and releases moisture, reshaping seasonal rainfall.
+              In summer, irrigation can increase humidity and storms, while over-plowed dry areas become hotter and drier.
+              In winter, changes in vegetation and soil affect surface energy and moisture, subtly influencing storm paths and rainfall.
             </p>
           </div>
           <div class="slide-viz">
@@ -64,39 +63,9 @@
         <div class="slide-content">
           <div class="slide-text">
             <span class="slide-number">2</span>
-            <h2>From Smoke Stacks to Plowed Fields</h2>
-            <p>
-              Since the Industrial Revolution, greenhouse gases have warmed and
-              moistened the atmosphere, allowing winter storms to carry more
-              moisture and produce heavier cold-season precipitation. At the
-              same time, early industrial sulfate pollution suppressed cloud
-              formation in summer, limiting rainfall that would otherwise have
-              increased. As air pollution declined, both winter and summer
-              precipitation began to show clearer signs of strengthening.
-            </p>
-            <p>
-              Land clearing, farming, and deforestation have altered how the
-              surface stores and releases moisture, reshaping seasonal rainfall
-              patterns. In summer, irrigation can boost humidity and enhance
-              local storms, while over-plowed drylands become hotter and drier,
-              reducing rainfall. In winter, changes to vegetation and soil
-              modify surface energy and moisture, subtly influencing storm
-              tracks and cold-season precipitation.
-            </p>
-          </div>
-          <div class="slide-viz">
-            <div id="industrial-precipitation-chart"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Slide 3: Regional summer 2-month precipitation + explanatory text -->
-      <div class="slide">
-        <div class="slide-content">
-          <div class="slide-text">
-            <span class="slide-number">3</span>
-            <h2>Summer Rainfall by Region, 1850–2020</h2>
-            <p>
+            <h2>Along the long timeline of the past, some marks of human influence</h2>
+            <!-- 新增 id，方便在 JS 里监听 hover -->
+            <p id="industrial-text-1">
               Around the 1930s, the summer rainfall in the Midwest and the South
               dropped sharply. This was the famous Dust Bowl drought—a classic
               case of human land use and climate working together. Over-farming
@@ -105,7 +74,7 @@
               of severe drought. After the New Deal introduced soil conservation
               policies, rainfall and climate gradually recovered.
             </p>
-            <p>
+            <p id="industrial-text-2">
               In the 1950s, there was another major drought, along with the peak
               of industrial pollution. Summer rainfall in the South, the West,
               and parts of the Midwest dropped again. After World War II,
@@ -117,19 +86,12 @@
               cause—especially in the Southeast and South.
             </p>
           </div>
-          <div class="slide-viz">
-            <img
-              src="images/summer_precipitation.png"
-              style="
-                width: 100%;
-                height: 100%;
-                object-fit: contain;
-                border-radius: 10px;
-              "
-            />
+          <div class="slide-viz-industrial">
+            <div id="industrial-precipitation-chart"></div>
           </div>
         </div>
       </div>
+
 
       <!-- Slide 4: Regional Precipitation Chart -->
       <div class="slide scrollable">
@@ -434,9 +396,9 @@
         </div>
       </div>
     </div>
-
-    <!-- Navigation -->
-    <div class="slide-indicator" id="slide-indicator"></div>
+      
+    
+    <div id="slide-indicator" class="slide-indicator"></div>
 
     <script src="main.js"></script>
     <script src="industrial-precipitation.js"></script>

@@ -208,19 +208,6 @@ body {
   padding: 2rem;
 }
 
-#industrial-precipitation-chart {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#industrial-precipitation-chart svg {
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
 
 .title-slide {
   background: linear-gradient(135deg, #1a5490 0%, #2e86ab 50%, #4a9fd8 100%);
@@ -611,3 +598,35 @@ body {
 
 
 
+
+.slide-viz-industrial {
+    width: 100%;
+    height: 500px;         /* ← 你想要的白框高度 */
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    
+    /* 可以自己决定是否居中图像 */
+    display: flex;
+    align-items: center;     /* 图上下居中 */
+    justify-content: center; /* 图左右居中 */
+
+    padding: 0;              /* 内边距你自己调 */
+}
+
+#industrial-precipitation-chart {
+  width: 100%;
+  height: 100%;
+}
+#industrial-precipitation-chart svg {
+  width: 100%;
+  height: 100%;
+  background: transparent;   /* 不要再来一层白底 */
+  box-shadow: none;          /* 去掉内层阴影，避免“双白框” */
+  border-radius: 8px;        /* 跟外框圆角一致，看起来是一层 */
+}
+
+.slide-text p.dimmed-text {
+  opacity: 0.45;
+  transition: opacity 0.2s ease;
+}
