@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Climate Precipitation Story</title>
+  <style>
+    * {
+      margin: 10px;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: #f8f9fa;
+    }
+
+    #scrolly-container {
+      position: relative;
+      display: flex;
+      padding: 50px 0;
+    }
+
+    #line-story {
+      flex: 1;
+      padding: 0 50px;
+    }
+
+    .step {
+      min-height: 80vh;
+      display: flex;
+      align-items: flex-start;
+      padding-top: 15vh;
+      opacity: 0.3;
+      transition: opacity 0.5s;
+      font-size: 1.4rem;
+      line-height: 1.8;
+      color: black;
+      position: relative;
+    }
+    
+    .step-content {
+      position: relative;
+      padding-bottom: 320px; 
+      z-index: 2;
+    }
+    
+    .rain-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 300px;
+      overflow: hidden;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+    
+    .step.active .rain-container {
+      opacity: 1;
+    }
+    
+    .clouds {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+    
+    .cloud {
+      position: relative;
+      width: 80px;
+      height: 30px;
+      border-radius: 50px;
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    .cloud:nth-child(1) { animation-delay: 0s; }
+    .cloud:nth-child(2) { animation-delay: 0.5s; }
+    .cloud:nth-child(3) { animation-delay: 1s; }
+    
+    .cloud::before,
+    .cloud::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+    }
+    
+    .cloud::before {
+      width: 40px;
+      height: 40px;
+      top: -20px;
+      left: 10px;
+      background: inherit;
+    }
+    
+    .cloud::after {
+      width: 50px;
+      height: 50px;
+      top: -25px;
+      right: 10px;
+      background: inherit;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+    }
+    
+    .ground {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 40px;
+      background: linear-gradient(to bottom, transparent, rgba(139, 90, 43, 0.3));
+      border-top: 2px solid rgba(139, 90, 43, 0.5);
+    }
+    
+    .raindrop {
+      position: absolute;
+      width: 2px;
+      background: linear-gradient(to bottom, transparent, rgba(100, 149, 237, 0.8));
+      animation: fall linear infinite;
+      top: 60px;
+    }
+    
+    .ripple {
+      position: absolute;
+      bottom: 40px;
+      width: 10px;
+      height: 10px;
+      border: 2px solid rgba(100, 149, 237, 0.6);
+      border-radius: 50%;
+      animation: ripple 0.6s ease-out;
+      pointer-events: none;
+    }
+    
+    @keyframes fall {
+      0% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(200px);
+        opacity: 0.3;
+      }
+    }
+    
+    @keyframes ripple {
+      0% {
+        width: 10px;
+        height: 10px;
+        opacity: 0.8;
+      }
+      100% {
+        width: 30px;
+        height: 30px;
+        opacity: 0;
+      }
+    }
+
+    .step.active {
+      opacity: 1;
+    }
+
+    #line-plot {
+      flex: 1;
+      position: sticky;
+      top: 100px;
+      height: 600px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    svg {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .axis-label {
+      font-size: 14px;
+      font-family: sans-serif;
+    }
+
+    h1 {
+      text-align: center;
+      padding: 50px 0;
+      font-size: 2.5rem;
+      color: black;
+    }
+
+    .highlight-yellow {
+      background: linear-gradient(transparent 60%, #fff176 60%);
+      padding: 0 2px;
+      font-weight: bold;
+    }
+    .highlight-red {
+      background: linear-gradient(transparent 60%, #ffccbc 60%);
+      padding: 0 2px;
+      font-weight: bold;
+    }
+    .highlight-green {
+      background: linear-gradient(transparent 60%, #c8e6c9 60%);
+      padding: 0 2px;
+      font-weight: bold;
+    }
+
+    #scroll-hint {
+      text-align: center;
+      margin-top: -30px;
+      margin-bottom: 20px;
+      font-family: 'Georgia', serif;
+      color: grey;
+      animation: fadeIn 1.5s ease-out forwards;
+      opacity: 0;
+    }
+
+    #scroll-hint p {
+      font-size: 1.2rem;
+      margin-bottom: 5px;
+    }
+
+    #scroll-hint .arrow {
+      font-size: 2rem;
+      animation: upDown 1.3s ease-in-out infinite;
+      position: relative;
+    }
+
+    @keyframes upDown {
+      0%   { transform: translateY(0); }
+      50%  { transform: translateY(8px); }
+      100% { transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <h1>A Story of Changing Precipitation in the U.S.</h1>
+
+  <div id="scroll-hint">
+    <p>Scroll to Explore</p>
+    <div class="arrow">↓</div>
+  </div>
+
+  <div id="scrolly-container">
+    <div id="line-story">
+      <div class="step" data-step="0">
+        <div class="step-content">
+          <p>From 1850 to 2014, we observed <span class="highlight-yellow">historical precipitation</span> patterns. The data shows natural variations in rainfall over more than 150 years of record-keeping.</p>
+        </div>
+        <div class="rain-container">
+          <div class="clouds">
+            <div class="cloud"></div>
+            <div class="cloud"></div>
+            <div class="cloud"></div>
+          </div>
+          <div class="ground"></div>
+        </div>
+      </div>
+      <div class="step" data-step="1">
+        <div class="step-content">
+          <p>But what does the future hold? Climate models project dramatic changes ahead. Under a <span class="highlight-red">high-emissions scenario</span>, precipitation patterns could shift significantly by 2100.</p>
+        </div>
+        <div class="rain-container">
+          <div class="clouds">
+            <div class="cloud"></div>
+            <div class="cloud"></div>
+            <div class="cloud"></div>
+          </div>
+          <div class="ground"></div>
+        </div>
+      </div>
+      <div class="step" data-step="2">
+        <div class="step-content">
+          <p>However, if we cut down the emissions levels, and go for a more <span class="highlight-green">sustainable pathway</span>, we could see a stabilization of precipitation patterns by 2100.</p>
+        </div>
+        <div class="rain-container">
+          <div class="clouds">
+            <div class="cloud"></div>
+            <div class="cloud"></div>
+            <div class="cloud"></div>
+          </div>
+          <div class="ground"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div id="line-plot">
+      <svg id="lineChart"></svg>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm";
+    import scrollama from "https://cdn.jsdelivr.net/npm/scrollama@3.2.0/+esm";
+
+    // Rain configuration for each step
+    const rainConfig = {
+      0: { // Historical - light rain
+        cloudColor: '#d3d3d3',
+        raindrops: 20,
+        rainHeight: 15,
+        rainDuration: [1.5, 2.5],
+        rippleFrequency: 800
+      },
+      1: { // High emissions - intense rain
+        cloudColor: '#4a4a4a',
+        raindrops: 50,
+        rainHeight: 25,
+        rainDuration: [0.5, 1],
+        rippleFrequency: 300
+      },
+      2: { // Low emissions - moderate rain
+        cloudColor: '#808080',
+        raindrops: 30,
+        rainHeight: 20,
+        rainDuration: [1, 1.8],
+        rippleFrequency: 500
+      }
+    };
+
+    // Create rain animation
+    function createRain() {
+      const steps = document.querySelectorAll('.step');
+      
+      steps.forEach((step, stepIndex) => {
+        const container = step.querySelector('.rain-container');
+        const clouds = step.querySelectorAll('.cloud');
+        const config = rainConfig[stepIndex];
+        
+        // Set cloud colors
+        clouds.forEach(cloud => {
+          cloud.style.background = config.cloudColor;
+        });
+        
+        // Create raindrops
+        for (let i = 0; i < config.raindrops; i++) {
+          const drop = document.createElement('div');
+          drop.className = 'raindrop';
+          
+          drop.style.left = Math.random() * 100 + '%';
+          drop.style.height = config.rainHeight + 'px';
+          
+          const duration = config.rainDuration[0] + 
+            Math.random() * (config.rainDuration[1] - config.rainDuration[0]);
+          drop.style.animationDuration = duration + 's';
+          drop.style.animationDelay = Math.random() * 2 + 's';
+          
+          container.appendChild(drop);
+        }
+      });
+    }
+    
+    // Create ripple effect
+    function createRipple(container, config) {
+      const ripple = document.createElement('div');
+      ripple.className = 'ripple';
+      ripple.style.left = Math.random() * 100 + '%';
+      
+      container.appendChild(ripple);
+      
+      setTimeout(() => {
+        ripple.remove();
+      }, 600);
+    }
+    
+    // Start ripple intervals for active step
+    let rippleIntervals = {};
+    
+    function startRipples(stepIndex) {
+      stopAllRipples();
+      
+      const step = document.querySelectorAll('.step')[stepIndex];
+      const container = step.querySelector('.rain-container');
+      const config = rainConfig[stepIndex];
+      
+      rippleIntervals[stepIndex] = setInterval(() => {
+        createRipple(container, config);
+      }, config.rippleFrequency);
+    }
+    
+    function stopAllRipples() {
+      Object.values(rippleIntervals).forEach(interval => clearInterval(interval));
+      rippleIntervals = {};
+    }
+
+    // Load data
+    async function loadData() {
+      const [hist, low, high] = await Promise.all([
+        d3.csv("pr_1850_2010.csv", d => ({
+          year: +d.year,
+          pr: +d.pr
+        })),
+        d3.csv("projected_low_2025_2100.csv", d => ({
+          year: +d.year,
+          pr: +d.pr
+        })),
+        d3.csv("projected_high_2025_2100.csv", d => ({
+          year: +d.year,
+          pr: +d.pr
+        })),
+      ]);
+      
+      const lastHistPoint = hist[hist.length - 1];
+      const highWithConnection = [lastHistPoint, ...high];
+      const lowWithConnection = [lastHistPoint, ...low];
+
+      return { hist, low: lowWithConnection, high: highWithConnection };
+    }
+
+    // Main visualization
+    async function init() {
+      const { hist, low, high } = await loadData();
+
+      const width = 800;
+      const height = 500;
+      const margin = { top: 80, right: 60, bottom: 80, left: 100 };
+
+      const svg = d3.select("#lineChart")
+        .attr("width", width)
+        .attr("height", height);
+
+      const xScale = d3.scaleLinear()
+        .domain(d3.extent(hist, d => d.year))
+        .range([margin.left, width - margin.right]);
+
+      const yScale = d3.scaleLinear()
+        .domain(d3.extent(hist, d => d.pr))
+        .range([height - margin.bottom, margin.top]);
+
+      const xAxisGroup = svg.append("g")
+        .attr("class", "x-axis")
+        .attr("transform", `translate(0, ${height - margin.bottom})`);
+
+      const yAxisGroup = svg.append("g")
+        .attr("class", "y-axis")
+        .attr("transform", `translate(${margin.left}, 0)`);
+
+      svg.append("text")
+        .attr("class", "axis-label")
+        .attr("x", width / 2)
+        .attr("y", height - 25)
+        .attr("text-anchor", "middle")
+        .text("Year");
+
+      svg.append("text")
+        .attr("class", "axis-label")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -height / 2)
+        .attr("y", 30)
+        .attr("text-anchor", "middle")
+        .text("Precipitation (mm)");
+
+      svg.append("text")
+        .attr("class", "chart-title")
+        .attr("x", width / 2)
+        .attr("y", 40)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "18px")
+        .attr("font-weight", "bold")
+        .attr("font-family", "sans-serif")
+        .attr("fill", "#2c3e50")
+        .text("From Past to Future: U.S. Precipitation Under Different Emission Scenarios");
+
+      const line = d3.line()
+        .x(d => xScale(d.year))
+        .y(d => yScale(d.pr))
+        .curve(d3.curveBundle.beta(0.85));
+
+      const histLine = svg.append("path")
+        .datum(hist)
+        .attr("class", "hist-line")
+        .attr("fill", "none")
+        .attr("stroke", "#4682b4")
+        .attr("stroke-width", 2.5)
+        .attr("d", line);
+
+      const histLineLength = histLine.node().getTotalLength();
+      
+      histLine
+        .attr("stroke-dasharray", histLineLength + " " + histLineLength)
+        .attr("stroke-dashoffset", histLineLength);
+
+      const highLine = svg.append("path")
+        .datum(high)
+        .attr("class", "high-line")
+        .attr("fill", "none")
+        .attr("stroke", "#e74c3c")
+        .attr("stroke-width", 2.5)
+        .attr("d", line)
+        .style("opacity", 0);
+      
+      const highLineLength = highLine.node().getTotalLength();
+      
+      highLine
+        .attr("stroke-dasharray", highLineLength + " " + highLineLength)
+        .attr("stroke-dashoffset", highLineLength);
+
+      const lowLine = svg.append("path")
+        .datum(low)
+        .attr("class", "low-line")
+        .attr("fill", "none")
+        .attr("stroke", "#2ecc71")
+        .attr("stroke-width", 2.5)
+        .attr("d", line)
+        .style("opacity", 0);
+        
+      const lowEndDot = svg.append("circle")
+        .attr("class", "low-end-dot")
+        .attr("r", 6)
+        .attr("fill", "#2ecc71")
+        .attr("stroke", "white")
+        .attr("stroke-width", 2)
+        .style("opacity", 0);
+
+      const highEndDot = svg.append("circle")
+        .attr("class", "high-end-dot")
+        .attr("r", 6)
+        .attr("fill", "#e74c3c")
+        .attr("stroke", "white")
+        .attr("stroke-width", 2)
+        .style("opacity", 0);
+            
+      const lowLineLength = lowLine.node().getTotalLength();
+      
+      lowLine
+        .attr("stroke-dasharray", lowLineLength + " " + lowLineLength)
+        .attr("stroke-dashoffset", lowLineLength);
+
+      const lastHistPoint = hist[hist.length - 1];
+      
+      const annotationDot = svg.append("circle")
+        .attr("class", "annotation-dot")
+        .attr("r", 6)
+        .attr("fill", "#4682b4")
+        .attr("stroke", "white")
+        .attr("stroke-width", 2)
+        .style("opacity", 0);
+
+      const annotationText = svg.append("text")
+        .attr("class", "annotation-text")
+        .attr("font-size", "14px")
+        .attr("font-family", "sans-serif")
+        .attr("font-weight", "bold")
+        .attr("fill", "#4682b4")
+        .style("opacity", 0)
+        .text("2014");
+
+      updateChart(0);
+
+      function updateChart(step) {
+        if (step === 0) {
+          xScale.domain(d3.extent(hist, d => d.year));
+          yScale.domain(d3.extent(hist, d => d.pr));
+          
+          xAxisGroup.transition().duration(1000)
+            .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
+          
+          yAxisGroup.transition().duration(1000)
+            .call(d3.axisLeft(yScale))
+            .on("end", () => {
+              histLine.attr("d", line);
+              const histLen = histLine.node().getTotalLength();
+              histLine
+                .attr("stroke-dasharray", histLen + " " + histLen)
+                .attr("stroke-dashoffset", histLen)
+                .transition()
+                .duration(1000)
+                .ease(d3.easeLinear)
+                .attr("stroke-dashoffset", 0)
+                .on("end", () => {
+                  const lastPoint = hist[hist.length - 1];
+                  annotationDot
+                    .attr("cx", xScale(lastPoint.year))
+                    .attr("cy", yScale(lastPoint.pr))
+                    .transition()
+                    .duration(500)
+                    .style("opacity", 1);
+                  
+                  annotationText
+                    .attr("x", xScale(lastPoint.year) + 15)
+                    .attr("y", yScale(lastPoint.pr) + 5)
+                    .transition()
+                    .duration(500)
+                    .style("opacity", 1);
+                });
+            });
+
+          highLine.transition().duration(1000)
+            .style("opacity", 0);
+          
+          lowLine.transition().duration(1000)
+            .style("opacity", 0);
+
+          const lastPoint = hist[hist.length - 1];
+          annotationDot
+            .attr("cx", xScale(lastPoint.year))
+            .attr("cy", yScale(lastPoint.pr));
+          
+          annotationText
+            .attr("x", xScale(lastPoint.year) + 15)
+            .attr("y", yScale(lastPoint.pr) + 5);
+            
+          highEndDot.transition().duration(500).style("opacity", 0);
+          lowEndDot.transition().duration(500).style("opacity", 0);
+
+        } else if (step === 1) {
+          const allData = [...hist, ...high];
+          xScale.domain(d3.extent(allData, d => d.year));
+          yScale.domain(d3.extent(allData, d => d.pr));
+
+          xAxisGroup.transition().duration(1000)
+            .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
+          
+          yAxisGroup.transition().duration(1000)
+            .call(d3.axisLeft(yScale))
+            .on("end", () => {
+              highLine
+                .attr("d", line)
+                .style("opacity", 1);
+              
+              const lastHigh = high[high.length - 1];
+              highEndDot
+                .attr("cx", xScale(lastHigh.year))
+                .attr("cy", yScale(lastHigh.pr))
+                .transition()
+                .delay(500)
+                .duration(500)
+                .style("opacity", 1);
+
+              lowEndDot.transition().duration(500).style("opacity", 0);
+                
+              const highLen = highLine.node().getTotalLength();
+              highLine
+                .attr("stroke-dasharray", highLen + " " + highLen)
+                .attr("stroke-dashoffset", highLen)
+                .transition()
+                .duration(500)
+                .ease(d3.easeLinear)
+                .attr("stroke-dashoffset", 0);
+            });
+
+          histLine.transition().duration(1000)
+            .attr("d", line)
+            .attr("stroke-dashoffset", 0);
+
+          const lastPoint = hist[hist.length - 1];
+          annotationDot
+            .transition()
+            .duration(1000)
+            .attr("cx", xScale(lastPoint.year))
+            .attr("cy", yScale(lastPoint.pr));
+          
+          annotationText
+            .transition()
+            .duration(1000)
+            .attr("x", xScale(lastPoint.year) + 15)
+            .attr("y", yScale(lastPoint.pr) + 5);
+
+          lowLine.transition().duration(1000)
+            .style("opacity", 0);
+
+        } else if (step === 2) {
+          const allData = [...hist, ...high, ...low];
+          xScale.domain(d3.extent(allData, d => d.year));
+          yScale.domain(d3.extent(allData, d => d.pr));
+
+          xAxisGroup.transition().duration(1000)
+            .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
+          
+          yAxisGroup.transition().duration(1000)
+            .call(d3.axisLeft(yScale))
+            .on("end", () => {
+              const lastHigh2 = high[high.length - 1];
+              highEndDot
+                .attr("cx", xScale(lastHigh2.year))
+                .attr("cy", yScale(lastHigh2.pr))
+                .transition()
+                .duration(500)
+                .style("opacity", 0.3);
+
+              lowLine
+                .attr("d", line)
+                .style("opacity", 1);
+
+              const lastLow = low[low.length - 1];
+              lowEndDot
+                .attr("cx", xScale(lastLow.year))
+                .attr("cy", yScale(lastLow.pr))
+                .transition()
+                .delay(500)
+                .duration(500)
+                .style("opacity", 1);
+
+              const lowLen = lowLine.node().getTotalLength();
+              lowLine
+                .attr("stroke-dasharray", lowLen + " " + lowLen)
+                .attr("stroke-dashoffset", lowLen)
+                .transition()
+                .duration(500)
+                .ease(d3.easeLinear)
+                .attr("stroke-dashoffset", 0);
+            });
+
+          histLine.transition().duration(1000)
+            .attr("d", line)
+            .attr("stroke-dashoffset", 0);
+
+          highLine
+            .interrupt()
+            .attr("d", line)
+            .attr("stroke-dashoffset", 0)
+            .transition()
+            .duration(1000)
+            .style("opacity", 0.3);
+
+          const lastPoint = hist[hist.length - 1];
+          annotationDot
+            .transition()
+            .duration(1000)
+            .attr("cx", xScale(lastPoint.year))
+            .attr("cy", yScale(lastPoint.pr));
+          
+          annotationText
+            .transition()
+            .duration(1000)
+            .attr("x", xScale(lastPoint.year) + 15)
+            .attr("y", yScale(lastPoint.pr) + 5);
+        }
+      }
+
+      const scroller = scrollama();
+      
+      scroller
+        .setup({
+          step: '.step',
+          offset: 0.5,
+        })
+        .onStepEnter(response => {
+          d3.selectAll('.step').classed('active', false);
+          d3.select(response.element).classed('active', true);
+          
+          updateChart(response.index);
+          startRipples(response.index);
+        });
+
+      window.addEventListener('resize', scroller.resize);
+    }
+    
+    createRain();
+    init();
+  </script>
+</body>
+</html>

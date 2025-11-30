@@ -13,6 +13,16 @@ body {
   overflow: hidden;
 }
 
+canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 100;
+}
+
 .slides-container {
   width: 100vw;
   height: 100vh;
@@ -42,6 +52,7 @@ body {
   will-change: opacity, transform;
   box-sizing: border-box;
   overflow: hidden;
+  z-index: 1;
 }
 
 .slide.scrollable {
@@ -50,6 +61,7 @@ body {
   justify-content: flex-start;
   padding: 2rem 2rem 0.5rem 2rem;
 }
+
 
 .regional-chart-slide {
   grid-template-columns: 1fr;
@@ -209,12 +221,14 @@ body {
 }
 
 
+/* Title slide with rain effect */
 .title-slide {
   background: linear-gradient(135deg, #1a5490 0%, #2e86ab 50%, #4a9fd8 100%);
   color: white;
   text-align: center;
   position: relative;
   overflow: hidden;
+  z-index: 1;
 }
 
 .title-slide::before {
@@ -228,6 +242,7 @@ body {
     radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
     radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
   pointer-events: none;
+  z-index: 1;
 }
 
 .title-slide h1 {
@@ -239,7 +254,7 @@ body {
   letter-spacing: -0.02em;
   line-height: 1.1;
   position: relative;
-  z-index: 1;
+  z-index: 10;
 }
 
 .title-slide .subtitle {
@@ -253,7 +268,7 @@ body {
   margin-left: auto;
   margin-right: auto;
   position: relative;
-  z-index: 1;
+  z-index: 10;
 }
 
 .title-slide .authors {
@@ -263,7 +278,7 @@ body {
   font-weight: 400;
   letter-spacing: 0.5px;
   position: relative;
-  z-index: 1;
+  z-index: 10;
 }
 
 .title-slide .authors::before {
@@ -273,6 +288,31 @@ body {
   height: 2px;
   background: rgba(255, 255, 255, 0.4);
   margin: 0 auto 1.5rem;
+}
+
+.title-slide .dots {
+  display: flex;
+  gap: 10px;
+  margin-top: 40px;
+  position: relative;
+  z-index: 10;
+  justify-content: center;
+}
+
+.title-slide .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transition: background 0.3s ease;
+}
+
+.title-slide .dot:first-child {
+  background: white;
+}
+
+.title-slide .dot:hover {
+  background: rgba(255, 255, 255, 0.8);
 }
 
 .slide-indicator {
@@ -593,10 +633,6 @@ body {
     height: auto !important;
   }
 }
-
-
-
-
 
 
 .slide-viz-industrial {

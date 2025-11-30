@@ -9,6 +9,7 @@
   </head>
   <body>
     <div class="slides-container">
+      <canvas id="rainCanvas"></canvas>
       <!-- Title Slide -->
       <div class="slide active title-slide">
         <h1>When It Rains: America's Changing Climate</h1>
@@ -18,44 +19,23 @@
         <p class="authors">
           Claudine Handali, Sharon Tey, Charles Zhang, Jeremy Cheng
         </p>
+        <div class="dots">
+          <div class="dot" style="background: white;"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          </div>
       </div>
 
       <!-- About Slide -->
       <div class="slide">
-        <div class="slide-content">
-          <div class="slide-text">
-            <span class="slide-number">1</span>
-            <h2>The Quiet Shift in America’s Seasons</h2>
-            <p>
-              For more than a century, the rhythm of America’s seasons has been
-              quietly shifting. Each winter storm and summer downpour carries
-              the imprint of changing climate forces—some natural, others
-              unmistakably shaped by human decisions.
-            </p>
-            <p>
-              Human activities since the Industrial Revolution changed seasonal rainfall.
-              Greenhouse gases made the air warmer and wetter, leading to heavier winter precipitation.
-              But early industrial sulfate pollution reduced summer rainfall by suppressing clouds.
-              As pollution later decreased, both winter and summer rainfall began to increase more clearly.
-            </p>
-            <p>
-              Land clearing, farming, and deforestation changed how the land holds and releases moisture, reshaping seasonal rainfall.
-              In summer, irrigation can increase humidity and storms, while over-plowed dry areas become hotter and drier.
-              In winter, changes in vegetation and soil affect surface energy and moisture, subtly influencing storm paths and rainfall.
-            </p>
-          </div>
-          <div class="slide-viz">
-            <img
-              src="images/avg_historical.png"
-              style="
-                width: 100%;
-                height: 100%;
-                object-fit: contain;
-                border-radius: 10px;
-              "
-            />
-          </div>
-        </div>
+        <iframe 
+          src="./test/precip.html"
+          style="width: 100%; height: 100vh; border: none;"
+        ></iframe>
       </div>
 
       <!-- Slide 2: Industrial revolution + land use texts -->
@@ -401,6 +381,7 @@
     <div id="slide-indicator" class="slide-indicator"></div>
 
     <script src="main.js"></script>
+    <script src="rain-canvas.js"></script>
     <script src="industrial-precipitation.js"></script>
     <script src="regional-precipitation.js"></script>
   </body>
