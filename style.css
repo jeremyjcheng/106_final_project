@@ -58,8 +58,8 @@ canvas {
 .slide.scrollable {
   overflow-y: auto;
   overflow-x: hidden;
-  justify-content: flex-start;
-  padding: 2rem 2rem 0.5rem 2rem;
+  justify-content: center;
+  padding: 2rem;
 }
 
 
