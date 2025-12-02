@@ -412,8 +412,59 @@ function drawChart() {
 
   // Bin data first, then calculate y-scale domain from binned data
   const binnedHistorical = binDataByDecade(filteredHistorical);
-  const binnedLow = binDataByDecade(lowWithConnection);
-  const binnedHigh = binDataByDecade(highWithConnection);
+  let binnedLow = binDataByDecade(lowWithConnection);
+  let binnedHigh = binDataByDecade(highWithConnection);
+
+  // Ensure continuity: make future lines start at the same point as historical data ends
+  if (binnedHistorical.length > 0 && historicalInsideDomain) {
+    const lastHistoricalBin = binnedHistorical[binnedHistorical.length - 1];
+    const lastHistoricalYear = lastHistoricalBin.year;
+    const lastHistoricalValue = lastHistoricalBin.value;
+
+    // For low emissions: ensure first bin connects to last historical bin
+    if (binnedLow.length > 0) {
+      const firstLowBin = binnedLow[0];
+      if (firstLowBin.year > lastHistoricalYear) {
+        // There's a gap between bins: add a connecting point at the last historical year
+        binnedLow = [
+          {
+            year: lastHistoricalYear,
+            value: lastHistoricalValue,
+            binStart: lastHistoricalBin.binStart,
+            binEnd: lastHistoricalBin.binEnd,
+            count: lastHistoricalBin.count,
+          },
+          ...binnedLow,
+        ];
+      } else if (firstLowBin.year === lastHistoricalYear) {
+        // Same bin year: use historical value to ensure continuity
+        // This handles the case where binning averaged historical and future data
+        binnedLow[0].value = lastHistoricalValue;
+      }
+    }
+
+    // For high emissions: ensure first bin connects to last historical bin
+    if (binnedHigh.length > 0) {
+      const firstHighBin = binnedHigh[0];
+      if (firstHighBin.year > lastHistoricalYear) {
+        // There's a gap between bins: add a connecting point at the last historical year
+        binnedHigh = [
+          {
+            year: lastHistoricalYear,
+            value: lastHistoricalValue,
+            binStart: lastHistoricalBin.binStart,
+            binEnd: lastHistoricalBin.binEnd,
+            count: lastHistoricalBin.count,
+          },
+          ...binnedHigh,
+        ];
+      } else if (firstHighBin.year === lastHistoricalYear) {
+        // Same bin year: use historical value to ensure continuity
+        // This handles the case where binning averaged historical and future data
+        binnedHigh[0].value = lastHistoricalValue;
+      }
+    }
+  }
 
   const allValues = [...binnedHistorical, ...binnedLow, ...binnedHigh].map(
     (d) => d.value
@@ -753,9 +804,14 @@ function drawChart() {
       .y((d) => yScale(d.value))
       .curve(d3.curveBasis);
 
+    // Compute historical regression line first to get the endpoint for continuity
+    let regHist = null;
+    let lastHistoricalRegPoint = null;
+
     if (activeScenarios.includes("historical")) {
-      const regHist = computeRegressionLine(binnedHistorical);
-      if (regHist) {
+      regHist = computeRegressionLine(binnedHistorical);
+      if (regHist && regHist.length > 0) {
+        lastHistoricalRegPoint = regHist[regHist.length - 1];
         svg
           .append("path")
           .datum(regHist)
@@ -768,8 +824,26 @@ function drawChart() {
       }
     }
 
+    // For future regression lines, ensure they start at the same point as historical ends
     if (activeScenarios.includes("low")) {
-      const regLow = computeRegressionLine(binnedLow);
+      let regLow = computeRegressionLine(binnedLow);
+      if (
+        regLow &&
+        regLow.length > 0 &&
+        lastHistoricalRegPoint &&
+        historicalInsideDomain
+      ) {
+        // Ensure the first point of future trend line matches the last point of historical trend line
+        const firstLowRegPoint = regLow[0];
+        if (firstLowRegPoint.year >= lastHistoricalRegPoint.year) {
+          // Adjust the first point to match historical endpoint for continuity
+          regLow[0].value = lastHistoricalRegPoint.value;
+          // If there's a gap, add a connecting point
+          if (firstLowRegPoint.year > lastHistoricalRegPoint.year) {
+            regLow = [lastHistoricalRegPoint, ...regLow];
+          }
+        }
+      }
       if (regLow) {
         svg
           .append("path")
@@ -784,7 +858,24 @@ function drawChart() {
     }
 
     if (activeScenarios.includes("high")) {
-      const regHigh = computeRegressionLine(binnedHigh);
+      let regHigh = computeRegressionLine(binnedHigh);
+      if (
+        regHigh &&
+        regHigh.length > 0 &&
+        lastHistoricalRegPoint &&
+        historicalInsideDomain
+      ) {
+        // Ensure the first point of future trend line matches the last point of historical trend line
+        const firstHighRegPoint = regHigh[0];
+        if (firstHighRegPoint.year >= lastHistoricalRegPoint.year) {
+          // Adjust the first point to match historical endpoint for continuity
+          regHigh[0].value = lastHistoricalRegPoint.value;
+          // If there's a gap, add a connecting point
+          if (firstHighRegPoint.year > lastHistoricalRegPoint.year) {
+            regHigh = [lastHistoricalRegPoint, ...regHigh];
+          }
+        }
+      }
       if (regHigh) {
         svg
           .append("path")
