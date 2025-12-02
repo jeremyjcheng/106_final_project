@@ -97,7 +97,9 @@ function initializeRegionalChart() {
         drawChart();
         regionalChartInitialized = true;
       } else {
-        svg.select("text").text("Error loading data. Check console for details.");
+        svg
+          .select("text")
+          .text("Error loading data. Check console for details.");
       }
     }
   );
@@ -132,7 +134,7 @@ function setYearInputLimits() {
 function initializeRegionDots() {
   const dotsContainer = document.getElementById("dotsContainer");
   if (!dotsContainer) return;
-  
+
   dotsContainer.innerHTML = "";
   regions.forEach((region) => {
     const dot = document.createElement("span");
@@ -170,7 +172,7 @@ function updateLegendVisualState() {
 function setupEventListeners() {
   const prevBtn = document.getElementById("prevBtn");
   const nextBtn = document.getElementById("nextBtn");
-  
+
   if (prevBtn) {
     prevBtn.addEventListener("click", () => {
       navigateRegion("prev");
@@ -408,11 +410,14 @@ function drawChart() {
     .domain([domainStart, domainEnd])
     .range([margin.left, width - margin.right]);
 
-  const allValues = [
-    ...filteredHistorical,
-    ...lowWithConnection,
-    ...highWithConnection,
-  ].map((d) => d.value);
+  // Bin data first, then calculate y-scale domain from binned data
+  const binnedHistorical = binDataByDecade(filteredHistorical);
+  const binnedLow = binDataByDecade(lowWithConnection);
+  const binnedHigh = binDataByDecade(highWithConnection);
+
+  const allValues = [...binnedHistorical, ...binnedLow, ...binnedHigh].map(
+    (d) => d.value
+  );
 
   const yScale = d3
     .scaleLinear()
@@ -539,18 +544,28 @@ function drawChart() {
     const svgRect = svgNode.getBoundingClientRect();
     const tooltipNode = tooltip.node();
     if (!tooltipNode) return;
-    
+
     const slideElement = tooltipNode.closest(".slide");
     if (!slideElement) return;
-    
+
     const slideRect = slideElement.getBoundingClientRect();
 
     // Position tooltip relative to slide container
     const tooltipX = svgRect.left - slideRect.left + xPos + 10;
     const tooltipY = svgRect.top - slideRect.top + yPos - 40;
 
+    // Show bin range if this is binned data
+    let tooltipText = `Year: ${d.year}`;
+    if (d.binStart !== undefined && d.binEnd !== undefined) {
+      tooltipText = `Years: ${d.binStart}-${d.binEnd}<br>Center: ${d.year}`;
+    }
+    tooltipText += `<br>Precipitation: ${d.value.toFixed(2)} mm/day`;
+    if (d.count !== undefined) {
+      tooltipText += `<br>(Avg of ${d.count} years)`;
+    }
+
     tooltip
-      .html(`Year: ${d.year}<br>Precipitation: ${d.value.toFixed(2)} mm/day`)
+      .html(tooltipText)
       .style("left", tooltipX + "px")
       .style("top", tooltipY + "px")
       .classed("visible", true);
@@ -560,19 +575,51 @@ function drawChart() {
     tooltip.classed("visible", false);
   };
 
-  // Helper function to downsample data for better visibility
-  function downsampleData(data, maxPoints = 100) {
-    if (data.length <= maxPoints) return data;
-    const step = Math.ceil(data.length / maxPoints);
-    return data.filter((d, i) => i % step === 0 || i === data.length - 1);
+  // Helper function to bin data into 10-year intervals
+  // Groups data points into bins (e.g., 1850-1859, 1860-1869, etc.)
+  // and calculates the mean value for each bin
+  function binDataByDecade(data) {
+    if (!data || data.length === 0) return [];
+
+    // Create a map to store bins: binStartYear -> array of values
+    const bins = new Map();
+
+    data.forEach((d) => {
+      // Calculate which 10-year bin this year belongs to
+      // e.g., 1853 -> 1850, 1867 -> 1860, 2014 -> 2010
+      const binStart = Math.floor(d.year / 10) * 10;
+
+      if (!bins.has(binStart)) {
+        bins.set(binStart, []);
+      }
+      bins.get(binStart).push(d.value);
+    });
+
+    // Convert bins to array of {year, value} objects
+    // Use the center year of each bin (e.g., 1855 for 1850-1859)
+    const binnedData = Array.from(bins.entries())
+      .map(([binStart, values]) => {
+        const meanValue =
+          values.reduce((sum, val) => sum + val, 0) / values.length;
+        const centerYear = binStart + 5; // Center of the 10-year bin
+        return {
+          year: centerYear,
+          value: meanValue,
+          binStart: binStart,
+          binEnd: binStart + 9,
+          count: values.length,
+        };
+      })
+      .sort((a, b) => a.year - b.year); // Sort by year
+
+    return binnedData;
   }
 
   // Historical line + invisible circles for tooltip
   if (activeScenarios.includes("historical")) {
-    const downsampledHistorical = downsampleData(filteredHistorical, 80);
     svg
       .append("path")
-      .datum(downsampledHistorical)
+      .datum(binnedHistorical)
       .attr("fill", "none")
       .attr("stroke", "#888")
       .attr("stroke-width", 2)
@@ -582,16 +629,20 @@ function drawChart() {
       .style("cursor", "pointer")
       .on("mouseover", function () {
         d3.select(this).attr("opacity", 1).attr("stroke-width", 3);
-        svg.selectAll(".low-emission-line, .high-emission-line").attr("opacity", 0.3);
+        svg
+          .selectAll(".low-emission-line, .high-emission-line")
+          .attr("opacity", 0.3);
       })
       .on("mouseout", function () {
         d3.select(this).attr("opacity", 0.7).attr("stroke-width", 2);
-        svg.selectAll(".low-emission-line, .high-emission-line").attr("opacity", 0.7);
+        svg
+          .selectAll(".low-emission-line, .high-emission-line")
+          .attr("opacity", 0.7);
       });
 
     svg
       .selectAll(".historical-point")
-      .data(filteredHistorical)
+      .data(binnedHistorical)
       .enter()
       .append("circle")
       .attr("cx", (d) => xScale(d.year))
@@ -609,10 +660,9 @@ function drawChart() {
 
   // Low emission (SSP 126)
   if (activeScenarios.includes("low")) {
-    const downsampledLow = downsampleData(lowWithConnection, 80);
     svg
       .append("path")
-      .datum(downsampledLow)
+      .datum(binnedLow)
       .attr("fill", "none")
       .attr("stroke", "#1e88e5")
       .attr("stroke-width", 2)
@@ -622,16 +672,20 @@ function drawChart() {
       .style("cursor", "pointer")
       .on("mouseover", function () {
         d3.select(this).attr("opacity", 1).attr("stroke-width", 3);
-        svg.selectAll(".historical-line, .high-emission-line").attr("opacity", 0.3);
+        svg
+          .selectAll(".historical-line, .high-emission-line")
+          .attr("opacity", 0.3);
       })
       .on("mouseout", function () {
         d3.select(this).attr("opacity", 0.7).attr("stroke-width", 2);
-        svg.selectAll(".historical-line, .high-emission-line").attr("opacity", 0.7);
+        svg
+          .selectAll(".historical-line, .high-emission-line")
+          .attr("opacity", 0.7);
       });
 
     svg
       .selectAll(".low-point")
-      .data(filteredLow)
+      .data(binnedLow)
       .enter()
       .append("circle")
       .attr("cx", (d) => xScale(d.year))
@@ -649,10 +703,9 @@ function drawChart() {
 
   // High emission (SSP 585)
   if (activeScenarios.includes("high")) {
-    const downsampledHigh = downsampleData(highWithConnection, 80);
     svg
       .append("path")
-      .datum(downsampledHigh)
+      .datum(binnedHigh)
       .attr("fill", "none")
       .attr("stroke", "#e53935")
       .attr("stroke-width", 2)
@@ -662,16 +715,20 @@ function drawChart() {
       .style("cursor", "pointer")
       .on("mouseover", function () {
         d3.select(this).attr("opacity", 1).attr("stroke-width", 3);
-        svg.selectAll(".historical-line, .low-emission-line").attr("opacity", 0.3);
+        svg
+          .selectAll(".historical-line, .low-emission-line")
+          .attr("opacity", 0.3);
       })
       .on("mouseout", function () {
         d3.select(this).attr("opacity", 0.7).attr("stroke-width", 2);
-        svg.selectAll(".historical-line, .low-emission-line").attr("opacity", 0.7);
+        svg
+          .selectAll(".historical-line, .low-emission-line")
+          .attr("opacity", 0.7);
       });
 
     svg
       .selectAll(".high-point")
-      .data(filteredHigh)
+      .data(binnedHigh)
       .enter()
       .append("circle")
       .attr("cx", (d) => xScale(d.year))
@@ -688,6 +745,7 @@ function drawChart() {
   }
 
   // Charles: draw smoothed regression curves when toggle is on
+  // Use binned data for regression to maintain consistency
   if (showRegression) {
     const regLine = d3
       .line()
@@ -696,7 +754,7 @@ function drawChart() {
       .curve(d3.curveBasis);
 
     if (activeScenarios.includes("historical")) {
-      const regHist = computeRegressionLine(filteredHistorical);
+      const regHist = computeRegressionLine(binnedHistorical);
       if (regHist) {
         svg
           .append("path")
@@ -711,7 +769,7 @@ function drawChart() {
     }
 
     if (activeScenarios.includes("low")) {
-      const regLow = computeRegressionLine(lowWithConnection);
+      const regLow = computeRegressionLine(binnedLow);
       if (regLow) {
         svg
           .append("path")
@@ -726,7 +784,7 @@ function drawChart() {
     }
 
     if (activeScenarios.includes("high")) {
-      const regHigh = computeRegressionLine(highWithConnection);
+      const regHigh = computeRegressionLine(binnedHigh);
       if (regHigh) {
         svg
           .append("path")
@@ -790,4 +848,3 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
-
