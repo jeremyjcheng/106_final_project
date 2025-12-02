@@ -551,7 +551,10 @@ function drawChart() {
   // Add Historical label ONLY if some historical data remains
   if (hasHistorical) {
     // Position the label between domainStart and 2014 (or domainEnd if less)
-    const histLabelX = xScale((domainStart + Math.min(2014, domainEnd)) / 2);
+    let histLabelX = xScale((domainStart + Math.min(2014, domainEnd)) / 2);
+
+    // Ensure the label is within the chart bounds (not too far left)
+    histLabelX = Math.max(margin.left + 50, histLabelX);
 
     svg
       .append("text")

@@ -55,6 +55,10 @@ canvas {
   z-index: 1;
 }
 
+.slide:not(.active) iframe {
+  display: none;
+}
+
 .slide.scrollable {
   overflow-y: auto;
   overflow-x: hidden;

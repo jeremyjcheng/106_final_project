@@ -1,1057 +1,1207 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Climate Precipitation Story</title>
-  <style>
-    * {
-      margin: 10px;
-      padding: 0;
-      box-sizing: border-box;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Climate Precipitation Story</title>
+    <style>
+      * {
+        margin: 10px;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-    body {
-      font-family: 'Georgia', serif;
-      background: #f8f9fa;
-    }
+      body {
+        font-family: "Georgia", serif;
+        background: #f8f9fa;
+      }
 
-    #scrolly-container {
-      position: relative;
-      display: flex;
-      padding: 50px 0;
-    }
+      #scrolly-container {
+        position: relative;
+        display: flex;
+        padding: 50px 0;
+      }
 
-    #line-story {
-      flex: 1;
-      padding: 0 50px;
-    }
+      #line-story {
+        flex: 1;
+        padding: 0 50px;
+      }
 
-    .step {
-      min-height: 80vh;
-      display: flex;
-      align-items: flex-start;
-      padding-top: 15vh;
-      opacity: 0.3;
-      transition: opacity 0.5s;
-      font-size: 1.4rem;
-      line-height: 1.8;
-      color: black;
-      position: relative;
-    }
-    
-    .step-content {
-      position: relative;
-      padding-bottom: 320px; 
-      z-index: 2;
-    }
-    
-    .rain-container {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 330px;
-      overflow: hidden;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.5s;
-    }
-    
-    .step.active .rain-container {
-      opacity: 1;
-    }
-    
-    .clouds {
-      position: absolute;
-      top: 30px;
-      left: 0;
-      right: 0;
-      height: 60px;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-    }
-    
-    .cloud {
-      position: relative;
-      width: 80px;
-      height: 30px;
-      border-radius: 50px;
-      animation: float 3s ease-in-out infinite;
-    }
-    
-    .cloud:nth-child(1) { animation-delay: 0s; }
-    .cloud:nth-child(2) { animation-delay: 0.5s; }
-    .cloud:nth-child(3) { animation-delay: 1s; }
-    
-    .cloud::before,
-    .cloud::after {
-      content: '';
-      position: absolute;
-      border-radius: 50%;
-    }
-    
-    .cloud::before {
-      width: 40px;
-      height: 40px;
-      top: -20px;
-      left: 10px;
-      background: inherit;
-    }
-    
-    .cloud::after {
-      width: 50px;
-      height: 50px;
-      top: -25px;
-      right: 10px;
-      background: inherit;
-    }
-    
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-5px); }
-    }
-    
-    .ground {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 40px;
-      background: linear-gradient(to bottom, transparent, rgba(139, 90, 43, 0.3));
-      border-top: 2px solid rgba(139, 90, 43, 0.5);
-    }
-    
-    .raindrop {
-      position: absolute;
-      width: 2px;
-      background: linear-gradient(to bottom, transparent, rgba(100, 149, 237, 0.8));
-      animation: fall linear infinite;
-      top: 60px;
-    }
-    
-    .ripple {
-      position: absolute;
-      bottom: 40px;
-      width: 10px;
-      height: 10px;
-      border: 2px solid rgba(100, 149, 237, 0.6);
-      border-radius: 50%;
-      animation: ripple 0.6s ease-out;
-      pointer-events: none;
-    }
-    
-    @keyframes fall {
-      0% {
-        transform: translateY(0);
+      .step {
+        min-height: 80vh;
+        display: flex;
+        align-items: flex-start;
+        padding-top: 15vh;
+        opacity: 0.3;
+        transition: opacity 0.5s;
+        font-size: 1.4rem;
+        line-height: 1.8;
+        color: black;
+        position: relative;
+      }
+
+      .step-content {
+        position: relative;
+        padding-bottom: 320px;
+        z-index: 2;
+      }
+
+      .rain-container {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 330px;
+        overflow: hidden;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.5s;
+      }
+
+      .step.active .rain-container {
         opacity: 1;
       }
-      100% {
-        transform: translateY(200px);
-        opacity: 0.3;
+
+      .clouds {
+        position: absolute;
+        top: 30px;
+        left: 0;
+        right: 0;
+        height: 60px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
       }
-    }
-    
-    @keyframes ripple {
-      0% {
+
+      .cloud {
+        position: relative;
+        width: 80px;
+        height: 30px;
+        border-radius: 50px;
+        animation: float 3s ease-in-out infinite;
+      }
+
+      .cloud:nth-child(1) {
+        animation-delay: 0s;
+      }
+      .cloud:nth-child(2) {
+        animation-delay: 0.5s;
+      }
+      .cloud:nth-child(3) {
+        animation-delay: 1s;
+      }
+
+      .cloud::before,
+      .cloud::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+      }
+
+      .cloud::before {
+        width: 40px;
+        height: 40px;
+        top: -20px;
+        left: 10px;
+        background: inherit;
+      }
+
+      .cloud::after {
+        width: 50px;
+        height: 50px;
+        top: -25px;
+        right: 10px;
+        background: inherit;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-5px);
+        }
+      }
+
+      .ground {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 40px;
+        background: linear-gradient(
+          to bottom,
+          transparent,
+          rgba(139, 90, 43, 0.3)
+        );
+        border-top: 2px solid rgba(139, 90, 43, 0.5);
+      }
+
+      .raindrop {
+        position: absolute;
+        width: 2px;
+        background: linear-gradient(
+          to bottom,
+          transparent,
+          rgba(100, 149, 237, 0.8)
+        );
+        animation: fall linear infinite;
+        top: 60px;
+      }
+
+      .ripple {
+        position: absolute;
+        bottom: 40px;
         width: 10px;
         height: 10px;
-        opacity: 0.8;
+        border: 2px solid rgba(100, 149, 237, 0.6);
+        border-radius: 50%;
+        animation: ripple 0.6s ease-out;
+        pointer-events: none;
       }
-      100% {
-        width: 30px;
-        height: 30px;
+
+      @keyframes fall {
+        0% {
+          transform: translateY(0);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(200px);
+          opacity: 0.3;
+        }
+      }
+
+      @keyframes ripple {
+        0% {
+          width: 10px;
+          height: 10px;
+          opacity: 0.8;
+        }
+        100% {
+          width: 30px;
+          height: 30px;
+          opacity: 0;
+        }
+      }
+
+      .step.active {
+        opacity: 1;
+      }
+
+      #line-plot {
+        flex: 1;
+        position: sticky;
+        top: 100px;
+        height: 600px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      svg {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .axis-label {
+        font-size: 14px;
+        font-family: sans-serif;
+      }
+
+      h1 {
+        text-align: center;
+        padding: 50px 0;
+        font-size: 2.5rem;
+        color: black;
+      }
+
+      .highlight-yellow {
+        background: linear-gradient(transparent 60%, #fff176 60%);
+        padding: 0 2px;
+        font-weight: bold;
+      }
+      .highlight-red {
+        background: linear-gradient(transparent 60%, #ffccbc 60%);
+        padding: 0 2px;
+        font-weight: bold;
+      }
+      .highlight-green {
+        background: linear-gradient(transparent 60%, #c8e6c9 60%);
+        padding: 0 2px;
+        font-weight: bold;
+      }
+
+      #scroll-hint {
+        text-align: center;
+        margin-top: -30px;
+        margin-bottom: 20px;
+        font-family: "Georgia", serif;
+        color: grey;
+        animation: fadeIn 1.5s ease-out forwards;
         opacity: 0;
       }
-    }
 
-    .step.active {
-      opacity: 1;
-    }
-
-    #line-plot {
-      flex: 1;
-      position: sticky;
-      top: 100px;
-      height: 600px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    svg {
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-
-    .axis-label {
-      font-size: 14px;
-      font-family: sans-serif;
-    }
-
-    h1 {
-      text-align: center;
-      padding: 50px 0;
-      font-size: 2.5rem;
-      color: black;
-    }
-
-    .highlight-yellow {
-      background: linear-gradient(transparent 60%, #fff176 60%);
-      padding: 0 2px;
-      font-weight: bold;
-    }
-    .highlight-red {
-      background: linear-gradient(transparent 60%, #ffccbc 60%);
-      padding: 0 2px;
-      font-weight: bold;
-    }
-    .highlight-green {
-      background: linear-gradient(transparent 60%, #c8e6c9 60%);
-      padding: 0 2px;
-      font-weight: bold;
-    }
-
-    #scroll-hint {
-      text-align: center;
-      margin-top: -30px;
-      margin-bottom: 20px;
-      font-family: 'Georgia', serif;
-      color: grey;
-      animation: fadeIn 1.5s ease-out forwards;
-      opacity: 0;
-    }
-
-    #scroll-hint p {
-      font-size: 1.2rem;
-      margin-bottom: 5px;
-    }
-
-    #scroll-hint .arrow {
-      font-size: 2rem;
-      animation: upDown 1.3s ease-in-out infinite;
-      position: relative;
-    }
-
-    @keyframes upDown {
-      0%   { transform: translateY(0); }
-      50%  { transform: translateY(8px); }
-      100% { transform: translateY(0); }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-  </style>
-</head>
-<body>
-  <h1>The Quiet Shift in America's Seasons</h1>
-
-  <div id="scroll-hint">
-    <p>Scroll to Explore</p>
-    <div class="arrow">↓</div>
-  </div>
-
-  <div id="scrolly-container">
-    <div id="line-story">
-      <div class="step" data-step="0">
-        <div class="step-content">
-          <p>For more than a century, from 1850 to 2014, the rhythm of America's seasons has been quietly shifting. Each winter storm and summer downpour carries the imprint of changing climate forces—some natural, others unmistakably shaped by human decisions.</p>
-        </div>
-        <div class="rain-container">
-          <div class="clouds">
-            <div class="cloud"></div>
-            <div class="cloud"></div>
-            <div class="cloud"></div>
-          </div>
-          <div class="ground"></div>
-        </div>
-      </div>
-      <div class="step" data-step="1">
-        <div class="step-content">
-          <p>Around the 1930s, summer rainfall in the Midwest and South dropped sharply—the <span class="highlight-yellow">Dust Bowl drought</span>. Over-farming broke down soil structure; dust storms formed, rainfall decreased, and the region fell into years of severe drought.</p>
-        </div>
-        <div class="rain-container">
-          <div class="clouds">
-            <div class="cloud"></div>
-            <div class="cloud"></div>
-            <div class="cloud"></div>
-          </div>
-          <div class="ground"></div>
-        </div>
-      </div>
-      <div class="step" data-step="2">
-        <div class="step-content">
-          <p>In the 1950s, another major drought coincided with the peak of <span class="highlight-yellow">industrial pollution</span>. Sulfate aerosols from coal power plants created a heavy pollution belt, creating a clear "drying effect" that suppressed summer rainfall across the eastern and midwestern U.S.</p>
-        </div>
-        <div class="rain-container">
-          <div class="clouds">
-            <div class="cloud"></div>
-            <div class="cloud"></div>
-            <div class="cloud"></div>
-          </div>
-          <div class="ground"></div>
-        </div>
-      </div>
-      <div class="step" data-step="3">
-        <div class="step-content">
-          <p>By 2014, we reached a critical turning point. Decades of atmospheric change are written into the long-term rise and fall of seasonal precipitation. Now, we face a choice that will reshape America's climate future.</p>
-        </div>
-        <div class="rain-container">
-          <div class="clouds">
-            <div class="cloud"></div>
-            <div class="cloud"></div>
-            <div class="cloud"></div>
-          </div>
-          <div class="ground"></div>
-        </div>
-      </div>
-      <div class="step" data-step="4">
-        <div class="step-content">
-          <p>Under a <span class="highlight-red">high-emissions scenario (SSP5-8.5)</span>, precipitation patterns will shift dramatically by 2100. Extreme events will become more frequent, regional disparities will intensify, and heavy rainfall events will increase by 5-15% nationally.</p>
-        </div>
-        <div class="rain-container">
-          <div class="clouds">
-            <div class="cloud"></div>
-            <div class="cloud"></div>
-            <div class="cloud"></div>
-          </div>
-          <div class="ground"></div>
-        </div>
-      </div>
-      <div class="step" data-step="5">
-        <div class="step-content">
-          <p>However, with aggressive climate action and a <span class="highlight-green">sustainable pathway (SSP1-2.6)</span>, we can expect more moderate changes. Regional variations will be less extreme, patterns more predictable, and adaptation more manageable—stabilizing precipitation by 2100.</p>
-        </div>
-        <div class="rain-container">
-          <div class="clouds">
-            <div class="cloud"></div>
-            <div class="cloud"></div>
-            <div class="cloud"></div>
-          </div>
-          <div class="ground"></div>
-        </div>
-      </div>
-    </div>
-    
-    <div id="line-plot">
-      <svg id="lineChart"></svg>
-    </div>
-  </div>
-
-  <script type="module">
-    import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm";
-    import scrollama from "https://cdn.jsdelivr.net/npm/scrollama@3.2.0/+esm";
-
-    // Rain configuration for each step
-    const rainConfig = {
-      0: { // Historical baseline - light rain
-        cloudColor: '#d3d3d3',
-        raindrops: 20,
-        rainHeight: 15,
-        rainDuration: [1.5, 2.5],
-        rippleFrequency: 800
-      },
-      1: { // Dust Bowl - sparse rain
-        cloudColor: '#c9a961',
-        raindrops: 8,
-        rainHeight: 10,
-        rainDuration: [2, 3],
-        rippleFrequency: 1200
-      },
-      2: { // Industrial pollution - reduced rain
-        cloudColor: '#6b6b6b',
-        raindrops: 15,
-        rainHeight: 12,
-        rainDuration: [1.8, 2.8],
-        rippleFrequency: 900
-      },
-      3: { // Transition point - moderate rain
-        cloudColor: '#a0a0a0',
-        raindrops: 25,
-        rainHeight: 18,
-        rainDuration: [1.2, 2],
-        rippleFrequency: 600
-      },
-      4: { // High emissions - intense rain
-        cloudColor: '#4a4a4a',
-        raindrops: 50,
-        rainHeight: 25,
-        rainDuration: [0.5, 1],
-        rippleFrequency: 300
-      },
-      5: { // Low emissions - moderate rain
-        cloudColor: '#808080',
-        raindrops: 30,
-        rainHeight: 20,
-        rainDuration: [1, 1.8],
-        rippleFrequency: 500
+      #scroll-hint p {
+        font-size: 1.2rem;
+        margin-bottom: 5px;
       }
-    };
 
-    // Create rain animation
-    function createRain() {
-      const steps = document.querySelectorAll('.step');
-      
-      steps.forEach((step, stepIndex) => {
-        const container = step.querySelector('.rain-container');
-        const clouds = step.querySelectorAll('.cloud');
+      #scroll-hint .arrow {
+        font-size: 2rem;
+        animation: upDown 1.3s ease-in-out infinite;
+        position: relative;
+      }
+
+      @keyframes upDown {
+        0% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(8px);
+        }
+        100% {
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>The Quiet Shift in America's Seasons</h1>
+
+    <div id="scroll-hint">
+      <p>Scroll to Explore</p>
+      <div class="arrow">↓</div>
+    </div>
+
+    <div id="scrolly-container">
+      <div id="line-story">
+        <div class="step" data-step="0">
+          <div class="step-content">
+            <p>
+              For more than a century, from 1850 to 2014, the rhythm of
+              America's seasons has been quietly shifting. Each winter storm and
+              summer downpour carries the imprint of changing climate
+              forces—some natural, others unmistakably shaped by human
+              decisions.
+            </p>
+          </div>
+          <div class="rain-container">
+            <div class="clouds">
+              <div class="cloud"></div>
+              <div class="cloud"></div>
+              <div class="cloud"></div>
+            </div>
+            <div class="ground"></div>
+          </div>
+        </div>
+        <div class="step" data-step="1">
+          <div class="step-content">
+            <p>
+              Around the 1930s, summer rainfall in the Midwest and South dropped
+              sharply—the
+              <span class="highlight-yellow">Dust Bowl drought</span>.
+              Over-farming broke down soil structure; dust storms formed,
+              rainfall decreased, and the region fell into years of severe
+              drought.
+            </p>
+          </div>
+          <div class="rain-container">
+            <div class="clouds">
+              <div class="cloud"></div>
+              <div class="cloud"></div>
+              <div class="cloud"></div>
+            </div>
+            <div class="ground"></div>
+          </div>
+        </div>
+        <div class="step" data-step="2">
+          <div class="step-content">
+            <p>
+              In the 1950s, another major drought coincided with the peak of
+              <span class="highlight-yellow">industrial pollution</span>.
+              Sulfate aerosols from coal power plants created a heavy pollution
+              belt, creating a clear "drying effect" that suppressed summer
+              rainfall across the eastern and midwestern U.S.
+            </p>
+          </div>
+          <div class="rain-container">
+            <div class="clouds">
+              <div class="cloud"></div>
+              <div class="cloud"></div>
+              <div class="cloud"></div>
+            </div>
+            <div class="ground"></div>
+          </div>
+        </div>
+        <div class="step" data-step="3">
+          <div class="step-content">
+            <p>
+              By 2014, we reached a critical turning point. Decades of
+              atmospheric change are written into the long-term rise and fall of
+              seasonal precipitation. Now, we face a choice that will reshape
+              America's climate future.
+            </p>
+          </div>
+          <div class="rain-container">
+            <div class="clouds">
+              <div class="cloud"></div>
+              <div class="cloud"></div>
+              <div class="cloud"></div>
+            </div>
+            <div class="ground"></div>
+          </div>
+        </div>
+        <div class="step" data-step="4">
+          <div class="step-content">
+            <p>
+              Under a
+              <span class="highlight-red"
+                >high-emissions scenario (SSP5-8.5)</span
+              >, precipitation patterns will shift dramatically by 2100. Extreme
+              events will become more frequent, regional disparities will
+              intensify, and heavy rainfall events will increase by 5-15%
+              nationally.
+            </p>
+          </div>
+          <div class="rain-container">
+            <div class="clouds">
+              <div class="cloud"></div>
+              <div class="cloud"></div>
+              <div class="cloud"></div>
+            </div>
+            <div class="ground"></div>
+          </div>
+        </div>
+        <div class="step" data-step="5">
+          <div class="step-content">
+            <p>
+              However, with aggressive climate action and a
+              <span class="highlight-green">sustainable pathway (SSP1-2.6)</span
+              >, we can expect more moderate changes. Regional variations will
+              be less extreme, patterns more predictable, and adaptation more
+              manageable—stabilizing precipitation by 2100.
+            </p>
+          </div>
+          <div class="rain-container">
+            <div class="clouds">
+              <div class="cloud"></div>
+              <div class="cloud"></div>
+              <div class="cloud"></div>
+            </div>
+            <div class="ground"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="line-plot">
+        <svg id="lineChart"></svg>
+      </div>
+    </div>
+
+    <script type="module">
+      import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm";
+      import scrollama from "https://cdn.jsdelivr.net/npm/scrollama@3.2.0/+esm";
+
+      // Rain configuration for each step
+      const rainConfig = {
+        0: {
+          // Historical baseline - light rain
+          cloudColor: "#d3d3d3",
+          raindrops: 20,
+          rainHeight: 15,
+          rainDuration: [1.5, 2.5],
+          rippleFrequency: 800,
+        },
+        1: {
+          // Dust Bowl - sparse rain
+          cloudColor: "#c9a961",
+          raindrops: 8,
+          rainHeight: 10,
+          rainDuration: [2, 3],
+          rippleFrequency: 1200,
+        },
+        2: {
+          // Industrial pollution - reduced rain
+          cloudColor: "#6b6b6b",
+          raindrops: 15,
+          rainHeight: 12,
+          rainDuration: [1.8, 2.8],
+          rippleFrequency: 900,
+        },
+        3: {
+          // Transition point - moderate rain
+          cloudColor: "#a0a0a0",
+          raindrops: 25,
+          rainHeight: 18,
+          rainDuration: [1.2, 2],
+          rippleFrequency: 600,
+        },
+        4: {
+          // High emissions - intense rain
+          cloudColor: "#4a4a4a",
+          raindrops: 50,
+          rainHeight: 25,
+          rainDuration: [0.5, 1],
+          rippleFrequency: 300,
+        },
+        5: {
+          // Low emissions - moderate rain
+          cloudColor: "#808080",
+          raindrops: 30,
+          rainHeight: 20,
+          rainDuration: [1, 1.8],
+          rippleFrequency: 500,
+        },
+      };
+
+      // Create rain animation
+      function createRain() {
+        const steps = document.querySelectorAll(".step");
+
+        steps.forEach((step, stepIndex) => {
+          const container = step.querySelector(".rain-container");
+          const clouds = step.querySelectorAll(".cloud");
+          const config = rainConfig[stepIndex];
+
+          // Set cloud colors
+          clouds.forEach((cloud) => {
+            cloud.style.background = config.cloudColor;
+          });
+
+          // Create raindrops
+          for (let i = 0; i < config.raindrops; i++) {
+            const drop = document.createElement("div");
+            drop.className = "raindrop";
+
+            drop.style.left = Math.random() * 100 + "%";
+            drop.style.height = config.rainHeight + "px";
+
+            const duration =
+              config.rainDuration[0] +
+              Math.random() * (config.rainDuration[1] - config.rainDuration[0]);
+            drop.style.animationDuration = duration + "s";
+            drop.style.animationDelay = Math.random() * 2 + "s";
+
+            container.appendChild(drop);
+          }
+        });
+      }
+
+      // Create ripple effect
+      function createRipple(container, config) {
+        const ripple = document.createElement("div");
+        ripple.className = "ripple";
+        ripple.style.left = Math.random() * 100 + "%";
+
+        container.appendChild(ripple);
+
+        setTimeout(() => {
+          ripple.remove();
+        }, 600);
+      }
+
+      // Start ripple intervals for active step
+      let rippleIntervals = {};
+
+      function startRipples(stepIndex) {
+        stopAllRipples();
+
+        const step = document.querySelectorAll(".step")[stepIndex];
+        const container = step.querySelector(".rain-container");
         const config = rainConfig[stepIndex];
-        
-        // Set cloud colors
-        clouds.forEach(cloud => {
-          cloud.style.background = config.cloudColor;
-        });
-        
-        // Create raindrops
-        for (let i = 0; i < config.raindrops; i++) {
-          const drop = document.createElement('div');
-          drop.className = 'raindrop';
-          
-          drop.style.left = Math.random() * 100 + '%';
-          drop.style.height = config.rainHeight + 'px';
-          
-          const duration = config.rainDuration[0] + 
-            Math.random() * (config.rainDuration[1] - config.rainDuration[0]);
-          drop.style.animationDuration = duration + 's';
-          drop.style.animationDelay = Math.random() * 2 + 's';
-          
-          container.appendChild(drop);
-        }
-      });
-    }
-    
-    // Create ripple effect
-    function createRipple(container, config) {
-      const ripple = document.createElement('div');
-      ripple.className = 'ripple';
-      ripple.style.left = Math.random() * 100 + '%';
-      
-      container.appendChild(ripple);
-      
-      setTimeout(() => {
-        ripple.remove();
-      }, 600);
-    }
-    
-    // Start ripple intervals for active step
-    let rippleIntervals = {};
-    
-    function startRipples(stepIndex) {
-      stopAllRipples();
-      
-      const step = document.querySelectorAll('.step')[stepIndex];
-      const container = step.querySelector('.rain-container');
-      const config = rainConfig[stepIndex];
-      
-      rippleIntervals[stepIndex] = setInterval(() => {
-        createRipple(container, config);
-      }, config.rippleFrequency);
-    }
-    
-    function stopAllRipples() {
-      Object.values(rippleIntervals).forEach(interval => clearInterval(interval));
-      rippleIntervals = {};
-    }
 
-    // Load data
-    // Data is in kg/m²/s, convert to mm/day by multiplying by 86400
-    async function loadData() {
-      const [hist, low, high] = await Promise.all([
-        d3.csv("pr_1850_2010.csv", d => ({
-          year: +d.year,
-          pr: +d.pr * 86400  // Convert to mm/day
-        })),
-        d3.csv("projected_low_2025_2100.csv", d => ({
-          year: +d.year,
-          pr: +d.pr * 86400  // Convert to mm/day
-        })),
-        d3.csv("projected_high_2025_2100.csv", d => ({
-          year: +d.year,
-          pr: +d.pr * 86400  // Convert to mm/day
-        })),
-      ]);
-      
-      const lastHistPoint = hist[hist.length - 1];
-      const highWithConnection = [lastHistPoint, ...high];
-      const lowWithConnection = [lastHistPoint, ...low];
-
-      return { hist, low: lowWithConnection, high: highWithConnection };
-    }
-
-    // Main visualization
-    async function init() {
-      const { hist, low, high } = await loadData();
-
-      const width = 800;
-      const height = 500;
-      const margin = { top: 80, right: 150, bottom: 100, left: 100 };
-      const svgWidth = width + 100; // Extra width for legend
-
-      const svg = d3.select("#lineChart")
-        .attr("width", svgWidth)
-        .attr("height", height);
-
-      const xScale = d3.scaleLinear()
-        .domain(d3.extent(hist, d => d.year))
-        .range([margin.left, width - margin.right]);
-
-      const yScale = d3.scaleLinear()
-        .domain(d3.extent(hist, d => d.pr))
-        .range([height - margin.bottom, margin.top]);
-
-      const xAxisGroup = svg.append("g")
-        .attr("class", "x-axis")
-        .attr("transform", `translate(0, ${height - margin.bottom})`);
-
-      const yAxisGroup = svg.append("g")
-        .attr("class", "y-axis")
-        .attr("transform", `translate(${margin.left}, 0)`);
-
-      // Create legend - position it to the right of the chart area
-      const legend = svg.append("g")
-        .attr("class", "legend")
-        .attr("transform", `translate(${width - margin.right + 30}, ${margin.top + 20})`);
-
-      // Historical line legend
-      legend.append("line")
-        .attr("x1", 0)
-        .attr("x2", 20)
-        .attr("y1", 0)
-        .attr("y2", 0)
-        .attr("stroke", "#4682b4")
-        .attr("stroke-width", 2.5);
-
-      legend.append("text")
-        .attr("x", 25)
-        .attr("y", 4)
-        .attr("font-size", "12px")
-        .attr("fill", "#333")
-        .text("Historical (1850-2014)");
-
-      // High emissions line legend
-      legend.append("line")
-        .attr("x1", 0)
-        .attr("x2", 20)
-        .attr("y1", 20)
-        .attr("y2", 20)
-        .attr("stroke", "#e74c3c")
-        .attr("stroke-width", 2.5)
-        .style("opacity", 0);
-
-      legend.append("text")
-        .attr("x", 25)
-        .attr("y", 24)
-        .attr("font-size", "12px")
-        .attr("fill", "#333")
-        .attr("class", "legend-high-text")
-        .style("opacity", 0)
-        .text("High Emissions (SSP5-8.5)");
-
-      // Low emissions line legend
-      legend.append("line")
-        .attr("x1", 0)
-        .attr("x2", 20)
-        .attr("y1", 40)
-        .attr("y2", 40)
-        .attr("stroke", "#2ecc71")
-        .attr("stroke-width", 2.5)
-        .style("opacity", 0);
-
-      legend.append("text")
-        .attr("x", 25)
-        .attr("y", 44)
-        .attr("font-size", "12px")
-        .attr("fill", "#333")
-        .attr("class", "legend-low-text")
-        .style("opacity", 0)
-        .text("Low Emissions (SSP1-2.6)");
-
-      svg.append("text")
-        .attr("class", "axis-label")
-        .attr("x", width / 2)
-        .attr("y", height - 25)
-        .attr("text-anchor", "middle")
-        .text("Year");
-
-      svg.append("text")
-        .attr("class", "axis-label")
-        .attr("transform", "rotate(-90)")
-        .attr("x", -height / 2)
-        .attr("y", 30)
-        .attr("text-anchor", "middle")
-        .text("Precipitation (mm/day)");
-
-      svg.append("text")
-        .attr("class", "chart-title")
-        .attr("x", width / 2)
-        .attr("y", 40)
-        .attr("text-anchor", "middle")
-        .attr("font-size", "18px")
-        .attr("font-weight", "bold")
-        .attr("font-family", "sans-serif")
-        .attr("fill", "#2c3e50")
-        .text("From Past to Future: U.S. Precipitation Under Different Emission Scenarios");
-
-      const line = d3.line()
-        .x(d => xScale(d.year))
-        .y(d => yScale(d.pr))
-        .curve(d3.curveBundle.beta(0.85));
-
-      const histLine = svg.append("path")
-        .datum(hist)
-        .attr("class", "hist-line")
-        .attr("fill", "none")
-        .attr("stroke", "#4682b4")
-        .attr("stroke-width", 2.5)
-        .attr("d", line);
-
-      const histLineLength = histLine.node().getTotalLength();
-      
-      histLine
-        .attr("stroke-dasharray", histLineLength + " " + histLineLength)
-        .attr("stroke-dashoffset", histLineLength);
-
-      const highLine = svg.append("path")
-        .datum(high)
-        .attr("class", "high-line")
-        .attr("fill", "none")
-        .attr("stroke", "#e74c3c")
-        .attr("stroke-width", 2.5)
-        .attr("d", line)
-        .style("opacity", 0);
-      
-      const highLineLength = highLine.node().getTotalLength();
-      
-      highLine
-        .attr("stroke-dasharray", highLineLength + " " + highLineLength)
-        .attr("stroke-dashoffset", highLineLength);
-
-      const lowLine = svg.append("path")
-        .datum(low)
-        .attr("class", "low-line")
-        .attr("fill", "none")
-        .attr("stroke", "#2ecc71")
-        .attr("stroke-width", 2.5)
-        .attr("d", line)
-        .style("opacity", 0);
-        
-      const lowEndDot = svg.append("circle")
-        .attr("class", "low-end-dot")
-        .attr("r", 6)
-        .attr("fill", "#2ecc71")
-        .attr("stroke", "white")
-        .attr("stroke-width", 2)
-        .style("opacity", 0);
-
-      const highEndDot = svg.append("circle")
-        .attr("class", "high-end-dot")
-        .attr("r", 6)
-        .attr("fill", "#e74c3c")
-        .attr("stroke", "white")
-        .attr("stroke-width", 2)
-        .style("opacity", 0);
-            
-      const lowLineLength = lowLine.node().getTotalLength();
-      
-      lowLine
-        .attr("stroke-dasharray", lowLineLength + " " + lowLineLength)
-        .attr("stroke-dashoffset", lowLineLength);
-
-      const lastHistPoint = hist[hist.length - 1];
-
-      // Add annotations for historical events
-      const dustBowlAnnotation = svg.append("g")
-        .attr("class", "dust-bowl-annotation")
-        .style("opacity", 0);
-      
-      // Add a vertical span/band for the Dust Bowl decade (1930-1940)
-      dustBowlAnnotation.append("rect")
-        .attr("x", 0)
-        .attr("y", margin.top)
-        .attr("width", 0)
-        .attr("height", height - margin.bottom - margin.top)
-        .attr("fill", "#c9a961")
-        .attr("opacity", 0.15)
-        .attr("stroke", "#c9a961")
-        .attr("stroke-width", 2)
-        .attr("stroke-dasharray", "5,5");
-      
-      dustBowlAnnotation.append("text")
-        .attr("x", 0)
-        .attr("y", height - margin.bottom + 20)
-        .attr("text-anchor", "middle")
-        .attr("font-size", "12px")
-        .attr("fill", "#c9a961")
-        .attr("font-weight", "bold")
-        .text("1930-1940: Dust Bowl");
-
-      const pollutionAnnotation = svg.append("g")
-        .attr("class", "pollution-annotation")
-        .style("opacity", 0);
-      
-      pollutionAnnotation.append("line")
-        .attr("x1", 0)
-        .attr("x2", 0)
-        .attr("y1", margin.top)
-        .attr("y2", height - margin.bottom)
-        .attr("stroke", "#6b6b6b")
-        .attr("stroke-width", 2)
-        .attr("stroke-dasharray", "5,5");
-      
-      pollutionAnnotation.append("text")
-        .attr("x", 0)
-        .attr("y", height - margin.bottom + 40)
-        .attr("text-anchor", "middle")
-        .attr("font-size", "12px")
-        .attr("fill", "#6b6b6b")
-        .text("1950s: Peak Pollution");
-
-      // Add vertical line at 2014 to separate historical from future
-      const transitionLine = svg.append("line")
-        .attr("class", "transition-line")
-        .attr("x1", 0)
-        .attr("x2", 0)
-        .attr("y1", margin.top)
-        .attr("y2", height - margin.bottom)
-        .attr("stroke", "#999")
-        .attr("stroke-width", 2)
-        .attr("stroke-dasharray", "5,5")
-        .style("opacity", 0);
-
-      updateChart(0);
-
-      function updateChart(step) {
-        if (step === 0) {
-          xScale.domain(d3.extent(hist, d => d.year));
-          yScale.domain(d3.extent(hist, d => d.pr));
-          
-          xAxisGroup.transition().duration(1000)
-            .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
-          
-          yAxisGroup.transition().duration(1000)
-            .call(d3.axisLeft(yScale).tickFormat(d3.format(".2f")))
-            .on("end", () => {
-              histLine.attr("d", line);
-              const histLen = histLine.node().getTotalLength();
-              histLine
-                .attr("stroke-dasharray", histLen + " " + histLen)
-                .attr("stroke-dashoffset", histLen)
-                .transition()
-                .duration(1000)
-                .ease(d3.easeLinear)
-                .attr("stroke-dashoffset", 0);
-            });
-
-          highLine.transition().duration(1000)
-            .style("opacity", 0);
-          
-          lowLine.transition().duration(1000)
-            .style("opacity", 0);
-            
-          highEndDot.transition().duration(500).style("opacity", 0);
-          lowEndDot.transition().duration(500).style("opacity", 0);
-          
-          dustBowlAnnotation.transition().duration(500).style("opacity", 0);
-          pollutionAnnotation.transition().duration(500).style("opacity", 0);
-          transitionLine.transition().duration(500).style("opacity", 0);
-          
-          // Hide future scenario legends
-          legend.select(".legend-high-text").transition().duration(500).style("opacity", 0);
-          legend.select(".legend-low-text").transition().duration(500).style("opacity", 0);
-          legend.select("line:nth-of-type(2)").transition().duration(500).style("opacity", 0);
-          legend.select("line:nth-of-type(3)").transition().duration(500).style("opacity", 0);
-
-        } else if (step === 1) {
-          // Dust Bowl era
-          xScale.domain(d3.extent(hist, d => d.year));
-          yScale.domain(d3.extent(hist, d => d.pr));
-          
-          xAxisGroup.transition().duration(1000)
-            .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
-          
-          yAxisGroup.transition().duration(1000)
-            .call(d3.axisLeft(yScale).tickFormat(d3.format(".2f")))
-            .on("end", () => {
-              histLine.attr("d", line);
-              const histLen = histLine.node().getTotalLength();
-              histLine
-                .attr("stroke-dasharray", histLen + " " + histLen)
-                .attr("stroke-dashoffset", histLen)
-                .transition()
-                .duration(1000)
-                .ease(d3.easeLinear)
-                .attr("stroke-dashoffset", 0)
-                .on("end", () => {
-                  const dustBowlStart = 1930;
-                  const dustBowlEnd = 1940;
-                  const xStart = xScale(dustBowlStart);
-                  const xEnd = xScale(dustBowlEnd);
-                  const width = xEnd - xStart;
-                  
-                  dustBowlAnnotation
-                    .select("rect")
-                    .attr("x", xStart)
-                    .attr("width", width);
-                  
-                  dustBowlAnnotation
-                    .select("text")
-                    .attr("x", xStart + width / 2);
-                  
-                  dustBowlAnnotation
-                    .transition()
-                    .duration(500)
-                    .style("opacity", 1);
-                });
-            });
-
-          highLine.transition().duration(1000).style("opacity", 0);
-          lowLine.transition().duration(1000).style("opacity", 0);
-          highEndDot.transition().duration(500).style("opacity", 0);
-          lowEndDot.transition().duration(500).style("opacity", 0);
-          pollutionAnnotation.transition().duration(500).style("opacity", 0);
-          transitionLine.transition().duration(500).style("opacity", 0);
-
-        } else if (step === 2) {
-          // Industrial pollution era
-          xScale.domain(d3.extent(hist, d => d.year));
-          yScale.domain(d3.extent(hist, d => d.pr));
-          
-          xAxisGroup.transition().duration(1000)
-            .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
-          
-          yAxisGroup.transition().duration(1000)
-            .call(d3.axisLeft(yScale).tickFormat(d3.format(".2f")))
-            .on("end", () => {
-              histLine.attr("d", line);
-              const histLen = histLine.node().getTotalLength();
-              histLine
-                .attr("stroke-dasharray", histLen + " " + histLen)
-                .attr("stroke-dashoffset", 0);
-              
-              const pollutionYear = 1955;
-              pollutionAnnotation
-                .select("line")
-                .attr("x1", xScale(pollutionYear))
-                .attr("x2", xScale(pollutionYear));
-              
-              pollutionAnnotation
-                .select("text")
-                .attr("x", xScale(pollutionYear));
-              
-              pollutionAnnotation
-                .transition()
-                .duration(500)
-                .style("opacity", 1);
-            });
-
-          highLine.transition().duration(1000).style("opacity", 0);
-          lowLine.transition().duration(1000).style("opacity", 0);
-          highEndDot.transition().duration(500).style("opacity", 0);
-          lowEndDot.transition().duration(500).style("opacity", 0);
-          dustBowlAnnotation.transition().duration(500).style("opacity", 0.3);
-          transitionLine.transition().duration(500).style("opacity", 0);
-
-        } else if (step === 3) {
-          // Transition point (2014)
-          xScale.domain(d3.extent(hist, d => d.year));
-          yScale.domain(d3.extent(hist, d => d.pr));
-          
-          xAxisGroup.transition().duration(1000)
-            .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
-          
-          yAxisGroup.transition().duration(1000)
-            .call(d3.axisLeft(yScale).tickFormat(d3.format(".2f")))
-                .on("end", () => {
-                  histLine.attr("d", line);
-                  const histLen = histLine.node().getTotalLength();
-                  histLine
-                    .attr("stroke-dasharray", histLen + " " + histLen)
-                    .attr("stroke-dashoffset", 0);
-                });
-
-          highLine.transition().duration(1000).style("opacity", 0);
-          lowLine.transition().duration(1000).style("opacity", 0);
-          highEndDot.transition().duration(500).style("opacity", 0);
-          lowEndDot.transition().duration(500).style("opacity", 0);
-          dustBowlAnnotation.transition().duration(500).style("opacity", 0.2);
-          pollutionAnnotation.transition().duration(500).style("opacity", 0.2);
-          
-          // Show transition line at 2014
-          const transitionYear = 2014;
-          transitionLine
-            .attr("x1", xScale(transitionYear))
-            .attr("x2", xScale(transitionYear))
-            .transition()
-            .duration(500)
-            .style("opacity", 1);
-
-        } else if (step === 4) {
-          const allData = [...hist, ...high];
-          xScale.domain(d3.extent(allData, d => d.year));
-          yScale.domain(d3.extent(allData, d => d.pr));
-
-          xAxisGroup.transition().duration(1000)
-            .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
-          
-          yAxisGroup.transition().duration(1000)
-            .call(d3.axisLeft(yScale).tickFormat(d3.format(".2f")))
-            .on("end", () => {
-              // Show transition line at 2014
-              const transitionYear = 2014;
-              transitionLine
-                .attr("x1", xScale(transitionYear))
-                .attr("x2", xScale(transitionYear))
-                .transition()
-                .duration(500)
-                .style("opacity", 1);
-              highLine
-                .attr("d", line)
-                .style("opacity", 1);
-              
-              const lastHigh = high[high.length - 1];
-              highEndDot
-                .attr("cx", xScale(lastHigh.year))
-                .attr("cy", yScale(lastHigh.pr))
-                .transition()
-                .delay(500)
-                .duration(500)
-                .style("opacity", 1);
-
-              lowEndDot.transition().duration(500).style("opacity", 0);
-                
-              const highLen = highLine.node().getTotalLength();
-              highLine
-                .attr("stroke-dasharray", highLen + " " + highLen)
-                .attr("stroke-dashoffset", highLen)
-                .transition()
-                .duration(500)
-                .ease(d3.easeLinear)
-                .attr("stroke-dashoffset", 0);
-              
-              // Show high emissions in legend
-              legend.select(".legend-high-text")
-                .transition()
-                .duration(500)
-                .style("opacity", 1);
-              legend.select("line:nth-of-type(2)")
-                .transition()
-                .duration(500)
-                .style("opacity", 1);
-            });
-
-          histLine.transition().duration(1000)
-            .attr("d", line)
-            .attr("stroke-dashoffset", 0);
-
-          lowLine.transition().duration(1000)
-            .style("opacity", 0);
-          
-          dustBowlAnnotation.transition().duration(500).style("opacity", 0);
-          pollutionAnnotation.transition().duration(500).style("opacity", 0);
-          transitionLine.transition().duration(500).style("opacity", 1);
-
-        } else if (step === 5) {
-          const allData = [...hist, ...high, ...low];
-          xScale.domain(d3.extent(allData, d => d.year));
-          yScale.domain(d3.extent(allData, d => d.pr));
-
-          xAxisGroup.transition().duration(1000)
-            .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
-          
-          yAxisGroup.transition().duration(1000)
-            .call(d3.axisLeft(yScale).tickFormat(d3.format(".2f")))
-            .on("end", () => {
-              const lastHigh2 = high[high.length - 1];
-              highEndDot
-                .attr("cx", xScale(lastHigh2.year))
-                .attr("cy", yScale(lastHigh2.pr))
-                .transition()
-                .duration(500)
-                .style("opacity", 0.3);
-
-              lowLine
-                .attr("d", line)
-                .style("opacity", 1);
-
-              const lastLow = low[low.length - 1];
-              lowEndDot
-                .attr("cx", xScale(lastLow.year))
-                .attr("cy", yScale(lastLow.pr))
-                .transition()
-                .delay(500)
-                .duration(500)
-                .style("opacity", 1);
-
-              const lowLen = lowLine.node().getTotalLength();
-              lowLine
-                .attr("stroke-dasharray", lowLen + " " + lowLen)
-                .attr("stroke-dashoffset", lowLen)
-                .transition()
-                .duration(500)
-                .ease(d3.easeLinear)
-                .attr("stroke-dashoffset", 0);
-              
-              // Show low emissions in legend
-              legend.select(".legend-low-text")
-                .transition()
-                .duration(500)
-                .style("opacity", 1);
-              legend.select("line:nth-of-type(3)")
-                .transition()
-                .duration(500)
-                .style("opacity", 1);
-            });
-
-          histLine.transition().duration(1000)
-            .attr("d", line)
-            .attr("stroke-dashoffset", 0);
-
-          highLine
-            .interrupt()
-            .attr("d", line)
-            .attr("stroke-dashoffset", 0)
-            .transition()
-            .duration(1000)
-            .style("opacity", 0.3);
-
-          dustBowlAnnotation.transition().duration(500).style("opacity", 0);
-          pollutionAnnotation.transition().duration(500).style("opacity", 0);
-          
-          // Update transition line position
-          const transitionYear = 2014;
-          transitionLine
-            .transition()
-            .duration(1000)
-            .attr("x1", xScale(transitionYear))
-            .attr("x2", xScale(transitionYear))
-            .style("opacity", 1);
-        }
+        rippleIntervals[stepIndex] = setInterval(() => {
+          createRipple(container, config);
+        }, config.rippleFrequency);
       }
 
-      const scroller = scrollama();
-      
-      scroller
-        .setup({
-          step: '.step',
-          offset: 0.5,
-        })
-        .onStepEnter(response => {
-          d3.selectAll('.step').classed('active', false);
-          d3.select(response.element).classed('active', true);
-          
-          updateChart(response.index);
-          startRipples(response.index);
-        });
+      function stopAllRipples() {
+        Object.values(rippleIntervals).forEach((interval) =>
+          clearInterval(interval)
+        );
+        rippleIntervals = {};
+      }
 
-      window.addEventListener('resize', scroller.resize);
-    }
-    
-    createRain();
-    init();
-  </script>
-</body>
+      // Load data
+      // Data is in kg/m²/s, convert to mm/day by multiplying by 86400
+      async function loadData() {
+        const [hist, low, high] = await Promise.all([
+          d3.csv("pr_1850_2010.csv", (d) => ({
+            year: +d.year,
+            pr: +d.pr * 86400, // Convert to mm/day
+          })),
+          d3.csv("projected_low_2025_2100.csv", (d) => ({
+            year: +d.year,
+            pr: +d.pr * 86400, // Convert to mm/day
+          })),
+          d3.csv("projected_high_2025_2100.csv", (d) => ({
+            year: +d.year,
+            pr: +d.pr * 86400, // Convert to mm/day
+          })),
+        ]);
+
+        const lastHistPoint = hist[hist.length - 1];
+        const highWithConnection = [lastHistPoint, ...high];
+        const lowWithConnection = [lastHistPoint, ...low];
+
+        return { hist, low: lowWithConnection, high: highWithConnection };
+      }
+
+      // Main visualization
+      async function init() {
+        const { hist, low, high } = await loadData();
+
+        const width = 800;
+        const height = 500;
+        const margin = { top: 80, right: 150, bottom: 100, left: 100 };
+        const svgWidth = width + 100; // Extra width for legend
+
+        const svg = d3
+          .select("#lineChart")
+          .attr("width", svgWidth)
+          .attr("height", height);
+
+        const xScale = d3
+          .scaleLinear()
+          .domain(d3.extent(hist, (d) => d.year))
+          .range([margin.left, width - margin.right]);
+
+        const yScale = d3
+          .scaleLinear()
+          .domain(d3.extent(hist, (d) => d.pr))
+          .range([height - margin.bottom, margin.top]);
+
+        const xAxisGroup = svg
+          .append("g")
+          .attr("class", "x-axis")
+          .attr("transform", `translate(0, ${height - margin.bottom})`);
+
+        const yAxisGroup = svg
+          .append("g")
+          .attr("class", "y-axis")
+          .attr("transform", `translate(${margin.left}, 0)`);
+
+        // Create legend - position it to the right of the chart area
+        const legend = svg
+          .append("g")
+          .attr("class", "legend")
+          .attr(
+            "transform",
+            `translate(${width - margin.right + 30}, ${margin.top + 20})`
+          );
+
+        // Historical line legend
+        legend
+          .append("line")
+          .attr("x1", 0)
+          .attr("x2", 20)
+          .attr("y1", 0)
+          .attr("y2", 0)
+          .attr("stroke", "#4682b4")
+          .attr("stroke-width", 2.5);
+
+        legend
+          .append("text")
+          .attr("x", 25)
+          .attr("y", 4)
+          .attr("font-size", "12px")
+          .attr("fill", "#333")
+          .text("Historical (1850-2014)");
+
+        // High emissions line legend
+        legend
+          .append("line")
+          .attr("x1", 0)
+          .attr("x2", 20)
+          .attr("y1", 20)
+          .attr("y2", 20)
+          .attr("stroke", "#e74c3c")
+          .attr("stroke-width", 2.5)
+          .style("opacity", 0);
+
+        legend
+          .append("text")
+          .attr("x", 25)
+          .attr("y", 24)
+          .attr("font-size", "12px")
+          .attr("fill", "#333")
+          .attr("class", "legend-high-text")
+          .style("opacity", 0)
+          .text("High Emissions (SSP5-8.5)");
+
+        // Low emissions line legend
+        legend
+          .append("line")
+          .attr("x1", 0)
+          .attr("x2", 20)
+          .attr("y1", 40)
+          .attr("y2", 40)
+          .attr("stroke", "#2ecc71")
+          .attr("stroke-width", 2.5)
+          .style("opacity", 0);
+
+        legend
+          .append("text")
+          .attr("x", 25)
+          .attr("y", 44)
+          .attr("font-size", "12px")
+          .attr("fill", "#333")
+          .attr("class", "legend-low-text")
+          .style("opacity", 0)
+          .text("Low Emissions (SSP1-2.6)");
+
+        svg
+          .append("text")
+          .attr("class", "axis-label")
+          .attr("x", width / 2)
+          .attr("y", height - 25)
+          .attr("text-anchor", "middle")
+          .text("Year");
+
+        svg
+          .append("text")
+          .attr("class", "axis-label")
+          .attr("transform", "rotate(-90)")
+          .attr("x", -height / 2)
+          .attr("y", 30)
+          .attr("text-anchor", "middle")
+          .text("Precipitation (mm/day)");
+
+        svg
+          .append("text")
+          .attr("class", "chart-title")
+          .attr("x", width / 2)
+          .attr("y", 40)
+          .attr("text-anchor", "middle")
+          .attr("font-size", "18px")
+          .attr("font-weight", "bold")
+          .attr("font-family", "sans-serif")
+          .attr("fill", "#2c3e50")
+          .text(
+            "From Past to Future: U.S. Precipitation Under Different Emission Scenarios"
+          );
+
+        const line = d3
+          .line()
+          .x((d) => xScale(d.year))
+          .y((d) => yScale(d.pr))
+          .curve(d3.curveBundle.beta(0.85));
+
+        const histLine = svg
+          .append("path")
+          .datum(hist)
+          .attr("class", "hist-line")
+          .attr("fill", "none")
+          .attr("stroke", "#4682b4")
+          .attr("stroke-width", 2.5)
+          .attr("d", line);
+
+        const histLineLength = histLine.node().getTotalLength();
+
+        histLine
+          .attr("stroke-dasharray", histLineLength + " " + histLineLength)
+          .attr("stroke-dashoffset", histLineLength);
+
+        const highLine = svg
+          .append("path")
+          .datum(high)
+          .attr("class", "high-line")
+          .attr("fill", "none")
+          .attr("stroke", "#e74c3c")
+          .attr("stroke-width", 2.5)
+          .attr("d", line)
+          .style("opacity", 0);
+
+        const highLineLength = highLine.node().getTotalLength();
+
+        highLine
+          .attr("stroke-dasharray", highLineLength + " " + highLineLength)
+          .attr("stroke-dashoffset", highLineLength);
+
+        const lowLine = svg
+          .append("path")
+          .datum(low)
+          .attr("class", "low-line")
+          .attr("fill", "none")
+          .attr("stroke", "#2ecc71")
+          .attr("stroke-width", 2.5)
+          .attr("d", line)
+          .style("opacity", 0);
+
+        const lowEndDot = svg
+          .append("circle")
+          .attr("class", "low-end-dot")
+          .attr("r", 6)
+          .attr("fill", "#2ecc71")
+          .attr("stroke", "white")
+          .attr("stroke-width", 2)
+          .style("opacity", 0);
+
+        const highEndDot = svg
+          .append("circle")
+          .attr("class", "high-end-dot")
+          .attr("r", 6)
+          .attr("fill", "#e74c3c")
+          .attr("stroke", "white")
+          .attr("stroke-width", 2)
+          .style("opacity", 0);
+
+        const lowLineLength = lowLine.node().getTotalLength();
+
+        lowLine
+          .attr("stroke-dasharray", lowLineLength + " " + lowLineLength)
+          .attr("stroke-dashoffset", lowLineLength);
+
+        const lastHistPoint = hist[hist.length - 1];
+
+        // Add annotations for historical events
+        const dustBowlAnnotation = svg
+          .append("g")
+          .attr("class", "dust-bowl-annotation")
+          .style("opacity", 0);
+
+        // Add a vertical span/band for the Dust Bowl decade (1930-1940)
+        dustBowlAnnotation
+          .append("rect")
+          .attr("x", 0)
+          .attr("y", margin.top)
+          .attr("width", 0)
+          .attr("height", height - margin.bottom - margin.top)
+          .attr("fill", "#c9a961")
+          .attr("opacity", 0.15)
+          .attr("stroke", "#c9a961")
+          .attr("stroke-width", 2)
+          .attr("stroke-dasharray", "5,5");
+
+        dustBowlAnnotation
+          .append("text")
+          .attr("x", 0)
+          .attr("y", height - margin.bottom + 20)
+          .attr("text-anchor", "middle")
+          .attr("font-size", "12px")
+          .attr("fill", "#c9a961")
+          .attr("font-weight", "bold")
+          .text("1930-1940: Dust Bowl");
+
+        const pollutionAnnotation = svg
+          .append("g")
+          .attr("class", "pollution-annotation")
+          .style("opacity", 0);
+
+        pollutionAnnotation
+          .append("line")
+          .attr("x1", 0)
+          .attr("x2", 0)
+          .attr("y1", margin.top)
+          .attr("y2", height - margin.bottom)
+          .attr("stroke", "#6b6b6b")
+          .attr("stroke-width", 2)
+          .attr("stroke-dasharray", "5,5");
+
+        pollutionAnnotation
+          .append("text")
+          .attr("x", 0)
+          .attr("y", height - margin.bottom + 40)
+          .attr("text-anchor", "middle")
+          .attr("font-size", "12px")
+          .attr("fill", "#6b6b6b")
+          .text("1950s: Peak Pollution");
+
+        // Add vertical line at 2014 to separate historical from future
+        const transitionLine = svg
+          .append("line")
+          .attr("class", "transition-line")
+          .attr("x1", 0)
+          .attr("x2", 0)
+          .attr("y1", margin.top)
+          .attr("y2", height - margin.bottom)
+          .attr("stroke", "#999")
+          .attr("stroke-width", 2)
+          .attr("stroke-dasharray", "5,5")
+          .style("opacity", 0);
+
+        updateChart(0);
+
+        function updateChart(step) {
+          if (step === 0) {
+            xScale.domain(d3.extent(hist, (d) => d.year));
+            yScale.domain(d3.extent(hist, (d) => d.pr));
+
+            xAxisGroup
+              .transition()
+              .duration(1000)
+              .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
+
+            yAxisGroup
+              .transition()
+              .duration(1000)
+              .call(d3.axisLeft(yScale).tickFormat(d3.format(".2f")))
+              .on("end", () => {
+                histLine.attr("d", line);
+                const histLen = histLine.node().getTotalLength();
+                histLine
+                  .attr("stroke-dasharray", histLen + " " + histLen)
+                  .attr("stroke-dashoffset", histLen)
+                  .transition()
+                  .duration(1000)
+                  .ease(d3.easeLinear)
+                  .attr("stroke-dashoffset", 0);
+              });
+
+            highLine.transition().duration(1000).style("opacity", 0);
+
+            lowLine.transition().duration(1000).style("opacity", 0);
+
+            highEndDot.transition().duration(500).style("opacity", 0);
+            lowEndDot.transition().duration(500).style("opacity", 0);
+
+            dustBowlAnnotation.transition().duration(500).style("opacity", 0);
+            pollutionAnnotation.transition().duration(500).style("opacity", 0);
+            transitionLine.transition().duration(500).style("opacity", 0);
+
+            // Hide future scenario legends
+            legend
+              .select(".legend-high-text")
+              .transition()
+              .duration(500)
+              .style("opacity", 0);
+            legend
+              .select(".legend-low-text")
+              .transition()
+              .duration(500)
+              .style("opacity", 0);
+            legend
+              .select("line:nth-of-type(2)")
+              .transition()
+              .duration(500)
+              .style("opacity", 0);
+            legend
+              .select("line:nth-of-type(3)")
+              .transition()
+              .duration(500)
+              .style("opacity", 0);
+          } else if (step === 1) {
+            // Dust Bowl era
+            xScale.domain(d3.extent(hist, (d) => d.year));
+            yScale.domain(d3.extent(hist, (d) => d.pr));
+
+            xAxisGroup
+              .transition()
+              .duration(1000)
+              .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
+
+            yAxisGroup
+              .transition()
+              .duration(1000)
+              .call(d3.axisLeft(yScale).tickFormat(d3.format(".2f")))
+              .on("end", () => {
+                histLine.attr("d", line);
+                const histLen = histLine.node().getTotalLength();
+                histLine
+                  .attr("stroke-dasharray", histLen + " " + histLen)
+                  .attr("stroke-dashoffset", histLen)
+                  .transition()
+                  .duration(1000)
+                  .ease(d3.easeLinear)
+                  .attr("stroke-dashoffset", 0)
+                  .on("end", () => {
+                    const dustBowlStart = 1930;
+                    const dustBowlEnd = 1940;
+                    const xStart = xScale(dustBowlStart);
+                    const xEnd = xScale(dustBowlEnd);
+                    const width = xEnd - xStart;
+
+                    dustBowlAnnotation
+                      .select("rect")
+                      .attr("x", xStart)
+                      .attr("width", width);
+
+                    dustBowlAnnotation
+                      .select("text")
+                      .attr("x", xStart + width / 2);
+
+                    dustBowlAnnotation
+                      .transition()
+                      .duration(500)
+                      .style("opacity", 1);
+                  });
+              });
+
+            highLine.transition().duration(1000).style("opacity", 0);
+            lowLine.transition().duration(1000).style("opacity", 0);
+            highEndDot.transition().duration(500).style("opacity", 0);
+            lowEndDot.transition().duration(500).style("opacity", 0);
+            pollutionAnnotation.transition().duration(500).style("opacity", 0);
+            transitionLine.transition().duration(500).style("opacity", 0);
+          } else if (step === 2) {
+            // Industrial pollution era
+            xScale.domain(d3.extent(hist, (d) => d.year));
+            yScale.domain(d3.extent(hist, (d) => d.pr));
+
+            xAxisGroup
+              .transition()
+              .duration(1000)
+              .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
+
+            yAxisGroup
+              .transition()
+              .duration(1000)
+              .call(d3.axisLeft(yScale).tickFormat(d3.format(".2f")))
+              .on("end", () => {
+                histLine.attr("d", line);
+                const histLen = histLine.node().getTotalLength();
+                histLine
+                  .attr("stroke-dasharray", histLen + " " + histLen)
+                  .attr("stroke-dashoffset", 0);
+
+                const pollutionYear = 1955;
+                pollutionAnnotation
+                  .select("line")
+                  .attr("x1", xScale(pollutionYear))
+                  .attr("x2", xScale(pollutionYear));
+
+                pollutionAnnotation
+                  .select("text")
+                  .attr("x", xScale(pollutionYear));
+
+                pollutionAnnotation
+                  .transition()
+                  .duration(500)
+                  .style("opacity", 1);
+              });
+
+            highLine.transition().duration(1000).style("opacity", 0);
+            lowLine.transition().duration(1000).style("opacity", 0);
+            highEndDot.transition().duration(500).style("opacity", 0);
+            lowEndDot.transition().duration(500).style("opacity", 0);
+            dustBowlAnnotation.transition().duration(500).style("opacity", 0.3);
+            transitionLine.transition().duration(500).style("opacity", 0);
+          } else if (step === 3) {
+            // Transition point (2014)
+            xScale.domain(d3.extent(hist, (d) => d.year));
+            yScale.domain(d3.extent(hist, (d) => d.pr));
+
+            xAxisGroup
+              .transition()
+              .duration(1000)
+              .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
+
+            yAxisGroup
+              .transition()
+              .duration(1000)
+              .call(d3.axisLeft(yScale).tickFormat(d3.format(".2f")))
+              .on("end", () => {
+                histLine.attr("d", line);
+                const histLen = histLine.node().getTotalLength();
+                histLine
+                  .attr("stroke-dasharray", histLen + " " + histLen)
+                  .attr("stroke-dashoffset", 0);
+              });
+
+            highLine.transition().duration(1000).style("opacity", 0);
+            lowLine.transition().duration(1000).style("opacity", 0);
+            highEndDot.transition().duration(500).style("opacity", 0);
+            lowEndDot.transition().duration(500).style("opacity", 0);
+            dustBowlAnnotation.transition().duration(500).style("opacity", 0.2);
+            pollutionAnnotation
+              .transition()
+              .duration(500)
+              .style("opacity", 0.2);
+
+            // Show transition line at 2014
+            const transitionYear = 2014;
+            transitionLine
+              .attr("x1", xScale(transitionYear))
+              .attr("x2", xScale(transitionYear))
+              .transition()
+              .duration(500)
+              .style("opacity", 1);
+          } else if (step === 4) {
+            const allData = [...hist, ...high];
+            xScale.domain(d3.extent(allData, (d) => d.year));
+            yScale.domain(d3.extent(allData, (d) => d.pr));
+
+            xAxisGroup
+              .transition()
+              .duration(1000)
+              .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
+
+            yAxisGroup
+              .transition()
+              .duration(1000)
+              .call(d3.axisLeft(yScale).tickFormat(d3.format(".2f")))
+              .on("end", () => {
+                // Show transition line at 2014
+                const transitionYear = 2014;
+                transitionLine
+                  .attr("x1", xScale(transitionYear))
+                  .attr("x2", xScale(transitionYear))
+                  .transition()
+                  .duration(500)
+                  .style("opacity", 1);
+                highLine.attr("d", line).style("opacity", 1);
+
+                const lastHigh = high[high.length - 1];
+                highEndDot
+                  .attr("cx", xScale(lastHigh.year))
+                  .attr("cy", yScale(lastHigh.pr))
+                  .transition()
+                  .delay(500)
+                  .duration(500)
+                  .style("opacity", 1);
+
+                lowEndDot.transition().duration(500).style("opacity", 0);
+
+                const highLen = highLine.node().getTotalLength();
+                highLine
+                  .attr("stroke-dasharray", highLen + " " + highLen)
+                  .attr("stroke-dashoffset", highLen)
+                  .transition()
+                  .duration(500)
+                  .ease(d3.easeLinear)
+                  .attr("stroke-dashoffset", 0);
+
+                // Show high emissions in legend
+                legend
+                  .select(".legend-high-text")
+                  .transition()
+                  .duration(500)
+                  .style("opacity", 1);
+                legend
+                  .select("line:nth-of-type(2)")
+                  .transition()
+                  .duration(500)
+                  .style("opacity", 1);
+              });
+
+            histLine
+              .transition()
+              .duration(1000)
+              .attr("d", line)
+              .attr("stroke-dashoffset", 0);
+
+            lowLine.transition().duration(1000).style("opacity", 0);
+
+            dustBowlAnnotation.transition().duration(500).style("opacity", 0);
+            pollutionAnnotation.transition().duration(500).style("opacity", 0);
+            transitionLine.transition().duration(500).style("opacity", 1);
+          } else if (step === 5) {
+            const allData = [...hist, ...high, ...low];
+            xScale.domain(d3.extent(allData, (d) => d.year));
+            yScale.domain(d3.extent(allData, (d) => d.pr));
+
+            xAxisGroup
+              .transition()
+              .duration(1000)
+              .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
+
+            yAxisGroup
+              .transition()
+              .duration(1000)
+              .call(d3.axisLeft(yScale).tickFormat(d3.format(".2f")))
+              .on("end", () => {
+                const lastHigh2 = high[high.length - 1];
+                highEndDot
+                  .attr("cx", xScale(lastHigh2.year))
+                  .attr("cy", yScale(lastHigh2.pr))
+                  .transition()
+                  .duration(500)
+                  .style("opacity", 0.3);
+
+                lowLine.attr("d", line).style("opacity", 1);
+
+                const lastLow = low[low.length - 1];
+                lowEndDot
+                  .attr("cx", xScale(lastLow.year))
+                  .attr("cy", yScale(lastLow.pr))
+                  .transition()
+                  .delay(500)
+                  .duration(500)
+                  .style("opacity", 1);
+
+                const lowLen = lowLine.node().getTotalLength();
+                lowLine
+                  .attr("stroke-dasharray", lowLen + " " + lowLen)
+                  .attr("stroke-dashoffset", lowLen)
+                  .transition()
+                  .duration(500)
+                  .ease(d3.easeLinear)
+                  .attr("stroke-dashoffset", 0);
+
+                // Show low emissions in legend
+                legend
+                  .select(".legend-low-text")
+                  .transition()
+                  .duration(500)
+                  .style("opacity", 1);
+                legend
+                  .select("line:nth-of-type(3)")
+                  .transition()
+                  .duration(500)
+                  .style("opacity", 1);
+              });
+
+            histLine
+              .transition()
+              .duration(1000)
+              .attr("d", line)
+              .attr("stroke-dashoffset", 0);
+
+            highLine
+              .interrupt()
+              .attr("d", line)
+              .attr("stroke-dashoffset", 0)
+              .transition()
+              .duration(1000)
+              .style("opacity", 0.3);
+
+            dustBowlAnnotation.transition().duration(500).style("opacity", 0);
+            pollutionAnnotation.transition().duration(500).style("opacity", 0);
+
+            // Update transition line position
+            const transitionYear = 2014;
+            transitionLine
+              .transition()
+              .duration(1000)
+              .attr("x1", xScale(transitionYear))
+              .attr("x2", xScale(transitionYear))
+              .style("opacity", 1);
+          }
+        }
+
+        const scroller = scrollama();
+
+        scroller
+          .setup({
+            step: ".step",
+            offset: 0.5,
+          })
+          .onStepEnter((response) => {
+            d3.selectAll(".step").classed("active", false);
+            d3.select(response.element).classed("active", true);
+
+            updateChart(response.index);
+            startRipples(response.index);
+          });
+
+        window.addEventListener("resize", scroller.resize);
+      }
+
+      createRain();
+      init();
+    </script>
+  </body>
 </html>
