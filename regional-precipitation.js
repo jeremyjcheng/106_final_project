@@ -632,6 +632,87 @@ function drawChart() {
     tooltip.classed("visible", false);
   };
 
+  // Helper function to calculate distance from point to line segment
+  function pointToLineDistance(px, py, x1, y1, x2, y2) {
+    const A = px - x1;
+    const B = py - y1;
+    const C = x2 - x1;
+    const D = y2 - y1;
+
+    const dot = A * C + B * D;
+    const lenSq = C * C + D * D;
+    let param = -1;
+    if (lenSq != 0) param = dot / lenSq;
+
+    let xx, yy;
+
+    if (param < 0) {
+      xx = x1;
+      yy = y1;
+    } else if (param > 1) {
+      xx = x2;
+      yy = y2;
+    } else {
+      xx = x1 + param * C;
+      yy = y1 + param * D;
+    }
+
+    const dx = px - xx;
+    const dy = py - yy;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  // Find nearest point on a line path to a given mouse position
+  function findNearestPointOnLine(mouseX, mouseY, data, lineClass) {
+    if (!data || data.length < 2) return null;
+
+    let minDistance = Infinity;
+    let nearestPoint = null;
+    let nearestIndex = -1;
+
+    for (let i = 0; i < data.length - 1; i++) {
+      const x1 = xScale(data[i].year);
+      const y1 = yScale(data[i].value);
+      const x2 = xScale(data[i + 1].year);
+      const y2 = yScale(data[i + 1].value);
+
+      const distance = pointToLineDistance(mouseX, mouseY, x1, y1, x2, y2);
+
+      if (distance < minDistance) {
+        minDistance = distance;
+        // Find the closest data point to the nearest point on the line segment
+        const segmentLength = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+        const t =
+          segmentLength > 0
+            ? Math.max(
+                0,
+                Math.min(
+                  1,
+                  ((mouseX - x1) * (x2 - x1) + (mouseY - y1) * (y2 - y1)) /
+                    segmentLength ** 2
+                )
+              )
+            : 0;
+
+        // Use the point that's closer to the mouse
+        const distToP1 = Math.sqrt((mouseX - x1) ** 2 + (mouseY - y1) ** 2);
+        const distToP2 = Math.sqrt((mouseX - x2) ** 2 + (mouseY - y2) ** 2);
+
+        if (distToP1 < distToP2) {
+          nearestPoint = data[i];
+          nearestIndex = i;
+        } else {
+          nearestPoint = data[i + 1];
+          nearestIndex = i + 1;
+        }
+      }
+    }
+
+    return minDistance <= 10
+      ? { point: nearestPoint, distance: minDistance, lineClass }
+      : null;
+  }
+
   // Helper function to bin data into 10-year intervals
   // Groups data points into bins (e.g., 1850-1859, 1860-1869, etc.)
   // and calculates the mean value for each bin
@@ -683,36 +764,7 @@ function drawChart() {
       .attr("d", line)
       .attr("opacity", 0.7)
       .attr("class", "historical-line")
-      .style("cursor", "pointer")
-      .on("mouseover", function () {
-        d3.select(this).attr("opacity", 1).attr("stroke-width", 3);
-        svg
-          .selectAll(".low-emission-line, .high-emission-line")
-          .attr("opacity", 0.3);
-      })
-      .on("mouseout", function () {
-        d3.select(this).attr("opacity", 0.7).attr("stroke-width", 2);
-        svg
-          .selectAll(".low-emission-line, .high-emission-line")
-          .attr("opacity", 0.7);
-      });
-
-    svg
-      .selectAll(".historical-point")
-      .data(binnedHistorical)
-      .enter()
-      .append("circle")
-      .attr("cx", (d) => xScale(d.year))
-      .attr("cy", (d) => yScale(d.value))
-      .attr("r", 10)
-      .attr("fill", "transparent")
-      .attr("stroke", "none")
-      .style("cursor", "pointer")
-      .style("pointer-events", "all")
-      .on("mouseover", function (event, d) {
-        showTooltip(event, d);
-      })
-      .on("mouseout", hideTooltip);
+      .style("pointer-events", "none");
   }
 
   // Low emission (SSP 126)
@@ -726,36 +778,7 @@ function drawChart() {
       .attr("d", line)
       .attr("opacity", 0.7)
       .attr("class", "low-emission-line")
-      .style("cursor", "pointer")
-      .on("mouseover", function () {
-        d3.select(this).attr("opacity", 1).attr("stroke-width", 3);
-        svg
-          .selectAll(".historical-line, .high-emission-line")
-          .attr("opacity", 0.3);
-      })
-      .on("mouseout", function () {
-        d3.select(this).attr("opacity", 0.7).attr("stroke-width", 2);
-        svg
-          .selectAll(".historical-line, .high-emission-line")
-          .attr("opacity", 0.7);
-      });
-
-    svg
-      .selectAll(".low-point")
-      .data(binnedLow)
-      .enter()
-      .append("circle")
-      .attr("cx", (d) => xScale(d.year))
-      .attr("cy", (d) => yScale(d.value))
-      .attr("r", 10)
-      .attr("fill", "transparent")
-      .attr("stroke", "none")
-      .style("cursor", "pointer")
-      .style("pointer-events", "all")
-      .on("mouseover", function (event, d) {
-        showTooltip(event, d);
-      })
-      .on("mouseout", hideTooltip);
+      .style("pointer-events", "none");
   }
 
   // High emission (SSP 585)
@@ -769,36 +792,7 @@ function drawChart() {
       .attr("d", line)
       .attr("opacity", 0.7)
       .attr("class", "high-emission-line")
-      .style("cursor", "pointer")
-      .on("mouseover", function () {
-        d3.select(this).attr("opacity", 1).attr("stroke-width", 3);
-        svg
-          .selectAll(".historical-line, .low-emission-line")
-          .attr("opacity", 0.3);
-      })
-      .on("mouseout", function () {
-        d3.select(this).attr("opacity", 0.7).attr("stroke-width", 2);
-        svg
-          .selectAll(".historical-line, .low-emission-line")
-          .attr("opacity", 0.7);
-      });
-
-    svg
-      .selectAll(".high-point")
-      .data(binnedHigh)
-      .enter()
-      .append("circle")
-      .attr("cx", (d) => xScale(d.year))
-      .attr("cy", (d) => yScale(d.value))
-      .attr("r", 10)
-      .attr("fill", "transparent")
-      .attr("stroke", "none")
-      .style("cursor", "pointer")
-      .style("pointer-events", "all")
-      .on("mouseover", function (event, d) {
-        showTooltip(event, d);
-      })
-      .on("mouseout", hideTooltip);
+      .style("pointer-events", "none");
   }
 
   // Charles: draw smoothed regression curves when toggle is on
@@ -895,6 +889,138 @@ function drawChart() {
       }
     }
   }
+
+  // Add invisible overlay for distance-based line detection
+  // This makes it easier to interact with lines by detecting when mouse is within 10px
+  const overlay = svg
+    .append("rect")
+    .attr("x", margin.left)
+    .attr("y", margin.top)
+    .attr("width", width - margin.left - margin.right)
+    .attr("height", height - margin.top - margin.bottom)
+    .attr("fill", "transparent")
+    .attr("pointer-events", "all")
+    .style("cursor", "crosshair");
+
+  // Track which line is currently highlighted
+  let currentHighlightedLine = null;
+  let currentTooltipData = null;
+
+  overlay.on("mousemove", function (event) {
+    const [mouseX, mouseY] = d3.pointer(event, svgNode);
+
+    // Only check within the chart area
+    if (
+      mouseX < margin.left ||
+      mouseX > width - margin.right ||
+      mouseY < margin.top ||
+      mouseY > height - margin.bottom
+    ) {
+      return;
+    }
+
+    // Find nearest point on each active line
+    const candidates = [];
+
+    if (activeScenarios.includes("historical") && binnedHistorical.length > 0) {
+      const result = findNearestPointOnLine(
+        mouseX,
+        mouseY,
+        binnedHistorical,
+        "historical-line"
+      );
+      if (result) candidates.push(result);
+    }
+
+    if (activeScenarios.includes("low") && binnedLow.length > 0) {
+      const result = findNearestPointOnLine(
+        mouseX,
+        mouseY,
+        binnedLow,
+        "low-emission-line"
+      );
+      if (result) candidates.push(result);
+    }
+
+    if (activeScenarios.includes("high") && binnedHigh.length > 0) {
+      const result = findNearestPointOnLine(
+        mouseX,
+        mouseY,
+        binnedHigh,
+        "high-emission-line"
+      );
+      if (result) candidates.push(result);
+    }
+
+    // Find the nearest line overall
+    if (candidates.length > 0) {
+      candidates.sort((a, b) => a.distance - b.distance);
+      const nearest = candidates[0];
+
+      // Highlight the nearest line
+      if (currentHighlightedLine !== nearest.lineClass) {
+        // Reset all lines
+        svg
+          .selectAll(
+            ".historical-line, .low-emission-line, .high-emission-line"
+          )
+          .each(function () {
+            d3.select(this).attr("opacity", 0.7).attr("stroke-width", 2);
+          });
+
+        // Highlight nearest line
+        const nearestLine = svg.select(`.${nearest.lineClass}`);
+        if (!nearestLine.empty()) {
+          nearestLine.attr("opacity", 1).attr("stroke-width", 3);
+          currentHighlightedLine = nearest.lineClass;
+
+          // Dim other lines
+          svg
+            .selectAll(
+              ".historical-line, .low-emission-line, .high-emission-line"
+            )
+            .filter(function () {
+              return !d3.select(this).classed(nearest.lineClass);
+            })
+            .attr("opacity", 0.3);
+        }
+      }
+
+      // Show tooltip
+      if (
+        !currentTooltipData ||
+        currentTooltipData.year !== nearest.point.year ||
+        currentTooltipData.value !== nearest.point.value
+      ) {
+        showTooltip(event, nearest.point);
+        currentTooltipData = nearest.point;
+      }
+    } else {
+      // No line within 10px, reset highlighting
+      if (currentHighlightedLine) {
+        svg
+          .selectAll(
+            ".historical-line, .low-emission-line, .high-emission-line"
+          )
+          .attr("opacity", 0.7)
+          .attr("stroke-width", 2);
+        currentHighlightedLine = null;
+        hideTooltip();
+        currentTooltipData = null;
+      }
+    }
+  });
+
+  overlay.on("mouseleave", function () {
+    // Reset all lines when mouse leaves the chart area
+    svg
+      .selectAll(".historical-line, .low-emission-line, .high-emission-line")
+      .attr("opacity", 0.7)
+      .attr("stroke-width", 2);
+    currentHighlightedLine = null;
+    hideTooltip();
+    currentTooltipData = null;
+  });
 }
 
 // Initialize chart when DOM is ready
