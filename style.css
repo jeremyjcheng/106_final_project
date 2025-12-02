@@ -5,12 +5,12 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: "Georgia", serif;
   line-height: 1.6;
   color: #333;
   background-color: #f5f5f5;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 canvas {
@@ -71,7 +71,7 @@ canvas {
   grid-template-columns: 1fr;
   max-width: 1200px;
   width: 100%;
-  margin: 0 auto;
+  margin: auto;
   gap: 0.5rem;
 }
 
@@ -95,7 +95,7 @@ canvas {
 .regional-chart-container {
   width: 100%;
   max-width: 1000px;
-  margin: 0 auto;
+  margin: 0 auto 3rem auto;
   background-color: white;
   border-radius: 12px;
   padding: 1rem;
@@ -141,14 +141,17 @@ canvas {
 }
 
 .slide-content {
-  max-width: 1200px;
+  max-width: 1000px;
   width: 100%;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  align-items: center;
-  max-height: 100%;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto;
+  gap: 1.5rem;
+  align-items: stretch;
+  max-height: calc(100% - 8rem);
   box-sizing: border-box;
+  margin-top: 4rem;
+  margin-bottom: 4rem;
 }
 
 .slide-text {
@@ -252,6 +255,7 @@ canvas {
 .title-slide h1 {
   font-size: 4.5rem;
   font-weight: 700;
+  font-family: "Georgia", serif;
   margin-bottom: 1.5rem;
   color: white;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
@@ -638,30 +642,15 @@ canvas {
   }
 }
 
-
-.slide-viz-industrial {
-    width: 100%;
-    height: 500px;         /* ← 你想要的白框高度 */
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    
-    /* 可以自己决定是否居中图像 */
-    display: flex;
-    align-items: center;     /* 图上下居中 */
-    justify-content: center; /* 图左右居中 */
-
-    padding: 0;              /* 内边距你自己调 */
-}
-
 #industrial-precipitation-chart {
   width: 100%;
   height: 100%;
 }
+
 #industrial-precipitation-chart svg {
   width: 100%;
   height: 100%;
-  background: transparent;   /* 不要再来一层白底 */
+  background: white;
   box-shadow: none;          /* 去掉内层阴影，避免“双白框” */
   border-radius: 8px;        /* 跟外框圆角一致，看起来是一层 */
 }
@@ -669,4 +658,9 @@ canvas {
 .slide-text p.dimmed-text {
   opacity: 0.45;
   transition: opacity 0.2s ease;
+}
+
+.invisible-separator {
+  height: 5px;     /* change to any spacing you want */
+  background: transparent;
 }

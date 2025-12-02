@@ -23,19 +23,17 @@ function createIndustrialPrecipitationChart() {
 
   container.selectAll("*").remove();
 
-  const containerWidth = container.node().clientWidth || 800;
-  const containerHeight = container.node().clientHeight || 450;
+  // Fixed dimensions
+  const width = 800;
+  const height = 450;
+  const margin = { top: 100, right: 50, bottom: 20, left: 120 };
+  const svgWidth = width;
+  const svgHeight = height;
 
-  const margin = { top: 20, right: 10, bottom: 40, left: 55 };
-  const width = containerWidth - margin.left - margin.right;
-  const height = containerHeight - margin.top - margin.bottom;
-
-  const svgElement = container
+  const svg = container
     .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom);
-
-  const svg = svgElement
+    .attr("width", svgWidth)
+    .attr("height", svgHeight)
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -65,7 +63,7 @@ function createIndustrialPrecipitationChart() {
   function loadRegionCSV(file) {
     return d3.csv(file, (d) => ({
       year: +d.year,
-      pr: parseFloat(d.pr),
+      pr: parseFloat(d.pr)* 86400,
     }));
   }
 
@@ -82,18 +80,20 @@ function createIndustrialPrecipitationChart() {
 
     const allValues = regions.flatMap((r) => r.data.map((d) => d.pr));
 
+    // Calculate chart dimensions
+    const chartWidth = width - margin.left - margin.right;
+    const chartHeight = height - margin.top - margin.bottom;
+
+    // Scales
     const xScale = d3
       .scaleLinear()
       .domain(d3.extent(allYears))
-      .range([0, width]);
+      .range([0, chartWidth]);
 
     const yScale = d3
       .scaleLinear()
-      .domain([
-        d3.min(allValues) * 0.95,
-        d3.max(allValues) * 1.05,
-      ])
-      .range([height, 0]);
+      .domain([d3.min(allValues) * 0.95, d3.max(allValues) * 1.05])
+      .range([chartHeight, 0]);
 
     const line = d3
       .line()
@@ -101,15 +101,16 @@ function createIndustrialPrecipitationChart() {
       .y((d) => yScale(d.pr))
       .curve(d3.curveMonotoneX);
 
+    // Axes
     const xAxis = d3.axisBottom(xScale).tickFormat(d3.format("d")).ticks(8);
     const yAxis = d3
       .axisLeft(yScale)
       .ticks(6)
-      .tickFormat(d3.format(".1e"));
+      .tickFormat(d3.format(".1f"));
 
     svg
       .append("g")
-      .attr("transform", `translate(0,${height})`)
+      .attr("transform", `translate(0,${chartHeight})`)
       .call(xAxis)
       .selectAll("text")
       .attr("font-size", "11px")
@@ -122,39 +123,82 @@ function createIndustrialPrecipitationChart() {
       .attr("font-size", "11px")
       .attr("fill", "#666");
 
+    // Axis labels
     svg
       .append("text")
       .attr("transform", "rotate(-90)")
-      .attr("y", 0 - margin.left)
-      .attr("x", 0 - height / 2)
-      .attr("dy", "1em")
+      .attr("y", -60)
+      .attr("x", -chartHeight / 2)
       .attr("text-anchor", "middle")
       .attr("font-size", "12px")
       .attr("fill", "#333")
-      .text("Summer Precipitation (mm)");
+      .text("Summer Precipitation (mm/day)");
 
     svg
       .append("text")
-      .attr(
-        "transform",
-        `translate(${width / 2}, ${height + margin.bottom - 10})`
-      )
+      .attr("transform", `translate(${chartWidth / 2}, ${chartHeight + 40})`)
       .attr("text-anchor", "middle")
       .attr("font-size", "12px")
       .attr("fill", "#333")
       .text("Year");
 
+    // Title
     svg
       .append("text")
-      .attr("x", width / 2)
-      .attr("y", -5)
+      .attr("x", chartWidth / 2)
+      .attr("y", -60)
       .attr("text-anchor", "middle")
-      .attr("font-size", "14px")
+      .attr("font-size", "18px")
       .attr("font-weight", "600")
-      .attr("fill", "#2e86ab")
+      .attr("font-family", "Georgia, serif")
+      .attr("fill", "#2c3e50")
       .text("Summer Precipitation Trends by Region (1850–2020)");
 
-    // --- Base lines ---
+    // Shaded drought regions
+    const droughtPeriods = [
+      {
+        start: 1930,
+        end: 1940,
+        color: "rgba(210, 180, 140, 0.3)", // light brown
+        label: "Dust Bowl Drought"
+      },
+      {
+        start: 1950,
+        end: 1957,
+        color: "rgba(128, 128, 128, 0.3)", // grey
+        label: "1950s Drought"
+      }
+    ];
+
+    const droughtGroup = svg.append("g").attr("class", "drought-regions");
+
+    droughtPeriods.forEach((period, index) => {
+      // Shaded rectangle
+      droughtGroup
+        .append("rect")
+        .attr("x", xScale(period.start))
+        .attr("y", 0)
+        .attr("width", xScale(period.end) - xScale(period.start))
+        .attr("height", chartHeight)
+        .attr("fill", period.color)
+        .attr("stroke", "none");
+
+      // Label - alternate vertical positions
+      const yPosition = index % 2 === 0 ? 0 : 10;
+      // Label text brown and grey respectively
+      droughtGroup
+        .append("text")
+        .attr("x", (xScale(period.start) + xScale(period.end)) / 2)
+        .attr("y", yPosition)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "9px")
+        .attr("font-weight", "600")
+        .attr("fill", index % 2 === 0 ? "brown" : "grey")
+        .attr("opacity", 0.8)
+        .text(period.label);
+    });
+
+    // Draw lines
     regions.forEach((r) => {
       const className =
         "region-line-" + r.key.replace(/\s+/g, "-").toLowerCase();
@@ -169,10 +213,10 @@ function createIndustrialPrecipitationChart() {
         .attr("d", line);
     });
 
-    // --- Legend ---
+    // Legend
     const legend = svg
       .append("g")
-      .attr("transform", `translate(${width - 80}, 0)`);
+      .attr("transform", `translate(${chartWidth + 20}, 20)`);
 
     function updateRegionVisibility(region) {
       region.path.style("opacity", region.visible ? 1 : 0.15);
@@ -218,10 +262,10 @@ function createIndustrialPrecipitationChart() {
       updateRegionVisibility(r);
     });
 
-    // --- High-lighted range group (for text hover) ---
+    // Highlight range group (for text hover)
     let highlightGroup = svg.append("g").attr("class", "range-highlight-group");
 
-    // --- Hover group for tooltip & circles ---
+    // Hover group for tooltip & circles
     const hoverGroup = svg.append("g").attr("class", "hover-group");
 
     const hoverLine = hoverGroup
@@ -231,7 +275,7 @@ function createIndustrialPrecipitationChart() {
       .attr("stroke-width", 1)
       .attr("stroke-dasharray", "3,3")
       .attr("y1", 0)
-      .attr("y2", height)
+      .attr("y2", chartHeight)
       .style("opacity", 0);
 
     regions.forEach((r) => {
@@ -244,6 +288,7 @@ function createIndustrialPrecipitationChart() {
         .style("opacity", 0);
     });
 
+    // Tooltip
     const tooltip = hoverGroup
       .append("g")
       .attr("class", "multi-tooltip")
@@ -307,11 +352,12 @@ function createIndustrialPrecipitationChart() {
       return best;
     }
 
+    // Hover overlay
     svg
       .append("rect")
       .attr("class", "overlay")
-      .attr("width", width)
-      .attr("height", height)
+      .attr("width", chartWidth)
+      .attr("height", chartHeight)
       .attr("fill", "transparent")
       .style("cursor", "crosshair")
       .on("mouseover", function () {
@@ -325,7 +371,7 @@ function createIndustrialPrecipitationChart() {
       })
       .on("mousemove", function (event) {
         const [mouseX] = d3.pointer(event, this);
-        const clampedX = Math.max(0, Math.min(width, mouseX));
+        const clampedX = Math.max(0, Math.min(chartWidth, mouseX));
         const mouseYear = xScale.invert(clampedX);
         const closestYear = findClosestYear(mouseYear);
         const xPos = xScale(closestYear);
@@ -371,12 +417,12 @@ function createIndustrialPrecipitationChart() {
           ...tooltipValueTexts.map((t) => t.node().getComputedTextLength()),
         ];
         const boxWidth = d3.max(widths) + 12;
-        const boxHeight = 6 + (regions.length + 1) * 12;
+        const boxHeight = 6 + (regions.length + 1) * 12 + 6;
 
         tooltipRect.attr("width", boxWidth).attr("height", boxHeight);
 
         const tooltipX =
-          xPos + 10 > width - boxWidth ? xPos - boxWidth - 10 : xPos + 10;
+          xPos + 10 > chartWidth - boxWidth ? xPos - boxWidth - 10 : xPos + 10;
         const tooltipY = 10;
 
         tooltip.attr(`transform`, `translate(${tooltipX}, ${tooltipY})`);
@@ -387,14 +433,9 @@ function createIndustrialPrecipitationChart() {
         tooltip.style("opacity", 0);
       });
 
-    // ----------------------------------------------------------------
     // Text hover → highlight specific year ranges
-    // ----------------------------------------------------------------
-
     function clearHighlightRange() {
-      // 删除高亮线段
       highlightGroup.selectAll("*").remove();
-      // 恢复所有原始线 & 图例透明度
       regions.forEach((r) => {
         r.path.style("opacity", 1);
         if (r.legendLine) r.legendLine.style("opacity", 1);
@@ -403,17 +444,14 @@ function createIndustrialPrecipitationChart() {
     }
 
     function applyHighlightRange(startYear, endYear) {
-      // 先清空之前的高亮
       highlightGroup.selectAll("*").remove();
 
-      // 让原始折线整体变淡
       regions.forEach((r) => {
         r.path.style("opacity", 0.15);
         if (r.legendLine) r.legendLine.style("opacity", 0.3);
         if (r.legendText) r.legendText.style("opacity", 0.5);
       });
 
-      // 每个 region 画一条高亮的“截断线段”
       regions.forEach((r) => {
         const segment = r.data.filter(
           (d) => d.year >= startYear && d.year <= endYear
@@ -429,52 +467,10 @@ function createIndustrialPrecipitationChart() {
         }
       });
     }
-
-    // 绑定 Slide 2 的两段文字 hover
-    const slide2 = document.querySelector(
-      ".slides-container .slide:nth-of-type(3)"
-    );
-    if (slide2) {
-      const paras = slide2.querySelectorAll(".slide-text p");
-      const firstPara = paras[0];
-      const secondPara = paras[1];
-
-      function addDimmedClass(el) {
-        if (!el) return;
-        el.classList.add("dimmed-text");
-      }
-
-      function removeDimmedClass(el) {
-        if (!el) return;
-        el.classList.remove("dimmed-text");
-      }
-
-      if (firstPara) {
-        firstPara.addEventListener("mouseenter", () => {
-          addDimmedClass(firstPara);
-          applyHighlightRange(1908, 1937);
-        });
-        firstPara.addEventListener("mouseleave", () => {
-          removeDimmedClass(firstPara);
-          clearHighlightRange();
-        });
-      }
-
-      if (secondPara) {
-        secondPara.addEventListener("mouseenter", () => {
-          addDimmedClass(secondPara);
-          applyHighlightRange(1946, 1973);
-        });
-        secondPara.addEventListener("mouseleave", () => {
-          removeDimmedClass(secondPara);
-          clearHighlightRange();
-        });
-      }
-    }
   });
 }
 
-// 简化初始化逻辑：DOM Ready 之后直接画一次图，不再监听 slide class 变化
+// Initialize on DOM ready
 document.addEventListener("DOMContentLoaded", () => {
   createIndustrialPrecipitationChart();
 });

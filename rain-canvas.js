@@ -14,13 +14,15 @@ class Raindrop {
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * canvas.height - canvas.height;
         this.length = Math.random() * 20 + 10;
+        this.angle = 15; 
         this.speed = Math.random() * 3 + 4;
         this.opacity = Math.random() * 0.3 + 0.3;
     }
     
     fall() {
         this.y += this.speed;
-        
+        this.x += Math.sin(this.angle * Math.PI / 180) * this.speed;
+
         if (this.y > canvas.height) {
             this.y = -this.length;
             this.x = Math.random() * canvas.width;
@@ -29,8 +31,10 @@ class Raindrop {
     
     draw() {
         ctx.beginPath();
+        const dx = Math.sin(this.angle * Math.PI / 180) * this.length;
+        const dy = Math.cos(this.angle * Math.PI / 180) * this.length;
         ctx.moveTo(this.x, this.y);
-        ctx.lineTo(this.x, this.y + this.length);
+        ctx.lineTo(this.x + dx, this.y + dy);
         ctx.strokeStyle = `rgba(174, 194, 224, ${this.opacity})`;
         ctx.lineWidth = 1;
         ctx.stroke();

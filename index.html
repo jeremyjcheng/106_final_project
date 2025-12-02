@@ -30,45 +30,39 @@
       </div>
 
       <!-- Slide 2: Industrial revolution + land use texts -->
-      <div class="slide">
-        <div class="slide-content">
+      <div class="slide scrollable">
+        <div class="slide-content"
+        style="grid-template-columns: 1fr; max-width: 900px; gap: 1.5rem">
           <div class="slide-text">
-            <span class="slide-number">2</span>
             <h2>Along the long timeline of the past, some marks of human influence</h2>
-            <!-- 新增 id，方便在 JS 里监听 hover -->
-            <p id="industrial-text-1">
-              Around the 1930s, the summer rainfall in the Midwest and the South
-              dropped sharply. This was the famous Dust Bowl drought—a classic
-              case of human land use and climate working together. Over-farming
-              and poor agricultural practices broke down soil structure; dust
-              storms formed, rainfall decreased, and the region fell into years
-              of severe drought. After the New Deal introduced soil conservation
-              policies, rainfall and climate gradually recovered.
-            </p>
-            <p id="industrial-text-2">
-              In the 1950s, there was another major drought, along with the peak
-              of industrial pollution. Summer rainfall in the South, the West,
-              and parts of the Midwest dropped again. After World War II,
-              industrial emissions and sulfate aerosols from coal power plants
-              rose quickly, forming a heavy pollution belt over the eastern and
-              midwestern U.S. Studies show that these aerosols created a clear
-              “drying effect” in summer and fall, partly canceling out the
-              rainfall increase that greenhouse gases would normally
-              cause—especially in the Southeast and South.
-            </p>
+            <p>Over more than 170 years of summer rainfall records, a quiet story unfolds. Natural swings in 
+              precipitation once shaped the nation’s regions almost entirely on their own, but as the decades 
+              progress, subtle shifts begin to emerge—patterns that no longer align with nature alone. These 
+              long timelines reveal the early fingerprints of human influence, faint at first, but growing 
+              clearer as emissions rise and the climate system responds.</p>
+
+            <p style="color: #888;">Click any legend item to show or hide a region. Hover over the lines to explore summer 
+              precipitation values for each year.</p>
           </div>
           <div class="slide-viz-industrial">
             <div id="industrial-precipitation-chart"></div>
           </div>
+          <h3 style="margin-top: 1rem; margin-bottom: 20rem; text-align: left;">
+            Northeast — the wettest and steadily increasing<br />
+            South — humid, volatile, and influenced by the Gulf<br /> 
+            Midwest — moderate but gradually increasing<br />
+            West — the driest and most stable
+          </h3>
+          <div class="invisible-separator"></div>
         </div>
       </div>
 
 
       <!-- Slide 4: Regional Precipitation Chart -->
       <div class="slide scrollable">
-        <div class="slide-content regional-chart-slide">
+        <div class="slide-content regional-chart-slide"
+        style="grid-template-columns: 1fr; max-width: 900px; gap: 1.5rem">
           <div class="slide-text regional-chart-text">
-            <span class="slide-number">4</span>
             <h2>Regional Precipitation: Past and Future</h2>
             <p>
               Explore how precipitation patterns vary across different regions
@@ -284,7 +278,9 @@
               </button>
             </div>
           </div>
+          <div class="invisible-separator"></div>
         </div>
+        
         <!-- Tooltip -->
         <div
           id="tooltip"
@@ -301,6 +297,7 @@
             z-index: 1000;
           "
         ></div>
+
       </div>
 
       <!-- Step 8: Climate Choices Game -->

@@ -34,7 +34,7 @@
         padding-top: 15vh;
         opacity: 0.3;
         transition: opacity 0.5s;
-        font-size: 1.4rem;
+        font-size: 1.1rem;
         line-height: 1.8;
         color: black;
         position: relative;
@@ -44,6 +44,7 @@
         position: relative;
         padding-bottom: 320px;
         z-index: 2;
+        text-align: center;
       }
 
       .rain-container {
@@ -214,7 +215,7 @@
         text-align: center;
         padding: 50px 0;
         font-size: 2.5rem;
-        color: black;
+        color: #2e86ab;
       }
 
       .highlight-yellow {
@@ -581,7 +582,7 @@
         const width = 800;
         const height = 500;
         const margin = { top: 80, right: 150, bottom: 100, left: 100 };
-        const svgWidth = width + 100; // Extra width for legend
+        const svgWidth = width + 80; // Extra width for legend
 
         const svg = d3
           .select("#lineChart")
@@ -702,7 +703,7 @@
           .attr("text-anchor", "middle")
           .attr("font-size", "18px")
           .attr("font-weight", "bold")
-          .attr("font-family", "sans-serif")
+          .attr("font-family", "Georgia, serif")
           .attr("fill", "#2c3e50")
           .text(
             "From Past to Future: U.S. Precipitation Under Different Emission Scenarios"
