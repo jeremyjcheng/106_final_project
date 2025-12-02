@@ -553,11 +553,25 @@
           })),
         ]);
 
+        // Create connection point at 2014 using the last historical value
         const lastHistPoint = hist[hist.length - 1];
-        const highWithConnection = [lastHistPoint, ...high];
-        const lowWithConnection = [lastHistPoint, ...low];
+        const connectionPoint2014 = { year: 2014, pr: lastHistPoint.pr };
 
-        return { hist, low: lowWithConnection, high: highWithConnection };
+        // Extend historical data to 2014 if it doesn't already reach there
+        let histExtended = hist;
+        if (lastHistPoint.year < 2014) {
+          histExtended = [...hist, connectionPoint2014];
+        }
+
+        // Connect future lines starting at 2014
+        const highWithConnection = [connectionPoint2014, ...high];
+        const lowWithConnection = [connectionPoint2014, ...low];
+
+        return {
+          hist: histExtended,
+          low: lowWithConnection,
+          high: highWithConnection,
+        };
       }
 
       // Main visualization
@@ -789,7 +803,7 @@
         dustBowlAnnotation
           .append("text")
           .attr("x", 0)
-          .attr("y", height - margin.bottom + 20)
+          .attr("y", height - margin.bottom + 40)
           .attr("text-anchor", "middle")
           .attr("font-size", "12px")
           .attr("fill", "#c9a961")
@@ -814,14 +828,19 @@
         pollutionAnnotation
           .append("text")
           .attr("x", 0)
-          .attr("y", height - margin.bottom + 40)
+          .attr("y", height - margin.bottom + 60)
           .attr("text-anchor", "middle")
           .attr("font-size", "12px")
           .attr("fill", "#6b6b6b")
           .text("1950s: Peak Pollution");
 
         // Add vertical line at 2014 to separate historical from future
-        const transitionLine = svg
+        const transitionLineGroup = svg
+          .append("g")
+          .attr("class", "transition-line-group")
+          .style("opacity", 0);
+
+        const transitionLine = transitionLineGroup
           .append("line")
           .attr("class", "transition-line")
           .attr("x1", 0)
@@ -830,8 +849,7 @@
           .attr("y2", height - margin.bottom)
           .attr("stroke", "#999")
           .attr("stroke-width", 2)
-          .attr("stroke-dasharray", "5,5")
-          .style("opacity", 0);
+          .attr("stroke-dasharray", "5,5");
 
         updateChart(0);
 
@@ -870,7 +888,7 @@
 
             dustBowlAnnotation.transition().duration(500).style("opacity", 0);
             pollutionAnnotation.transition().duration(500).style("opacity", 0);
-            transitionLine.transition().duration(500).style("opacity", 0);
+            transitionLineGroup.transition().duration(500).style("opacity", 0);
 
             // Hide future scenario legends
             legend
@@ -945,7 +963,7 @@
             highEndDot.transition().duration(500).style("opacity", 0);
             lowEndDot.transition().duration(500).style("opacity", 0);
             pollutionAnnotation.transition().duration(500).style("opacity", 0);
-            transitionLine.transition().duration(500).style("opacity", 0);
+            transitionLineGroup.transition().duration(500).style("opacity", 0);
           } else if (step === 2) {
             // Industrial pollution era
             xScale.domain(d3.extent(hist, (d) => d.year));
@@ -987,17 +1005,36 @@
             lowLine.transition().duration(1000).style("opacity", 0);
             highEndDot.transition().duration(500).style("opacity", 0);
             lowEndDot.transition().duration(500).style("opacity", 0);
-            dustBowlAnnotation.transition().duration(500).style("opacity", 0.3);
-            transitionLine.transition().duration(500).style("opacity", 0);
+            dustBowlAnnotation.transition().duration(500).style("opacity", 1);
+            transitionLineGroup.transition().duration(500).style("opacity", 0);
           } else if (step === 3) {
             // Transition point (2014)
-            xScale.domain(d3.extent(hist, (d) => d.year));
+            const histExtent = d3.extent(hist, (d) => d.year);
+            xScale.domain([histExtent[0], Math.max(histExtent[1], 2014)]);
             yScale.domain(d3.extent(hist, (d) => d.pr));
+
+            // Generate tick values every 20 years, but ensure 2014 is included
+            const tickValues = [];
+            for (
+              let year = Math.ceil(histExtent[0] / 20) * 20;
+              year <= 2014;
+              year += 20
+            ) {
+              if (year <= 2014) tickValues.push(year);
+            }
+            if (!tickValues.includes(2014)) {
+              tickValues.push(2014);
+            }
 
             xAxisGroup
               .transition()
               .duration(1000)
-              .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
+              .call(
+                d3
+                  .axisBottom(xScale)
+                  .tickValues(tickValues)
+                  .tickFormat(d3.format("d"))
+              );
 
             yAxisGroup
               .transition()
@@ -1015,20 +1052,21 @@
             lowLine.transition().duration(1000).style("opacity", 0);
             highEndDot.transition().duration(500).style("opacity", 0);
             lowEndDot.transition().duration(500).style("opacity", 0);
-            dustBowlAnnotation.transition().duration(500).style("opacity", 0.2);
-            pollutionAnnotation
-              .transition()
-              .duration(500)
-              .style("opacity", 0.2);
+            dustBowlAnnotation.transition().duration(500).style("opacity", 1);
+            pollutionAnnotation.transition().duration(500).style("opacity", 1);
 
             // Show transition line at 2014
             const transitionYear = 2014;
-            transitionLine
+            transitionLineGroup
+              .select("line")
               .attr("x1", xScale(transitionYear))
-              .attr("x2", xScale(transitionYear))
-              .transition()
-              .duration(500)
-              .style("opacity", 1);
+              .attr("x2", xScale(transitionYear));
+
+            transitionLineGroup
+              .select("text")
+              .attr("x", xScale(transitionYear));
+
+            transitionLineGroup.transition().duration(500).style("opacity", 1);
           } else if (step === 4) {
             const allData = [...hist, ...high];
             xScale.domain(d3.extent(allData, (d) => d.year));
@@ -1046,9 +1084,12 @@
               .on("end", () => {
                 // Show transition line at 2014
                 const transitionYear = 2014;
-                transitionLine
+                transitionLineGroup
+                  .select("line")
                   .attr("x1", xScale(transitionYear))
-                  .attr("x2", xScale(transitionYear))
+                  .attr("x2", xScale(transitionYear));
+
+                transitionLineGroup
                   .transition()
                   .duration(500)
                   .style("opacity", 1);
@@ -1097,7 +1138,7 @@
 
             dustBowlAnnotation.transition().duration(500).style("opacity", 0);
             pollutionAnnotation.transition().duration(500).style("opacity", 0);
-            transitionLine.transition().duration(500).style("opacity", 1);
+            transitionLineGroup.transition().duration(500).style("opacity", 1);
           } else if (step === 5) {
             const allData = [...hist, ...high, ...low];
             xScale.domain(d3.extent(allData, (d) => d.year));
