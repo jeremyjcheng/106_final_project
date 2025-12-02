@@ -168,6 +168,25 @@ function updateLegendVisualState() {
   });
 }
 
+// Handle legend item clicks for toggling scenario visibility
+function handleLegendClick(event) {
+  const legendItem = event.target.closest(".legend-item");
+  if (!legendItem) return;
+
+  const scenario = legendItem.dataset.scenario;
+  if (!scenario) return; // Skip regression toggle and other items without scenario
+
+  // Toggle this scenario in the array
+  if (activeScenarios.includes(scenario)) {
+    activeScenarios = activeScenarios.filter((sc) => sc !== scenario);
+  } else {
+    activeScenarios.push(scenario);
+  }
+
+  updateLegendVisualState();
+  drawChart();
+}
+
 // Set up button, legend, year window and regression toggle interactions
 function setupEventListeners() {
   const prevBtn = document.getElementById("prevBtn");
@@ -186,23 +205,10 @@ function setupEventListeners() {
   }
 
   // Charles: scenario legend click to filter which lines are visible
-  document.querySelectorAll(".legend-item").forEach((item) => {
-    const scenario = item.dataset.scenario;
-    if (!scenario) return;
-    item.addEventListener("click", function () {
-      const s = this.dataset.scenario;
-
-      // Toggle this scenario in the array
-      if (activeScenarios.includes(s)) {
-        activeScenarios = activeScenarios.filter((sc) => sc !== s);
-      } else {
-        activeScenarios.push(s);
-      }
-
-      updateLegendVisualState();
-      drawChart();
-    });
-  });
+  // Use event delegation on document to handle clicks, which is more robust
+  // Remove any existing listeners first to avoid duplicates
+  document.removeEventListener("click", handleLegendClick);
+  document.addEventListener("click", handleLegendClick);
 
   const yearStartInput = document.getElementById("yearStartInput");
   const yearEndInput = document.getElementById("yearEndInput");
