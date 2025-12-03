@@ -243,3 +243,25 @@ insightsContainer.addEventListener('touchstart', (e) => {
 insightsContainer.addEventListener('mousedown', (e) => {
   e.stopPropagation();
 });
+
+// typewriter
+function typewriterEffect(element, speed = 50) {
+  const text = element.getAttribute('data-text');
+  const textElement = element.querySelector('.typewriter-text');
+  let index = 0;
+
+  function type() {
+    if (index < text.length) {
+      textElement.textContent += text.charAt(index);
+      index++;
+      setTimeout(type, speed);
+    }
+  }
+
+  type();
+}
+
+// Apply to all typewriter elements
+document.querySelectorAll('.typewriter').forEach(el => {
+  typewriterEffect(el, 50);
+});

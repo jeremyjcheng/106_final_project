@@ -152,7 +152,7 @@ function createIndustrialPrecipitationChart() {
       .attr("font-weight", "600")
       .attr("font-family", "Georgia, serif")
       .attr("fill", "#2c3e50")
-      .text("Summer Precipitation Trends by Region (1850–2020)");
+      .text("Summer Precipitation Trends by U.S. Region (1850–2014)");
 
     // Shaded drought regions
     const droughtPeriods = [

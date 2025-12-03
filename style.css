@@ -807,3 +807,29 @@ canvas {
     transform: translateY(0);
   }
 }
+
+.typewriter {
+  max-width: 1000px;
+  margin: 0 auto;
+  text-align: center;
+  color: #2e86ab;
+}
+
+.typewriter h1 {
+  display: inline;
+  margin: 0;
+}
+
+.cursor {
+  display: inline-block;
+  width: 3px;
+  height: 1.8em;
+  background-color: #2e86ab;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: blink 0.75s step-end infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
