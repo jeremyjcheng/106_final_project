@@ -626,55 +626,62 @@ function showTotalEmissions() {
   let extremeRainfallDays = getExtremeRainfallDays(total);
   let lowEmissionImpact = getLowEmissionImpact(total);
 
-  d3.select("#final-emissions").html(`
-      <div class="results-header">
-        <h2>Our Future</h2>
-        <h3>Results Based On Your Answer:</h3>
-        <div class="results-total">${total} kg CO₂</div>
-        <div class="results-classification" style="color: ${classColor};">${classification}</div>
-      </div>
-      
-      <div class="results-grid">
-        <div class="results-box">
-          <h4>Your Precipitation Projection</h4>
-          <div id="precipitation-chart"></div>
+  // Use requestAnimationFrame to prevent blocking the UI
+  requestAnimationFrame(() => {
+    d3.select("#final-emissions").html(`
+        <div class="results-header">
+          <h2>Our Future</h2>
+          <h3>Results Based On Your Answer:</h3>
+          <div class="results-total">${total} kg CO₂</div>
+          <div class="results-classification" style="color: ${classColor};">${classification}</div>
+        </div>
+        
+        <div class="results-grid">
+          <div class="results-box">
+            <h4>Your Precipitation Projection</h4>
+            <div id="precipitation-chart"></div>
+          </div>
+          
+          <div class="results-box">
+            <h4>🌧️ Extreme Rainfall Days</h4>
+            <p><strong>Current scenario:</strong> ${extremeRainfallDays.current} days/year</p>
+            <p><strong>Low emission scenario:</strong> ${extremeRainfallDays.lowEmission} days/year</p>
+            <p style="margin-top: 15px; font-size: 0.9em; color: #888;">
+              <em>Extreme rainfall days can cause flooding, landslides, and infrastructure damage.</em>
+            </p>
+          </div>
         </div>
         
         <div class="results-box">
-          <h4>🌧️ Extreme Rainfall Days</h4>
-          <p><strong>Current scenario:</strong> ${extremeRainfallDays.current} days/year</p>
-          <p><strong>Low emission scenario:</strong> ${extremeRainfallDays.lowEmission} days/year</p>
-          <p style="margin-top: 15px; font-size: 0.9em; color: #888;">
-            <em>Extreme rainfall days can cause flooding, landslides, and infrastructure damage.</em>
+          <div id="co2-equivalency"></div>
+        </div>
+        
+        <div class="results-info-box">
+          <h4>💡 Understanding the Impact</h4>
+          <p>${lowEmissionImpact}</p>
+        </div>
+        
+        <div class="results-info-box">
+          <h4>🌍 How Carbon Emissions Affect Precipitation</h4>
+          <p>
+            Carbon dioxide traps heat in Earth's atmosphere. Warmer air holds approximately 7% more moisture 
+            per degree Celsius of warming. This extra moisture leads to more intense precipitation events 
+            and increases the frequency of extreme rainfall days, resulting in flooding, erosion, and 
+            infrastructure damage.
           </p>
         </div>
-      </div>
-      
-      <div class="results-box">
-        <div id="co2-equivalency"></div>
-      </div>
-      
-      <div class="results-info-box">
-        <h4>💡 Understanding the Impact</h4>
-        <p>${lowEmissionImpact}</p>
-      </div>
-      
-      <div class="results-info-box">
-        <h4>🌍 How Carbon Emissions Affect Precipitation</h4>
-        <p>
-          Carbon dioxide traps heat in Earth's atmosphere. Warmer air holds approximately 7% more moisture 
-          per degree Celsius of warming. This extra moisture leads to more intense precipitation events 
-          and increases the frequency of extreme rainfall days, resulting in flooding, erosion, and 
-          infrastructure damage.
-        </p>
-      </div>
-    `);
+      `);
 
-  // Create the D3 chart after the HTML is inserted
-  createPrecipitationChart("precipitation-chart", total);
+    // Create the D3 chart after the HTML is inserted (defer heavy operations)
+    requestAnimationFrame(() => {
+      createPrecipitationChart("precipitation-chart", total);
 
-  // Create CO2 equivalencies visualization
-  showCO2Equivalencies(total);
+      // Create CO2 equivalencies visualization with slight delay
+      setTimeout(() => {
+        showCO2Equivalencies(total);
+      }, 100);
+    });
+  });
 }
 
 function showCO2Equivalencies(total) {
@@ -807,29 +814,31 @@ function showCO2Equivalencies(total) {
 
       // Show initial helpful message
       d3.select("#city-message")
-      .text("💡 Default: San Diego, CA. Enter your city to update the route!")
-      .style("color", "#059669")
-      .style("font-weight", "600");
+        .text("💡 Default: San Diego, CA. Enter your city to update the route!")
+        .style("color", "#059669")
+        .style("font-weight", "600");
     }
 
     // Create the viz container div
     const vizId = `viz-${eq.type}`;
     vizBox.append("div").attr("id", vizId);
 
-
-// Create visualizations
-  setTimeout(() => {
-  if (eq.type === "driving") {
-    // Show default map with San Diego as starting point
-    createDrivingViz(vizId, eq.value, "San Diego, CA");
-  } else if (eq.type === "lighting") {
-    createLightingViz(vizId, eq.value);
-  } else if (eq.type === "burgers") {
-    createFoodComparison(`#${vizId}`, eq.value);
-  } else if (eq.type === "trees") {
-    createTreesViz(vizId, eq.value);
-  }
-}, index * 200);
+    // Create visualizations with staggered loading for better performance
+    // Use requestAnimationFrame for smoother rendering
+    setTimeout(() => {
+      requestAnimationFrame(() => {
+        if (eq.type === "driving") {
+          // Show default map with San Diego as starting point
+          createDrivingViz(vizId, eq.value, "San Diego, CA");
+        } else if (eq.type === "lighting") {
+          createLightingViz(vizId, eq.value);
+        } else if (eq.type === "burgers") {
+          createFoodComparison(`#${vizId}`, eq.value);
+        } else if (eq.type === "trees") {
+          createTreesViz(vizId, eq.value);
+        }
+      });
+    }, index * 300); // Increased delay slightly for better performance
   });
 }
 
@@ -1034,9 +1043,12 @@ function createDrivingViz(containerId, miles, startCity) {
                  📏 Route distance: <strong>~${actualDistance.toLocaleString()} miles</strong> | 
                  💨 CO₂ equivalent: <strong>${miles.toLocaleString()} miles</strong>`);
 
-        // Animate car along route
+        // Optimized car animation using requestAnimationFrame
         const steps = 150;
         let carStep = 0;
+        let animationId = null;
+        let lastTime = 0;
+        const frameDelay = 40; // Target 25fps
 
         const carMarkerEl = document.createElement("div");
         carMarkerEl.innerHTML = "🚗";
@@ -1047,23 +1059,35 @@ function createDrivingViz(containerId, miles, startCity) {
           .setLngLat(startCoords)
           .addTo(map);
 
-        function animateCar() {
-          if (carStep <= steps) {
-            const progress = carStep / steps;
-            const coordIndex = Math.floor(progress * (routeCoords.length - 1));
-            if (routeCoords[coordIndex]) {
-              car.setLngLat(routeCoords[coordIndex]);
+        function animateCar(timestamp) {
+          if (!lastTime) lastTime = timestamp;
+          const elapsed = timestamp - lastTime;
+
+          if (elapsed >= frameDelay) {
+            if (carStep <= steps) {
+              const progress = carStep / steps;
+              const coordIndex = Math.floor(
+                progress * (routeCoords.length - 1)
+              );
+              if (routeCoords[coordIndex]) {
+                car.setLngLat(routeCoords[coordIndex]);
+              }
+              carStep++;
+              lastTime = timestamp;
+            } else {
+              // Loop animation after pause
+              carStep = 0;
+              lastTime = timestamp + 2000; // Pause for 2 seconds
             }
-            carStep++;
-            setTimeout(animateCar, 40);
-          } else {
-            // Loop animation
-            carStep = 0;
-            setTimeout(animateCar, 2000);
           }
+
+          animationId = requestAnimationFrame(animateCar);
         }
 
-        setTimeout(animateCar, 1500);
+        // Start animation after initial delay
+        setTimeout(() => {
+          animationId = requestAnimationFrame(animateCar);
+        }, 1500);
       });
     })
     .catch((error) => {
@@ -1311,7 +1335,7 @@ function createLightingViz(containerId, hours) {
   // Calculate electricity cost (average $0.13 per kWh, 60W bulb)
   const kWh = (hours * 60) / 1000;
   const cost = (kWh * 0.18).toFixed(2);
-  
+
   // Determine impact level
   let impactLevel = "LOW";
   let impactColor = "#22c55e";
@@ -1404,8 +1428,7 @@ function createLightingViz(containerId, hours) {
     .style("display", "flex")
     .style("justify-content", "space-between")
     .style("align-items", "center")
-    .style("margin-bottom", "15px")
-    .html(`
+    .style("margin-bottom", "15px").html(`
       <span style="font-size: 16px; opacity: 0.9;">Equivalent Cost:</span>
       <span style="font-size: 32px; font-weight: bold;">$${cost}</span>
     `);
@@ -1446,7 +1469,6 @@ function createLightingViz(containerId, hours) {
     .text(`💡 Tip: LED bulbs use 75% less energy than traditional bulbs!`);
 }
 
-
 // 3. TREES VISUALIZATION - Animated growing forest for 2100 emissions
 function createTreesViz(containerId, currentYearEmissions) {
   const container = d3.select(`#${containerId}`);
@@ -1473,8 +1495,7 @@ function createTreesViz(containerId, currentYearEmissions) {
     .style("padding", "20px")
     .style("background", "linear-gradient(135deg, #10b981 0%, #059669 100%)")
     .style("border-radius", "12px 12px 0 0")
-    .style("color", "white")
-    .html(`
+    .style("color", "white").html(`
       <h3 style="margin: 0 0 10px 0; font-size: 24px;">🌍 Trees Needed by 2100</h3>
       <p style="margin: 5px 0; font-size: 16px; opacity: 0.95;">
         Your annual emissions: <strong>${currentYearEmissions} kg CO₂</strong>
@@ -1493,7 +1514,10 @@ function createTreesViz(containerId, currentYearEmissions) {
     .append("svg")
     .attr("width", width)
     .attr("height", height)
-    .style("background", "linear-gradient(to bottom, #87CEEB 0%, #b8dbd9 50%, #8B7355 100%)")
+    .style(
+      "background",
+      "linear-gradient(to bottom, #87CEEB 0%, #b8dbd9 50%, #8B7355 100%)"
+    )
     .style("display", "block")
     .style("border-radius", "0 0 12px 12px");
 
@@ -1542,18 +1566,21 @@ function createTreesViz(containerId, currentYearEmissions) {
     .attr("height", height - groundY)
     .attr("fill", "#6B8E23");
 
-  // Add grass blades
-  for (let i = 0; i < 50; i++) {
-    svg
-      .append("line")
-      .attr("x1", Math.random() * width)
-      .attr("y1", groundY)
-      .attr("x2", Math.random() * width)
-      .attr("y2", groundY - 10)
-      .attr("stroke", "#556B2F")
-      .attr("stroke-width", 2)
-      .style("opacity", 0.5);
+  // Add grass blades (optimized - use path for better performance)
+  const grassPath = d3.path();
+  for (let i = 0; i < 30; i++) {
+    // Reduced from 50 to 30
+    const x = Math.random() * width;
+    grassPath.moveTo(x, groundY);
+    grassPath.lineTo(x + (Math.random() - 0.5) * 5, groundY - 10);
   }
+  svg
+    .append("path")
+    .attr("d", grassPath.toString())
+    .attr("stroke", "#556B2F")
+    .attr("stroke-width", 2)
+    .attr("fill", "none")
+    .style("opacity", 0.5);
 
   // Animate tree counter
   d3.select("#tree-counter")
@@ -1585,12 +1612,12 @@ function createTreesViz(containerId, currentYearEmissions) {
   const dotSize = 8;
   const dotSpacing = (width - 40) / dotsPerRow;
   const verticalSpacing = 12;
-  
+
   const treePositions = [];
   for (let i = 0; i < treesNeeded; i++) {
     const row = Math.floor(i / dotsPerRow);
     const col = i % dotsPerRow;
-    
+
     treePositions.push({
       x: 20 + col * dotSpacing + Math.random() * 3, // Add slight randomness
       y: groundY - 30 - row * verticalSpacing,
@@ -1600,64 +1627,71 @@ function createTreesViz(containerId, currentYearEmissions) {
     });
   }
 
-  // Animate ALL trees as colorful dots growing from the ground - BATCHED for performance
-  let animationIndex = 0;
+  // Optimized batch animation for trees
+  // Limit the number of animated trees for performance
+  const maxAnimatedTrees = Math.min(treesNeeded, 500); // Cap at 500 for performance
+  const batchSize = 20; // Animate in batches
+  const batchDelay = 50; // Delay between batches
 
-  function animateNextBatch() {
-    const batchSize = 20; // Animate 20 trees per frame
-    const endIndex = Math.min(animationIndex + batchSize, treePositions.length);
-    
-    for (let i = animationIndex; i < endIndex; i++) {
-      const pos = treePositions[i];
-      
-      const dot = svg
-        .append("circle")
-        .attr("cx", pos.x)
-        .attr("cy", groundY) // Start from ground
-        .attr("r", 0)
-        .attr("fill", pos.color)
-        .attr("stroke", "rgba(255,255,255,0.4)")
-        .attr("stroke-width", 1);
+  // Store references to tree dots for batch animation
+  const treeDots = [];
 
-      // Animate dot growing and rising
-      dot
-        .transition()
-        .duration(600)
-        .ease(d3.easeBackOut)
-        .attr("r", pos.size)
-        .attr("cy", pos.y)
-        .style("filter", "drop-shadow(0px 2px 3px rgba(0,0,0,0.3))");
+  // Create all tree dots immediately (no animation for performance)
+  treePositions.slice(0, maxAnimatedTrees).forEach((pos, i) => {
+    const dot = svg
+      .append("circle")
+      .attr("cx", pos.x)
+      .attr("cy", pos.y) // Start at final position
+      .attr("r", pos.size)
+      .attr("fill", pos.color)
+      .attr("stroke", "rgba(255,255,255,0.4)")
+      .attr("stroke-width", 1)
+      .style("opacity", 0) // Start invisible
+      .style("filter", "drop-shadow(0px 2px 3px rgba(0,0,0,0.3))");
 
-      // Add subtle pulse animation (only for some dots)
-      if (Math.random() > 0.7) {
-        function pulse() {
-          dot
-            .transition()
-            .duration(2000 + Math.random() * 1000)
-            .ease(d3.easeSinInOut)
-            .attr("r", pos.size * 1.15)
-            .transition()
-            .duration(2000 + Math.random() * 1000)
-            .ease(d3.easeSinInOut)
-            .attr("r", pos.size)
-            .on("end", pulse);
-        }
-        
-        // Start pulsing after initial animation
-        setTimeout(pulse, 1000);
+    treeDots.push(dot);
+  });
+
+  // Batch animate trees in groups for better performance
+  let currentBatch = 0;
+  function animateBatch() {
+    const startIdx = currentBatch * batchSize;
+    const endIdx = Math.min(startIdx + batchSize, maxAnimatedTrees);
+
+    for (let i = startIdx; i < endIdx; i++) {
+      if (treeDots[i]) {
+        treeDots[i]
+          .transition()
+          .duration(400)
+          .ease(d3.easeBackOut)
+          .style("opacity", 1);
       }
     }
-    
-    animationIndex = endIndex;
-    
-    // Continue animating next batch
-    if (animationIndex < treePositions.length) {
-      requestAnimationFrame(animateNextBatch);
+
+    currentBatch++;
+    if (endIdx < maxAnimatedTrees) {
+      setTimeout(animateBatch, batchDelay);
+    } else {
+      // If there are more trees than animated, show them all at once
+      if (treesNeeded > maxAnimatedTrees) {
+        treePositions.slice(maxAnimatedTrees).forEach((pos) => {
+          svg
+            .append("circle")
+            .attr("cx", pos.x)
+            .attr("cy", pos.y)
+            .attr("r", pos.size)
+            .attr("fill", pos.color)
+            .attr("stroke", "rgba(255,255,255,0.4)")
+            .attr("stroke-width", 1)
+            .style("opacity", 0.8)
+            .style("filter", "drop-shadow(0px 2px 3px rgba(0,0,0,0.3))");
+        });
+      }
     }
   }
 
-  // Start the batch animation
-  animateNextBatch();
+  // Start batch animation
+  setTimeout(animateBatch, 500);
 
   // Progress indicator
   const progressText = svg
@@ -1717,7 +1751,9 @@ function createTreesViz(containerId, currentYearEmissions) {
     } else if (numTrees < 10000) {
       return `That's <strong>a medium-sized forest</strong> of 40+ acres - like Central Park! 🌲`;
     } else {
-      return `That's <strong>an entire forest reserve</strong> of ${Math.round(numTrees / 250)} acres! 🏔️`;
+      return `That's <strong>an entire forest reserve</strong> of ${Math.round(
+        numTrees / 250
+      )} acres! 🏔️`;
     }
   }
 
@@ -1728,15 +1764,16 @@ function createTreesViz(containerId, currentYearEmissions) {
     .style("padding", "20px")
     .style("background", "#f3f4f6")
     .style("border-radius", "8px")
-    .style("text-align", "center")
-    .html(`
+    .style("text-align", "center").html(`
       <p style="margin: 0 0 15px 0; font-size: 16px; color: #059669; line-height: 1.6; font-weight: 600;">
         📏 ${getTreeComparison(treesNeeded)}
       </p>
       <p style="margin: 0; font-size: 14px; color: #374151; line-height: 1.6;">
         🌲 Each mature tree absorbs approximately <strong>22 kg of CO₂ per year</strong>.<br>
         🌍 It would take <strong>${treesNeeded.toLocaleString()} trees</strong> growing for one year to offset your emissions by 2100.<br>
-        💚 Or plant <strong>${Math.ceil(treesNeeded / 75).toLocaleString()} trees now</strong> and let them grow for 75 years!
+        💚 Or plant <strong>${Math.ceil(
+          treesNeeded / 75
+        ).toLocaleString()} trees now</strong> and let them grow for 75 years!
       </p>
     `);
 }
