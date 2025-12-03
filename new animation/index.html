@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Industrial Aerosols and Clouds</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- D3.js -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+  <!-- Sticky visualization panel -->
+  <div id="viz-container" class="page">
+    <div id="viz"></div>
+  </div>
+
+  <!-- Narrative scrolling story -->
+  <main id="story">
+    <!-- Section 1: Introduction -->
+    <section>
+      
+      <h1>Have you ever wondered how factories influence rainfall?</h1>
+      <p>
+        As you scroll, factories begin to rise along the horizon. Each new facility
+        represents the growth of human activity, while the clouds above still look
+        thick, bright, and almost untouched.
+      </p>
+      <p class="scroll-hint">Keep scrolling to follow the smoke ⬇</p>
+    </section>
+
+    <!-- Section 2: Aerosols -->
+    <section>
+      
+      <h2>Factories release streams of SO₄-based aerosols into the sky.</h2>
+      <p>
+        Microscopic sulfate particles rise from smokestacks and drift toward the
+        cloud layer. They are not water vapor themselves, yet they quietly reshape
+        how clouds form, grow, and fade.
+      </p>
+    </section>
+
+    <!-- Section 3: Clouds & Rainfall -->
+    <section>
+     
+      <h2>Excess aerosols can thin the clouds and make rain less likely.</h2>
+      <p>
+        As SO₄ particles accumulate, cloud droplets struggle to merge into raindrops.
+        The clouds become patchy and faint, and once condensation weakens, rainfall
+        starts to decline as well.
+      </p>
+      <p class="scroll-hint">Scroll up or down anytime to replay the story.</p>
+    </section>
+  </main>
+
+  <script src="viz.js"></script>
+</body>
+</html>

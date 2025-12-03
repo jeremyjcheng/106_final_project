@@ -1,0 +1,93 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  color: #000000; /* changed to black */
+  background: #0b1020;
+  overflow-x: hidden;
+}
+
+.page {
+  min-height: 100vh;
+}
+
+#viz-container {
+  position: sticky;
+  top: 0;
+  height: 70vh;
+  background: linear-gradient(#1e293b, #020617);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  z-index: 1;
+}
+
+#viz {
+  width: 100%;
+  height: 100%;
+}
+
+#story {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 6rem;
+  position: relative;
+  z-index: 2;
+}
+
+section {
+  min-height: 80vh;
+  padding: 2.5rem 0 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+  color: #000000; /* changed to black */
+}
+
+h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #000000; /* changed to black */
+}
+
+h2 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #000000; /* changed to black */
+}
+
+p {
+  line-height: 1.6;
+  font-size: 0.98rem;
+  color: #000000; /* changed to black */
+}
+
+.scroll-hint {
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #000000; /* changed to black */
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #000000; /* changed to black */
+  background: rgba(15, 23, 42, 0.8);
+}
+
+@media (min-width: 900px) {
+  #story {
+    margin-top: -5vh;
+  }
+}
