@@ -530,7 +530,7 @@ function showCO2Equivalencies(total) {
       icon: "../assets/light.png",
     },
     {
-      label: "Beef burgers",
+      label: "Number of Meals 🍔 🥗 🍗",
       value: Math.round(total / 5),
       icon: "../assets/burger.png",
     },
@@ -690,7 +690,7 @@ function showCO2Equivalencies(total) {
       value: Math.round((total / 0.417) * 10),
       type: "lighting",
     },
-    { label: "Beef burgers", value: Math.round(total / 5), type: "burgers" },
+    { label: "Burgers 🍔", value: Math.round(total / 5), type: "burgers" },
     {
       label: "Trees to absorb it",
       value: Math.ceil(total / 22),
@@ -1212,7 +1212,11 @@ function generateGreatCirclePath(start, end, numPoints) {
 function createFoodComparison(containerId, burgers) {
   // DATA
   const foods = [
-    { name: "Beef Burgers", emoji: "🍔", value: burgers, color: "#ef4444" },
+    { name: "Beef Burgers", 
+      emoji: "🍔", 
+      value: burgers, 
+      color: "#ef4444" 
+    },
     {
       name: "Chicken Meals",
       emoji: "🍗",
@@ -1228,14 +1232,14 @@ function createFoodComparison(containerId, burgers) {
   ];
 
   // SVG SETUP
-  const width = 700;
+  const width = 800;
   const height = 300;
 
   const svg = d3
     .select(containerId)
     .html("") // clear previous render
     .append("svg")
-    .attr("width", width)
+    .attr("width", width - 10)
     .attr("height", height);
 
   const maxValue = d3.max(foods, (d) => d.value);
@@ -1255,7 +1259,7 @@ function createFoodComparison(containerId, burgers) {
 
     // EMOJI
     g.append("text")
-      .attr("x", -100)
+      .attr("x", -90)
       .attr("y", barHeight / 2)
       .attr("text-anchor", "middle")
       .style("font-size", "32px")
@@ -1263,7 +1267,7 @@ function createFoodComparison(containerId, burgers) {
 
     // LABEL
     g.append("text")
-      .attr("x", -100)
+      .attr("x", -90)
       .attr("y", barHeight / 2 + 30)
       .attr("text-anchor", "middle")
       .style("font-size", "12px")
@@ -1282,6 +1286,7 @@ function createFoodComparison(containerId, burgers) {
       .duration(1500)
       .delay(i * 200)
       .attr("width", xScale(food.value));
+      
 
     // VALUE TEXT (fade in)
     g.append("text")
@@ -1327,7 +1332,19 @@ function createLightingViz(containerId, hours) {
     .style("color", "white")
     .style("box-shadow", "0 10px 25px rgba(0,0,0,0.2)")
     .style("max-width", "450px")
-    .style("margin", "0 auto");
+    .style("margin", "0 auto")
+    .style("cursor", "pointer")
+    .style("transition", "all 0.3s ease")
+    .on("mouseenter", function() {
+      d3.select(this)
+        .style("transform", "translateY(-5px)")
+        .style("box-shadow", "0 15px 35px rgba(0,0,0,0.3)");
+    })
+    .on("mouseleave", function() {
+      d3.select(this)
+        .style("transform", "translateY(0)")
+        .style("box-shadow", "0 10px 25px rgba(0,0,0,0.2)");
+    });
 
   // Header with lightbulb icon
   card
@@ -1358,7 +1375,7 @@ function createLightingViz(containerId, hours) {
   // Animate the hours counter
   hoursDisplay
     .transition()
-    .duration(2000)
+    .duration(3000)
     .tween("text", function () {
       const i = d3.interpolateNumber(0, hours);
       return function (t) {
@@ -1583,19 +1600,26 @@ function createTreesViz(containerId, currentYearEmissions) {
     });
   }
 
-  // Animate ALL trees as colorful dots growing from the ground
-  treePositions.forEach((pos, i) => {
-    const dot = svg
-      .append("circle")
-      .attr("cx", pos.x)
-      .attr("cy", groundY) // Start from ground
-      .attr("r", 0)
-      .attr("fill", pos.color)
-      .attr("stroke", "rgba(255,255,255,0.4)")
-      .attr("stroke-width", 1);
+  // Animate ALL trees as colorful dots growing from the ground - BATCHED for performance
+  let animationIndex = 0;
 
-    // Animate dot growing and rising
-    setTimeout(() => {
+  function animateNextBatch() {
+    const batchSize = 20; // Animate 20 trees per frame
+    const endIndex = Math.min(animationIndex + batchSize, treePositions.length);
+    
+    for (let i = animationIndex; i < endIndex; i++) {
+      const pos = treePositions[i];
+      
+      const dot = svg
+        .append("circle")
+        .attr("cx", pos.x)
+        .attr("cy", groundY) // Start from ground
+        .attr("r", 0)
+        .attr("fill", pos.color)
+        .attr("stroke", "rgba(255,255,255,0.4)")
+        .attr("stroke-width", 1);
+
+      // Animate dot growing and rising
       dot
         .transition()
         .duration(600)
@@ -1604,26 +1628,36 @@ function createTreesViz(containerId, currentYearEmissions) {
         .attr("cy", pos.y)
         .style("filter", "drop-shadow(0px 2px 3px rgba(0,0,0,0.3))");
 
-      // Add subtle pulse animation
-      function pulse() {
-        dot
-          .transition()
-          .duration(2000 + Math.random() * 1000)
-          .ease(d3.easeSinInOut)
-          .attr("r", pos.size * 1.15)
-          .transition()
-          .duration(2000 + Math.random() * 1000)
-          .ease(d3.easeSinInOut)
-          .attr("r", pos.size)
-          .on("end", pulse);
-      }
-      
-      // Start pulsing after initial animation
-      if (Math.random() > 0.7) { // Only some dots pulse to avoid too much movement
+      // Add subtle pulse animation (only for some dots)
+      if (Math.random() > 0.7) {
+        function pulse() {
+          dot
+            .transition()
+            .duration(2000 + Math.random() * 1000)
+            .ease(d3.easeSinInOut)
+            .attr("r", pos.size * 1.15)
+            .transition()
+            .duration(2000 + Math.random() * 1000)
+            .ease(d3.easeSinInOut)
+            .attr("r", pos.size)
+            .on("end", pulse);
+        }
+        
+        // Start pulsing after initial animation
         setTimeout(pulse, 1000);
       }
-    }, pos.delay);
-  });
+    }
+    
+    animationIndex = endIndex;
+    
+    // Continue animating next batch
+    if (animationIndex < treePositions.length) {
+      requestAnimationFrame(animateNextBatch);
+    }
+  }
+
+  // Start the batch animation
+  animateNextBatch();
 
   // Progress indicator
   const progressText = svg
