@@ -664,3 +664,146 @@ canvas {
   height: 5px;     /* change to any spacing you want */
   background: transparent;
 }
+
+
+/* key insight*/
+.insights-container {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #e3f2fd;
+  border-radius: 8px;
+  border: 1px solid #90caf9;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.15);
+  transition: all 0.3s ease;
+  color: #1565c0;
+}
+
+.insights-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.insights-header h3 {
+  margin: 0;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.insights-toggle {
+  background: none;
+  border: none;
+  color: #333;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  border-radius: 4px;
+}
+
+.insights-toggle:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.insights-toggle:focus {
+  outline: 2px solid rgba(0, 0, 0, 0.2);
+  outline-offset: 2px;
+}
+
+.arrow-icon {
+  transition: transform 0.3s ease;
+}
+
+.insights-toggle.collapsed .arrow-icon {
+  transform: rotate(-90deg);
+}
+
+.insights-content {
+  max-height: 1000px;
+  overflow: hidden;
+  transition: max-height 0.4s ease, opacity 0.3s ease;
+  opacity: 1;
+}
+
+.insights-content.collapsed {
+  max-height: 0;
+  opacity: 0;
+}
+
+.insight-item {
+  margin-bottom: 1rem;
+  cursor: pointer;
+}
+
+.insight-item:last-child {
+  margin-bottom: 0;
+}
+
+.insight-summary {
+  font-weight: 600;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 4px;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s ease;
+  color: #333;
+}
+
+.insight-summary:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.insight-summary::-webkit-details-marker {
+  display: none;
+}
+
+.region-title {
+  transition: color 0.2s ease;
+}
+
+.insight-summary:hover .region-title {
+  color: #0066cc;
+}
+
+.detail-arrow {
+  font-size: 0.8em;
+  color: #666;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.insight-summary:hover .detail-arrow {
+  color: #0066cc;
+}
+
+.insight-item[open] .detail-arrow {
+  transform: rotate(180deg);
+}
+
+.insight-detail {
+  padding: 1rem;
+  padding-top: 0.75rem;
+  color: #555;
+  line-height: 1.6;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
