@@ -786,7 +786,7 @@ function showCO2Equivalencies(total) {
         const cityName = input.property("value").trim();
         if (cityName) {
           d3.select("#city-message")
-            .text("Loading map...")
+            .text("Loading new map...")
             .style("color", "#3b82f6");
           // Clear the viz area before creating new map
           d3.select(`#viz-${eq.type}`).selectAll("*").remove();
@@ -807,26 +807,29 @@ function showCO2Equivalencies(total) {
 
       // Show initial helpful message
       d3.select("#city-message")
-        .text("💡 Enter your city to see the driving route!")
-        .style("color", "#059669")
-        .style("font-weight", "600");
+      .text("💡 Default: San Diego, CA. Enter your city to update the route!")
+      .style("color", "#059669")
+      .style("font-weight", "600");
     }
 
     // Create the viz container div
     const vizId = `viz-${eq.type}`;
     vizBox.append("div").attr("id", vizId);
 
-    // Create visualizations (except driving which waits for input)
-    setTimeout(() => {
-      if (eq.type === "lighting") {
-        createLightingViz(vizId, eq.value);
-      } else if (eq.type === "burgers") {
-        createBurgersViz(vizId, eq.value);
-      } else if (eq.type === "trees") {
-        createTreesViz(vizId, eq.value);
-      }
-      // driving viz is created when user clicks button
-    }, index * 200);
+
+// Create visualizations
+  setTimeout(() => {
+  if (eq.type === "driving") {
+    // Show default map with San Diego as starting point
+    createDrivingViz(vizId, eq.value, "San Diego, CA");
+  } else if (eq.type === "lighting") {
+    createLightingViz(vizId, eq.value);
+  } else if (eq.type === "burgers") {
+    createFoodComparison(`#${vizId}`, eq.value);
+  } else if (eq.type === "trees") {
+    createTreesViz(vizId, eq.value);
+  }
+}, index * 200);
   });
 }
 
@@ -1294,4 +1297,412 @@ function createFoodComparison(containerId, burgers) {
       .delay(i * 200 + 1500)
       .style("opacity", 1);
   });
+}
+// 2. LIGHTING VISUALIZATION - Electricity bill card
+function createLightingViz(containerId, hours) {
+  const container = d3.select(`#${containerId}`);
+  container.selectAll("*").remove();
+
+  // Calculate electricity cost (average $0.13 per kWh, 60W bulb)
+  const kWh = (hours * 60) / 1000;
+  const cost = (kWh * 0.18).toFixed(2);
+  
+  // Determine impact level
+  let impactLevel = "LOW";
+  let impactColor = "#22c55e";
+  if (hours > 100) {
+    impactLevel = "HIGH";
+    impactColor = "#ef4444";
+  } else if (hours > 50) {
+    impactLevel = "MEDIUM";
+    impactColor = "#f59e0b";
+  }
+
+  // Create electricity bill card
+  const card = container
+    .append("div")
+    .style("background", "linear-gradient(135deg, #667eea 0%, #764ba2 100%)")
+    .style("border-radius", "16px")
+    .style("padding", "30px")
+    .style("color", "white")
+    .style("box-shadow", "0 10px 25px rgba(0,0,0,0.2)")
+    .style("max-width", "450px")
+    .style("margin", "0 auto");
+
+  // Header with lightbulb icon
+  card
+    .append("div")
+    .style("text-align", "center")
+    .style("font-size", "64px")
+    .style("margin-bottom", "20px")
+    .text("💡");
+
+  // Title
+  card
+    .append("h3")
+    .style("text-align", "center")
+    .style("margin", "0 0 25px 0")
+    .style("font-size", "24px")
+    .style("font-weight", "700")
+    .text("Electricity Usage");
+
+  // Hours display with animation
+  const hoursDisplay = card
+    .append("div")
+    .style("text-align", "center")
+    .style("font-size", "48px")
+    .style("font-weight", "bold")
+    .style("margin-bottom", "10px")
+    .text("0");
+
+  // Animate the hours counter
+  hoursDisplay
+    .transition()
+    .duration(2000)
+    .tween("text", function () {
+      const i = d3.interpolateNumber(0, hours);
+      return function (t) {
+        this.textContent = Math.round(i(t)).toLocaleString();
+      };
+    });
+
+  card
+    .append("div")
+    .style("text-align", "center")
+    .style("font-size", "18px")
+    .style("opacity", "0.9")
+    .style("margin-bottom", "25px")
+    .text("Hours of Lighting");
+
+  // Divider
+  card
+    .append("hr")
+    .style("border", "none")
+    .style("border-top", "1px solid rgba(255,255,255,0.3)")
+    .style("margin", "25px 0");
+
+  // Cost section
+  card
+    .append("div")
+    .style("display", "flex")
+    .style("justify-content", "space-between")
+    .style("align-items", "center")
+    .style("margin-bottom", "15px")
+    .html(`
+      <span style="font-size: 16px; opacity: 0.9;">Equivalent Cost:</span>
+      <span style="font-size: 32px; font-weight: bold;">$${cost}</span>
+    `);
+
+  // kWh info
+  card
+    .append("div")
+    .style("text-align", "right")
+    .style("font-size", "14px")
+    .style("opacity", "0.8")
+    .style("margin-bottom", "20px")
+    .text(`(${kWh.toFixed(1)} kWh @ $0.13/kWh)`);
+
+  // Impact level badge
+  card
+    .append("div")
+    .style("text-align", "center")
+    .style("margin-top", "20px")
+    .append("span")
+    .style("display", "inline-block")
+    .style("background", impactColor)
+    .style("padding", "10px 24px")
+    .style("border-radius", "25px")
+    .style("font-weight", "bold")
+    .style("font-size", "16px")
+    .style("letter-spacing", "1px")
+    .text(`${impactLevel} IMPACT`);
+
+  // Additional info
+  card
+    .append("p")
+    .style("text-align", "center")
+    .style("margin-top", "20px")
+    .style("font-size", "13px")
+    .style("opacity", "0.8")
+    .style("line-height", "1.5")
+    .style("color", "white")
+    .text(`💡 Tip: LED bulbs use 75% less energy than traditional bulbs!`);
+}
+
+
+// 3. TREES VISUALIZATION - Animated growing forest for 2100 emissions
+function createTreesViz(containerId, currentYearEmissions) {
+  const container = d3.select(`#${containerId}`);
+  container.selectAll("*").remove();
+
+  // Calculate 2100 emissions (75 years of emissions)
+  const emissions2100 = currentYearEmissions * 75;
+  const treesNeeded = Math.ceil(emissions2100 / 22); // Each tree absorbs 22kg CO2/year
+
+  const width = 700;
+  const height = 500;
+
+  // Main container with forest background
+  const vizContainer = container
+    .append("div")
+    .style("position", "relative")
+    .style("width", `${width}px`)
+    .style("margin", "0 auto");
+
+  // Info header
+  vizContainer
+    .append("div")
+    .style("text-align", "center")
+    .style("padding", "20px")
+    .style("background", "linear-gradient(135deg, #10b981 0%, #059669 100%)")
+    .style("border-radius", "12px 12px 0 0")
+    .style("color", "white")
+    .html(`
+      <h3 style="margin: 0 0 10px 0; font-size: 24px;">🌍 Trees Needed by 2100</h3>
+      <p style="margin: 5px 0; font-size: 16px; opacity: 0.95;">
+        Your annual emissions: <strong>${currentYearEmissions} kg CO₂</strong>
+      </p>
+      <p style="margin: 5px 0; font-size: 16px; opacity: 0.95;">
+        Total by 2100 (75 years): <strong>${emissions2100.toLocaleString()} kg CO₂</strong>
+      </p>
+      <div style="margin-top: 15px; padding: 12px; background: rgba(255,255,255,0.2); border-radius: 8px; display: inline-block;">
+        <div style="font-size: 48px; font-weight: bold;" id="tree-counter">0</div>
+        <div style="font-size: 14px; opacity: 0.9;">Trees Required</div>
+      </div>
+    `);
+
+  // SVG for animated forest
+  const svg = vizContainer
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .style("background", "linear-gradient(to bottom, #87CEEB 0%, #b8dbd9 50%, #8B7355 100%)")
+    .style("display", "block")
+    .style("border-radius", "0 0 12px 12px");
+
+  const groundY = height - 100;
+
+  // Add sun
+  svg
+    .append("circle")
+    .attr("cx", width - 80)
+    .attr("cy", 60)
+    .attr("r", 40)
+    .attr("fill", "#FFD700")
+    .style("opacity", 0)
+    .transition()
+    .duration(1500)
+    .style("opacity", 0.8);
+
+  // Add clouds
+  for (let i = 0; i < 3; i++) {
+    const cloudGroup = svg.append("g");
+    const cloudX = 100 + i * 200;
+    const cloudY = 50 + Math.random() * 50;
+
+    [0, 20, 40].forEach((offset, j) => {
+      cloudGroup
+        .append("ellipse")
+        .attr("cx", cloudX + offset)
+        .attr("cy", cloudY)
+        .attr("rx", 25)
+        .attr("ry", 15)
+        .attr("fill", "white")
+        .style("opacity", 0)
+        .transition()
+        .duration(1000)
+        .delay(500 + i * 200)
+        .style("opacity", 0.7);
+    });
+  }
+
+  // Ground with grass texture
+  svg
+    .append("rect")
+    .attr("x", 0)
+    .attr("y", groundY)
+    .attr("width", width)
+    .attr("height", height - groundY)
+    .attr("fill", "#6B8E23");
+
+  // Add grass blades
+  for (let i = 0; i < 50; i++) {
+    svg
+      .append("line")
+      .attr("x1", Math.random() * width)
+      .attr("y1", groundY)
+      .attr("x2", Math.random() * width)
+      .attr("y2", groundY - 10)
+      .attr("stroke", "#556B2F")
+      .attr("stroke-width", 2)
+      .style("opacity", 0.5);
+  }
+
+  // Animate tree counter
+  d3.select("#tree-counter")
+    .transition()
+    .duration(3000)
+    .tween("text", function () {
+      const i = d3.interpolateNumber(0, treesNeeded);
+      return function (t) {
+        this.textContent = Math.round(i(t)).toLocaleString();
+      };
+    });
+
+  // Create color palette for tree dots
+  const treeColors = [
+    "#228B22", // Forest Green
+    "#2E8B57", // Sea Green
+    "#3CB371", // Medium Sea Green
+    "#32CD32", // Lime Green
+    "#00FF00", // Lime
+    "#7CFC00", // Lawn Green
+    "#7FFF00", // Chartreuse
+    "#ADFF2F", // Green Yellow
+    "#9ACD32", // Yellow Green
+    "#00FA9A", // Medium Spring Green
+  ];
+
+  // Calculate ALL tree positions as colorful dots
+  const dotsPerRow = 40;
+  const dotSize = 8;
+  const dotSpacing = (width - 40) / dotsPerRow;
+  const verticalSpacing = 12;
+  
+  const treePositions = [];
+  for (let i = 0; i < treesNeeded; i++) {
+    const row = Math.floor(i / dotsPerRow);
+    const col = i % dotsPerRow;
+    
+    treePositions.push({
+      x: 20 + col * dotSpacing + Math.random() * 3, // Add slight randomness
+      y: groundY - 30 - row * verticalSpacing,
+      delay: i * 8, // Faster animation
+      size: dotSize + Math.random() * 3,
+      color: treeColors[Math.floor(Math.random() * treeColors.length)],
+    });
+  }
+
+  // Animate ALL trees as colorful dots growing from the ground
+  treePositions.forEach((pos, i) => {
+    const dot = svg
+      .append("circle")
+      .attr("cx", pos.x)
+      .attr("cy", groundY) // Start from ground
+      .attr("r", 0)
+      .attr("fill", pos.color)
+      .attr("stroke", "rgba(255,255,255,0.4)")
+      .attr("stroke-width", 1);
+
+    // Animate dot growing and rising
+    setTimeout(() => {
+      dot
+        .transition()
+        .duration(600)
+        .ease(d3.easeBackOut)
+        .attr("r", pos.size)
+        .attr("cy", pos.y)
+        .style("filter", "drop-shadow(0px 2px 3px rgba(0,0,0,0.3))");
+
+      // Add subtle pulse animation
+      function pulse() {
+        dot
+          .transition()
+          .duration(2000 + Math.random() * 1000)
+          .ease(d3.easeSinInOut)
+          .attr("r", pos.size * 1.15)
+          .transition()
+          .duration(2000 + Math.random() * 1000)
+          .ease(d3.easeSinInOut)
+          .attr("r", pos.size)
+          .on("end", pulse);
+      }
+      
+      // Start pulsing after initial animation
+      if (Math.random() > 0.7) { // Only some dots pulse to avoid too much movement
+        setTimeout(pulse, 1000);
+      }
+    }, pos.delay);
+  });
+
+  // Progress indicator
+  const progressText = svg
+    .append("text")
+    .attr("x", width / 2)
+    .attr("y", 180)
+    .attr("text-anchor", "middle")
+    .style("font-size", "18px")
+    .style("fill", "#2d5016")
+    .style("font-weight", "bold")
+    .style("opacity", 0)
+    .text("🌱 Forest Growing...");
+
+  progressText
+    .transition()
+    .delay(500)
+    .duration(1000)
+    .style("opacity", 1)
+    .transition()
+    .delay(treesNeeded * 8)
+    .duration(1000)
+    .style("opacity", 0);
+
+  // Completion message
+  setTimeout(() => {
+    svg
+      .append("text")
+      .attr("x", width / 2)
+      .attr("y", 180)
+      .attr("text-anchor", "middle")
+      .style("font-size", "20px")
+      .style("fill", "#059669")
+      .style("font-weight", "bold")
+      .style("opacity", 0)
+      .text(`✓ ${treesNeeded.toLocaleString()} Trees Complete!`)
+      .transition()
+      .duration(1000)
+      .style("opacity", 1);
+  }, treesNeeded * 8 + 1500);
+
+  // Calculate real-world comparison
+  function getTreeComparison(numTrees) {
+    if (numTrees < 50) {
+      return `That's about <strong>half a neighborhood block</strong> of trees! 🏘️`;
+    } else if (numTrees < 150) {
+      return `That's roughly <strong>1 football field</strong> covered in trees! ⚽`;
+    } else if (numTrees < 300) {
+      return `That's about <strong>2-3 football fields</strong> of forest! 🏟️`;
+    } else if (numTrees < 500) {
+      return `That's equivalent to <strong>a small city park</strong>! 🏞️`;
+    } else if (numTrees < 1000) {
+      return `That's like <strong>5+ football fields</strong> or a large urban park! 🌳`;
+    } else if (numTrees < 2500) {
+      return `That's <strong>10+ acres</strong> of forest - bigger than 7 football fields! 🌲`;
+    } else if (numTrees < 5000) {
+      return `That's <strong>a small forest</strong> of 20+ acres! 🏔️`;
+    } else if (numTrees < 10000) {
+      return `That's <strong>a medium-sized forest</strong> of 40+ acres - like Central Park! 🌲`;
+    } else {
+      return `That's <strong>an entire forest reserve</strong> of ${Math.round(numTrees / 250)} acres! 🏔️`;
+    }
+  }
+
+  // Bottom info panel
+  vizContainer
+    .append("div")
+    .style("margin-top", "20px")
+    .style("padding", "20px")
+    .style("background", "#f3f4f6")
+    .style("border-radius", "8px")
+    .style("text-align", "center")
+    .html(`
+      <p style="margin: 0 0 15px 0; font-size: 16px; color: #059669; line-height: 1.6; font-weight: 600;">
+        📏 ${getTreeComparison(treesNeeded)}
+      </p>
+      <p style="margin: 0; font-size: 14px; color: #374151; line-height: 1.6;">
+        🌲 Each mature tree absorbs approximately <strong>22 kg of CO₂ per year</strong>.<br>
+        🌍 It would take <strong>${treesNeeded.toLocaleString()} trees</strong> growing for one year to offset your emissions by 2100.<br>
+        💚 Or plant <strong>${Math.ceil(treesNeeded / 75).toLocaleString()} trees now</strong> and let them grow for 75 years!
+      </p>
+    `);
 }
