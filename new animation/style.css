@@ -1,0 +1,114 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* 整体页面：浅色背景 + 类似气候报告那种阅读感的字体 */
+body {
+  font-family: "Georgia", "Times New Roman", serif;
+  color: #111827;
+  background: #f3f4f6;
+  overflow-x: hidden;
+}
+
+.page {
+  min-height: 100vh;
+}
+
+/* 顶部可视化区域：稍微矮一点，让文字更容易出现在首屏 */
+#viz-container {
+  position: sticky;
+  top: 0;
+  height: 60vh; /* 原来是 70vh，调低一点给文字更多空间 */
+  background: linear-gradient(#1e293b, #020617);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.4);
+  z-index: 1;
+}
+
+#viz {
+  width: 100%;
+  height: 100%;
+}
+
+/* 文字故事区域：居中但整体偏上，类似长文排版 */
+#story {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 6rem;
+  position: relative;
+  z-index: 2;
+}
+
+/* 每个 section 改为从上往下排，不再垂直居中，
+   这样第一句一进页面就能看到，而且位置更靠上 */
+section {
+  min-height: 70vh;              /* 比原来的 80vh 略小一点 */
+  padding: 3.5rem 0 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;   /* 关键：不再垂直居中 */
+  align-items: flex-start;
+  gap: 1.25rem;
+  color: #111827;
+}
+
+/* 主标题：类似气候报道页面的大标题风格 */
+h1 {
+  font-size: clamp(2.2rem, 3vw, 2.8rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  color: #111827;
+}
+
+/* 小标题：稍微小一点，但依然有层级感 */
+h2 {
+  font-size: clamp(1.4rem, 2.2vw, 1.7rem);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+  color: #111827;
+}
+
+/* 正文：偏长文阅读风格 */
+p {
+  line-height: 1.7;
+  font-size: 1rem;
+  max-width: 38rem;
+  color: #111827;
+}
+
+/* 滚动提示：做成类似小注释的感觉，略微灰一点 */
+.scroll-hint {
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+/* 小标签样式（如果后面要用） */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #4b5563;
+  background: rgba(248, 250, 252, 0.9);
+}
+
+/* 大屏幕上，把文字稍微往上抬一点，像文章开头那种布局 */
+@media (min-width: 900px) {
+  #story {
+    margin-top: -6vh; /* 让第一句更靠近可视区域上方 */
+  }
+}
+
+/* 只让第一页标题上移，不影响后面章节 */
+section:first-of-type {
+  margin-top: -70vh;  /* 调高或调低就在这里调 */
+}
