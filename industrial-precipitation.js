@@ -63,7 +63,7 @@ function createIndustrialPrecipitationChart() {
   function loadRegionCSV(file) {
     return d3.csv(file, (d) => ({
       year: +d.year,
-      pr: parseFloat(d.pr)* 86400,
+      pr: parseFloat(d.pr) * 86400,
     }));
   }
 
@@ -103,10 +103,7 @@ function createIndustrialPrecipitationChart() {
 
     // Axes
     const xAxis = d3.axisBottom(xScale).tickFormat(d3.format("d")).ticks(8);
-    const yAxis = d3
-      .axisLeft(yScale)
-      .ticks(6)
-      .tickFormat(d3.format(".1f"));
+    const yAxis = d3.axisLeft(yScale).ticks(6).tickFormat(d3.format(".1f"));
 
     svg
       .append("g")
@@ -160,14 +157,14 @@ function createIndustrialPrecipitationChart() {
         start: 1930,
         end: 1940,
         color: "rgba(210, 180, 140, 0.3)", // light brown
-        label: "Dust Bowl Drought"
+        label: "Dust Bowl Drought",
       },
       {
         start: 1950,
         end: 1957,
         color: "rgba(128, 128, 128, 0.3)", // grey
-        label: "1950s Drought"
-      }
+        label: "1950s Drought",
+      },
     ];
 
     const droughtGroup = svg.append("g").attr("class", "drought-regions");
@@ -473,4 +470,408 @@ function createIndustrialPrecipitationChart() {
 // Initialize on DOM ready
 document.addEventListener("DOMContentLoaded", () => {
   createIndustrialPrecipitationChart();
+  createImpactComparisonChart();
 });
+
+// -------------------------------------------------------------------
+// Impact-focused comparison chart (High vs Low scenarios)
+// -------------------------------------------------------------------
+
+let impactChartInitialized = false;
+
+function createImpactComparisonChart() {
+  if (impactChartInitialized) return;
+  const container = d3.select("#impact-comparison-chart");
+  if (container.empty()) return;
+  impactChartInitialized = true;
+  container.selectAll("*").remove();
+
+  // Scenario assumptions (illustrative)
+  // Metric-specific factors to avoid a uniform % gap
+  const scenarioFactors = {
+    farms: { low: 1.12, high: 1.55 },
+    people: { low: 1.1, high: 1.5 },
+    damage: { low: 1.15, high: 1.7 },
+  };
+
+  // Exposure baselines per region (illustrative, consistent with other slides)
+  const regionExposure = {
+    northeast: { farms: 32000, damage: 12_000_000_000, people: 1_300_000 },
+    midwest: { farms: 45000, damage: 10_000_000_000, people: 1_000_000 },
+    south: { farms: 38000, damage: 11_000_000_000, people: 1_400_000 },
+    northwest: { farms: 16000, damage: 6_000_000_000, people: 450_000 },
+    west: { farms: 16000, damage: 6_000_000_000, people: 450_000 },
+  };
+
+  const regions = [
+    { key: "northeast", label: "Northeast" },
+    { key: "midwest", label: "Midwest" },
+    { key: "south", label: "South" },
+    { key: "west", label: "West" },
+  ];
+
+  const metrics = [
+    { key: "farms", label: "Farms flooded", type: "count" },
+    { key: "people", label: "People exposed", type: "count" },
+    { key: "damage", label: "Economic losses", type: "currency" },
+  ];
+
+  const colors = { low: "#4caf50", high: "#e53935" }; // match scrollytelling green, red for high
+
+  const formatNumber = (num) =>
+    num == null ? "—" : Math.round(num).toLocaleString("en-US");
+  const formatCurrency = (num) => {
+    if (num == null) return "—";
+    if (num >= 1_000_000_000) return `$${(num / 1_000_000_000).toFixed(1)}B`;
+    if (num >= 1_000_000) return `$${(num / 1_000_000).toFixed(1)}M`;
+    return `$${num.toLocaleString("en-US")}`;
+  };
+  const formatValue = (val, type) =>
+    type === "currency" ? formatCurrency(val) : formatNumber(val);
+
+  // Precompute impacts
+  function computeImpacts(metricKey) {
+    const factors = scenarioFactors[metricKey] || scenarioFactors.farms;
+    return regions.map((r) => {
+      const base = regionExposure[r.key][metricKey];
+      const lowVal = base * factors.low;
+      const highVal = base * factors.high;
+      return {
+        ...r,
+        low: { [metricKey]: lowVal },
+        high: { [metricKey]: highVal },
+      };
+    });
+  }
+
+  const state = { metric: "farms", data: computeImpacts("farms") };
+
+  // Layout
+  const width = 920;
+  const height = 600;
+  const margin = { top: 80, right: 320, bottom: 110, left: 190 };
+  const chartWidth = width - margin.left - margin.right;
+  const chartHeight = height - margin.top - margin.bottom;
+
+  // Controls
+  const controls = container
+    .append("div")
+    .style("display", "flex")
+    .style("gap", "0.5rem")
+    .style("align-items", "center")
+    .style("margin-bottom", "0.5rem");
+
+  controls
+    .append("span")
+    .text("Metric:")
+    .style("font-weight", "600")
+    .style("color", "#34495e");
+
+  metrics.forEach((m) => {
+    controls
+      .append("button")
+      .text(m.label)
+      .style("padding", "0.35rem 0.75rem")
+      .style("border", "1px solid #d0d7de")
+      .style("border-radius", "6px")
+      .style("background", m.key === state.metric ? "#e8f0fe" : "#fff")
+      .style("color", "#1f2937")
+      .style("cursor", "pointer")
+      .style("font-size", "13px")
+      .on("click", () => {
+        state.metric = m.key;
+        controls.selectAll("button").style("background", (d, i, nodes) => {
+          const key = metrics[i].key;
+          return key === state.metric ? "#e8f0fe" : "#fff";
+        });
+        update();
+      });
+  });
+
+  container
+    .append("div")
+    .style("font-size", "12px")
+    .style("color", "#5b6770")
+    .style("margin-bottom", "0.75rem")
+    .text("High vs low emissions. Gap = avoidable impact.");
+
+  const callout = container
+    .append("div")
+    .style("background", "#f2f8f2")
+    .style("border", "1px solid #dfe7df")
+    .style("border-radius", "10px")
+    .style("padding", "0.6rem 0.9rem")
+    .style("font-size", "13px")
+    .style("color", "#1f2937")
+    .style("margin-bottom", "0.75rem")
+    .style("font-weight", "600");
+
+  const svg = container
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+  const g = svg
+    .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  // Title & subtitle
+  svg
+    .append("text")
+    .attr("x", width / 2)
+    .attr("y", 32)
+    .attr("text-anchor", "middle")
+    .attr("font-size", "18px")
+    .attr("font-weight", "600")
+    .attr("font-family", "Georgia, serif")
+    .attr("fill", "#2c3e50")
+    .text("High vs Low Emissions: Who Bears the Impact?");
+
+  svg
+    .append("text")
+    .attr("x", width / 2)
+    .attr("y", 52)
+    .attr("text-anchor", "middle")
+    .attr("font-size", "13px")
+    .attr("fill", "#5b6770")
+    .text(
+      "Illustrative impacts from higher summer precipitation under two futures"
+    );
+
+  const xScale = d3.scaleLinear().range([0, chartWidth]);
+  const yScale = d3
+    .scaleBand()
+    .padding(0.3)
+    .domain(regions.map((r) => r.key))
+    .range([0, chartHeight]);
+
+  const ySub = d3
+    .scaleBand()
+    .domain(["low", "high"])
+    .range([0, yScale.bandwidth()])
+    .padding(0.25);
+
+  const xAxis = g
+    .append("g")
+    .attr("transform", `translate(0,${chartHeight})`)
+    .attr("class", "impact-x-axis");
+
+  const yAxis = g.append("g").attr("class", "impact-y-axis");
+  const grid = g.append("g").attr("class", "impact-grid");
+
+  const legend = svg
+    .append("g")
+    .attr("transform", `translate(${width - 260},${margin.top})`);
+  legend
+    .append("text")
+    .attr("x", 0)
+    .attr("y", -16)
+    .attr("fill", "#374151")
+    .attr("font-size", "12px")
+    .attr("font-weight", "700")
+    .text("Scenario");
+  const legendItems = [
+    { key: "low", label: "Low emissions", color: colors.low },
+    { key: "high", label: "High emissions", color: colors.high },
+  ];
+  legendItems.forEach((item, i) => {
+    const row = legend.append("g").attr("transform", `translate(0, ${i * 18})`);
+    row
+      .append("rect")
+      .attr("x", 0)
+      .attr("y", -10)
+      .attr("width", 14)
+      .attr("height", 14)
+      .attr("fill", item.color)
+      .attr("rx", 3);
+    row
+      .append("text")
+      .attr("x", 20)
+      .attr("y", 0)
+      .attr("fill", "#333")
+      .attr("font-size", "12px")
+      .text(item.label);
+  });
+
+  const deltaGroup = g.append("g").attr("class", "delta-labels");
+  const summaryDiv = container
+    .append("div")
+    .attr("class", "impact-summary")
+    .style("margin-top", "0.35rem");
+  const xAxisLabel = svg
+    .append("text")
+    .attr("class", "impact-axis-label")
+    .attr("text-anchor", "middle")
+    .attr("x", margin.left + chartWidth / 2)
+    .attr("y", height - 20)
+    .attr("fill", "#4b5563")
+    .attr("font-size", "12px")
+    .text("Exposure under illustrative summer precipitation futures");
+
+  function update() {
+    const metricDef = metrics.find((m) => m.key === state.metric);
+    // refresh data with metric-specific factors
+    state.data = computeImpacts(metricDef.key);
+    const values = state.data.flatMap((d) => [
+      d.low[metricDef.key],
+      d.high[metricDef.key],
+    ]);
+    const totalLow = d3.sum(state.data, (d) => d.low[metricDef.key]);
+    const totalHigh = d3.sum(state.data, (d) => d.high[metricDef.key]);
+    const totalGap = totalHigh - totalLow;
+    const maxVal = d3.max([...values, totalGap]) * 1.2;
+    xScale.domain([0, maxVal]);
+
+    // Gridlines
+    grid
+      .call(d3.axisBottom(xScale).ticks(6).tickSize(chartHeight).tickFormat(""))
+      .attr("transform", `translate(0,0)`);
+    grid.selectAll("line").attr("stroke", "#e5e7eb");
+    grid.selectAll("path").remove();
+
+    // Axes
+    xAxis.call(
+      d3
+        .axisBottom(xScale)
+        .ticks(6)
+        .tickFormat((d) => formatValue(d, metricDef.type))
+    );
+    xAxis.selectAll("text").attr("font-size", "11px").attr("fill", "#4b5563");
+    yAxis.call(
+      d3
+        .axisLeft(yScale)
+        .tickFormat((d) => regions.find((r) => r.key === d).label)
+    );
+    yAxis
+      .selectAll("text")
+      .attr("font-size", "12px")
+      .attr("fill", "#111827")
+      .attr("font-weight", "600");
+
+    // Per-region delta labels placed to the right of bars (reduced clutter)
+    const deltas = deltaGroup.selectAll("text").data(state.data, (d) => d.key);
+    deltas
+      .enter()
+      .append("text")
+      .attr("fill", "#1d4ed8")
+      .attr("font-size", "11px")
+      .attr("font-weight", "600")
+      .attr("fill", "#1e3a8a")
+      .attr("text-anchor", "start")
+      .merge(deltas)
+      .transition()
+      .duration(500)
+      .attr("x", chartWidth + 40)
+      .attr("y", (d) => yScale(d.key) + ySub("high") + 4)
+      .text((d) => {
+        const diff = d.high[metricDef.key] - d.low[metricDef.key];
+        const pct =
+          d.low[metricDef.key] > 0
+            ? ((diff / d.low[metricDef.key]) * 100).toFixed(0)
+            : "—";
+        return `+${formatValue(diff, metricDef.type)} (+${pct}%)`;
+      });
+    deltas.exit().remove();
+
+    // Bars
+    const regionGroups = g
+      .selectAll(".region-group")
+      .data(state.data, (d) => d.key);
+
+    const regionEnter = regionGroups
+      .enter()
+      .append("g")
+      .attr("class", "region-group")
+      .attr("transform", (d) => `translate(0, ${yScale(d.key)})`);
+
+    regionEnter
+      .selectAll(".scenario-bar")
+      .data((d) => ["low", "high"].map((s) => ({ region: d, scenario: s })))
+      .enter()
+      .append("rect")
+      .attr("class", "scenario-bar")
+      .attr("fill", (d) => colors[d.scenario])
+      .attr("rx", 4)
+      .attr("ry", 4)
+      .attr("y", (d) => ySub(d.scenario))
+      .attr("height", ySub.bandwidth());
+
+    const allGroups = regionEnter.merge(regionGroups);
+    allGroups.attr("transform", (d) => `translate(0, ${yScale(d.key)})`);
+
+    allGroups
+      .selectAll(".scenario-bar")
+      .data((d) => ["low", "high"].map((s) => ({ region: d, scenario: s })))
+      .join(
+        (enter) =>
+          enter
+            .append("rect")
+            .attr("class", "scenario-bar")
+            .attr("fill", (d) => colors[d.scenario])
+            .attr("rx", 4)
+            .attr("ry", 4)
+            .attr("y", (d) => ySub(d.scenario))
+            .attr("height", ySub.bandwidth())
+            .attr("width", 0),
+        (updateSel) => updateSel,
+        (exit) => exit.remove()
+      )
+      .transition()
+      .duration(500)
+      .attr("width", (d) => xScale(d.region[d.scenario][metricDef.key]));
+
+    // Remove inline gap labels to reduce overlap (deltas handled at right)
+
+    // Value labels on bars
+    const valueLabels = g.selectAll(".value-label").data(
+      state.data.flatMap((d) => [
+        { region: d, scenario: "low" },
+        { region: d, scenario: "high" },
+      ]),
+      (d) => d.region.key + d.scenario
+    );
+
+    valueLabels
+      .enter()
+      .append("text")
+      .attr("class", "value-label")
+      .attr("font-size", "11px")
+      .attr("font-weight", "600")
+      .merge(valueLabels)
+      .transition()
+      .duration(500)
+      .attr("x", (d) => xScale(d.region[d.scenario][metricDef.key]) + 6)
+      .attr(
+        "y",
+        (d) =>
+          yScale(d.region.key) + ySub(d.scenario) + ySub.bandwidth() / 2 + 3
+      )
+      .attr("fill", "#1f2937")
+      .attr("text-anchor", "start")
+      .text((d) =>
+        formatValue(d.region[d.scenario][metricDef.key], metricDef.type)
+      );
+
+    valueLabels.exit().remove();
+
+    // Callout aggregate + summary (moved outside SVG to avoid overlap)
+    const avoidedLabel = `Avoided: +${formatValue(
+      totalGap,
+      metricDef.type
+    )} (${((totalGap / totalLow) * 100).toFixed(0)}% vs low)`;
+    summaryDiv.html(
+      `<div class="summary-title">Avoided impact (High – Low)</div><div class="summary-value">${avoidedLabel}</div>`
+    );
+
+    const pctAvoided =
+      totalLow > 0 ? ((totalGap / totalLow) * 100).toFixed(0) : "—";
+    callout.text(
+      `Low emissions avoid ${formatValue(
+        totalGap,
+        metricDef.type
+      )} (${pctAvoided}% reduction) across all regions for this metric.`
+    );
+  }
+
+  update();
+}
