@@ -177,10 +177,10 @@
       </div>
 
       <!-- Slide 4: Regional Precipitation Chart -->
-      <div class="slide scrollable">
+      <div class="slide scrollable" id="regional-slide">
         <div
           class="slide-content regional-chart-slide"
-          style="grid-template-columns: 1fr; max-width: 900px; gap: 1.5rem"
+          style="grid-template-columns: 1fr; gap: 1.5rem"
         >
           <div class="slide-text regional-chart-text">
             <h2>Regional Precipitation: Past and Future</h2>
@@ -245,157 +245,218 @@
               </button>
             </div>
 
-            <!-- Chart SVG -->
-            <div class="chart-svg-wrapper">
-              <svg id="chartSvg"></svg>
-            </div>
+            <div class="regional-main">
+              <!-- Impact comparison panel -->
+              <div class="impact-column">
+                <div class="region-impact-panel">
+                  <div class="impact-header">
+                    <div class="impact-title">What this means</div>
+                    <div class="impact-note">
+                      Illustrative impacts under each pathway
+                    </div>
+                  </div>
+                  <div class="impact-grid">
+                    <div class="impact-card">
+                      <div class="impact-label">Farms impacted</div>
+                      <div class="impact-values">
+                        <div class="impact-value low">
+                          <span class="impact-chip">Low</span>
+                          <span id="impact-farms-low">—</span>
+                        </div>
+                        <div class="impact-value high">
+                          <span class="impact-chip">High</span>
+                          <span id="impact-farms-high">—</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="impact-card">
+                      <div class="impact-label">Economic loss</div>
+                      <div class="impact-values">
+                        <div class="impact-value low">
+                          <span class="impact-chip">Low</span>
+                          <span id="impact-damage-low">—</span>
+                        </div>
+                        <div class="impact-value high">
+                          <span class="impact-chip">High</span>
+                          <span id="impact-damage-high">—</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="impact-card">
+                      <div class="impact-label">People at risk</div>
+                      <div class="impact-values">
+                        <div class="impact-value low">
+                          <span class="impact-chip">Low</span>
+                          <span id="impact-people-low">—</span>
+                        </div>
+                        <div class="impact-value high">
+                          <span class="impact-chip">High</span>
+                          <span id="impact-people-high">—</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-            <!-- Legend -->
-            <div
-              style="
-                display: flex;
-                justify-content: center;
-                gap: 1.5rem;
-                margin-top: 0;
-                margin-bottom: 0.5rem;
-                flex-wrap: wrap;
-              "
-            >
-              <div
-                class="legend-item active"
-                data-scenario="historical"
-                style="
-                  display: flex;
-                  align-items: center;
-                  gap: 0.5rem;
-                  cursor: pointer;
-                "
-              >
+              <!-- Chart + controls column -->
+              <div class="chart-column">
+                <div class="chart-svg-wrapper">
+                  <svg id="chartSvg"></svg>
+                </div>
+
                 <div
-                  class="legend-box selected"
-                  style="width: 20px; height: 3px; background: #888"
-                ></div>
-                <span style="font-size: 14px">Historical</span>
-              </div>
-              <div
-                class="legend-item active"
-                data-scenario="low"
-                style="
-                  display: flex;
-                  align-items: center;
-                  gap: 0.5rem;
-                  cursor: pointer;
-                "
-              >
-                <div
-                  class="legend-box selected"
-                  style="width: 20px; height: 3px; background: #1e88e5"
-                ></div>
-                <span style="font-size: 14px">Low Emissions (SSP1-2.6)</span>
-              </div>
-              <div
-                class="legend-item active"
-                data-scenario="high"
-                style="
-                  display: flex;
-                  align-items: center;
-                  gap: 0.5rem;
-                  cursor: pointer;
-                "
-              >
-                <div
-                  class="legend-box selected"
-                  style="width: 20px; height: 3px; background: #e53935"
-                ></div>
-                <span style="font-size: 14px">High Emissions (SSP5-8.5)</span>
-              </div>
-              <div
-                class="legend-item"
-                id="regressionToggle"
-                style="
-                  display: flex;
-                  align-items: center;
-                  gap: 0.5rem;
-                  cursor: pointer;
-                "
-              >
-                <div
+                  class="legend-row"
                   style="
-                    width: 20px;
-                    height: 2px;
-                    background: #999;
-                    border-top: 1px dashed #999;
+                    display: flex;
+                    justify-content: center;
+                    gap: 1.5rem;
+                    margin-top: 0;
+                    margin-bottom: 0.5rem;
+                    flex-wrap: wrap;
                   "
-                ></div>
-                <span style="font-size: 14px">Trend Lines</span>
-              </div>
-            </div>
+                >
+                  <div
+                    class="legend-item active"
+                    data-scenario="historical"
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 0.5rem;
+                      cursor: pointer;
+                    "
+                  >
+                    <div
+                      class="legend-box selected"
+                      style="width: 20px; height: 3px; background: #888"
+                    ></div>
+                    <span style="font-size: 14px">Historical</span>
+                  </div>
+                  <div
+                    class="legend-item active"
+                    data-scenario="low"
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 0.5rem;
+                      cursor: pointer;
+                    "
+                  >
+                    <div
+                      class="legend-box selected"
+                      style="width: 20px; height: 3px; background: #1e88e5"
+                    ></div>
+                    <span style="font-size: 14px"
+                      >Low Emissions (SSP1-2.6)</span
+                    >
+                  </div>
+                  <div
+                    class="legend-item active"
+                    data-scenario="high"
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 0.5rem;
+                      cursor: pointer;
+                    "
+                  >
+                    <div
+                      class="legend-box selected"
+                      style="width: 20px; height: 3px; background: #e53935"
+                    ></div>
+                    <span style="font-size: 14px"
+                      >High Emissions (SSP5-8.5)</span
+                    >
+                  </div>
+                  <div
+                    class="legend-item"
+                    id="regressionToggle"
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 0.5rem;
+                      cursor: pointer;
+                    "
+                  >
+                    <div
+                      style="
+                        width: 20px;
+                        height: 2px;
+                        background: #999;
+                        border-top: 1px dashed #999;
+                      "
+                    ></div>
+                    <span style="font-size: 14px">Trend Lines</span>
+                  </div>
+                </div>
 
-            <!-- Year Range Controls -->
-            <div
-              style="
-                display: flex;
-                justify-content: center;
-                gap: 0.75rem;
-                align-items: center;
-                flex-wrap: wrap;
-                margin-top: 0;
-              "
-            >
-              <label style="font-size: 14px">Year Range:</label>
-              <input
-                type="number"
-                id="yearStartInput"
-                placeholder="Start"
-                style="
-                  padding: 0.4rem;
-                  border: 1px solid #ddd;
-                  border-radius: 4px;
-                  width: 100px;
-                  font-size: 14px;
-                "
-              />
-              <span style="font-size: 14px">to</span>
-              <input
-                type="number"
-                id="yearEndInput"
-                placeholder="End"
-                style="
-                  padding: 0.4rem;
-                  border: 1px solid #ddd;
-                  border-radius: 4px;
-                  width: 100px;
-                  font-size: 14px;
-                "
-              />
-              <button
-                id="applyYearBtn"
-                style="
-                  background: #2e86ab;
-                  color: white;
-                  border: none;
-                  padding: 0.4rem 1rem;
-                  border-radius: 4px;
-                  cursor: pointer;
-                  font-size: 14px;
-                "
-              >
-                Apply
-              </button>
-              <button
-                id="resetYearBtn"
-                style="
-                  background: #999;
-                  color: white;
-                  border: none;
-                  padding: 0.4rem 1rem;
-                  border-radius: 4px;
-                  cursor: pointer;
-                  font-size: 14px;
-                "
-              >
-                Reset
-              </button>
+                <div
+                  class="year-controls"
+                  style="
+                    display: flex;
+                    justify-content: center;
+                    gap: 0.75rem;
+                    align-items: center;
+                    flex-wrap: wrap;
+                    margin-top: 0;
+                  "
+                >
+                  <label style="font-size: 14px">Year Range:</label>
+                  <input
+                    type="number"
+                    id="yearStartInput"
+                    placeholder="Start"
+                    style="
+                      padding: 0.4rem;
+                      border: 1px solid #ddd;
+                      border-radius: 4px;
+                      width: 100px;
+                      font-size: 14px;
+                    "
+                  />
+                  <span style="font-size: 14px">to</span>
+                  <input
+                    type="number"
+                    id="yearEndInput"
+                    placeholder="End"
+                    style="
+                      padding: 0.4rem;
+                      border: 1px solid #ddd;
+                      border-radius: 4px;
+                      width: 100px;
+                      font-size: 14px;
+                    "
+                  />
+                  <button
+                    id="applyYearBtn"
+                    style="
+                      background: #2e86ab;
+                      color: white;
+                      border: none;
+                      padding: 0.4rem 1rem;
+                      border-radius: 4px;
+                      cursor: pointer;
+                      font-size: 14px;
+                    "
+                  >
+                    Apply
+                  </button>
+                  <button
+                    id="resetYearBtn"
+                    style="
+                      background: #999;
+                      color: white;
+                      border: none;
+                      padding: 0.4rem 1rem;
+                      border-radius: 4px;
+                      cursor: pointer;
+                      font-size: 14px;
+                    "
+                  >
+                    Reset
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
           <div class="invisible-separator"></div>

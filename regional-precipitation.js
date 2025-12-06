@@ -56,6 +56,12 @@ const regions = ["Northeast", "Midwest", "South", "Northwest"];
 let regionData = null;
 let futureData = null;
 let regionNavListenersAttached = false; // prevent duplicate nav listeners
+const regionExposure = {
+  northeast: { farms: 32000, damage: 12_000_000_000, people: 1_300_000 },
+  midwest: { farms: 45000, damage: 10_000_000_000, people: 1_000_000 },
+  south: { farms: 38000, damage: 11_000_000_000, people: 1_400_000 },
+  northwest: { farms: 16000, damage: 6_000_000_000, people: 450_000 },
+};
 
 // Charles: year range chosen by user (null means full range)
 let yearStart = null;
@@ -68,6 +74,20 @@ let showRegression = true;
 // Charles: smaller value -> curve follows data more closely (more wiggly)
 // Charles: larger value -> curve is smoother and less curved
 const TREND_WINDOW = 14;
+
+function getChartDimensions() {
+  const wrapper =
+    document.querySelector(".chart-column") ||
+    document.querySelector(".chart-svg-wrapper");
+  const containerWidth = wrapper ? wrapper.clientWidth : 1200;
+
+  // Keep the chart responsive to its column, with reasonable bounds
+  const width = Math.max(820, Math.min(containerWidth - 40, 1250));
+  const height = 440;
+  const margin = { top: 40, right: 120, bottom: 50, left: 100 };
+
+  return { width, height, margin };
+}
 
 function initializeRegionalChart() {
   if (regionalChartInitialized) {
@@ -99,6 +119,7 @@ function initializeRegionalChart() {
       if (regionData && futureData) {
         setYearInputLimits();
         drawChart();
+        updateImpactPanel(currentRegion);
       } else {
         svg
           .select("text")
@@ -274,6 +295,7 @@ function selectRegion(region) {
     dot.textContent = isActive ? "●" : "○";
   });
 
+  updateImpactPanel(region);
   drawChart();
 }
 
@@ -289,6 +311,88 @@ function navigateRegion(direction) {
   }
 
   selectRegion(regions[newIndex]);
+}
+
+// --- Impact panel helpers ---
+
+function meanValue(list, accessor) {
+  if (!list || !list.length) return null;
+  const sum = list.reduce((acc, d) => acc + accessor(d), 0);
+  return sum / list.length;
+}
+
+function scenarioDelta(regionKey, scenario) {
+  if (!regionData || !futureData) return 0;
+  const hist = regionData[regionKey] || [];
+  const fut = futureData[regionKey] || [];
+
+  const histMean = meanValue(hist, (d) => +d.pr * 86400);
+  const futMean =
+    scenario === "low"
+      ? meanValue(fut, (d) => +d.low_emissions_pr * 86400)
+      : meanValue(fut, (d) => +d.high_emissions_pr * 86400);
+
+  if (histMean == null || futMean == null) return 0;
+  return Math.max(futMean - histMean, 0); // mm/day increase
+}
+
+function computeImpacts(regionKey) {
+  const exposure = regionExposure[regionKey] || regionExposure.northeast;
+  const deltaLow = scenarioDelta(regionKey, "low");
+  const deltaHigh = scenarioDelta(regionKey, "high");
+
+  const scale = (delta) => Math.min(Math.max(delta / 2, 0), 2); // cap at 2x when +4 mm/day
+  const lowFactor = scale(deltaLow);
+  const highFactor = scale(deltaHigh);
+
+  return {
+    low: {
+      farms: Math.round(exposure.farms * lowFactor),
+      damage: Math.round(exposure.damage * lowFactor),
+      people: Math.round(exposure.people * lowFactor),
+    },
+    high: {
+      farms: Math.round(exposure.farms * highFactor),
+      damage: Math.round(exposure.damage * highFactor),
+      people: Math.round(exposure.people * highFactor),
+    },
+  };
+}
+
+function formatNumber(num) {
+  if (num == null) return "—";
+  return num.toLocaleString("en-US");
+}
+
+function formatCurrency(num) {
+  if (num == null) return "—";
+  if (num >= 1_000_000_000) {
+    return `$${(num / 1_000_000_000).toFixed(1)}B`;
+  }
+  if (num >= 1_000_000) {
+    return `$${(num / 1_000_000).toFixed(1)}M`;
+  }
+  return `$${formatNumber(num)}`;
+}
+
+function updateImpactPanel(region) {
+  if (!regionData || !futureData) return;
+  const regionKey = region.toLowerCase();
+  const impacts = computeImpacts(regionKey);
+
+  const farmsLowEl = document.getElementById("impact-farms-low");
+  const farmsHighEl = document.getElementById("impact-farms-high");
+  const dmgLowEl = document.getElementById("impact-damage-low");
+  const dmgHighEl = document.getElementById("impact-damage-high");
+  const pplLowEl = document.getElementById("impact-people-low");
+  const pplHighEl = document.getElementById("impact-people-high");
+
+  if (farmsLowEl) farmsLowEl.textContent = formatNumber(impacts.low.farms);
+  if (farmsHighEl) farmsHighEl.textContent = formatNumber(impacts.high.farms);
+  if (dmgLowEl) dmgLowEl.textContent = formatCurrency(impacts.low.damage);
+  if (dmgHighEl) dmgHighEl.textContent = formatCurrency(impacts.high.damage);
+  if (pplLowEl) pplLowEl.textContent = formatNumber(impacts.low.people);
+  if (pplHighEl) pplHighEl.textContent = formatNumber(impacts.high.people);
 }
 
 // Charles: build a smoothed trend curve using moving average
@@ -330,9 +434,7 @@ function drawChart() {
     return;
   }
 
-  const width = 900;
-  const height = 400;
-  const margin = { top: 40, right: 100, bottom: 40, left: 90 };
+  const { width, height, margin } = getChartDimensions();
 
   d3.select("#chartSvg").selectAll("*").remove();
 
