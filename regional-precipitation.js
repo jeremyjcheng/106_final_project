@@ -175,6 +175,39 @@ function initializeLegendState() {
   updateLegendVisualState();
 }
 
+function setScenarioHighlight(scenario) {
+  const lineSelectorMap = {
+    historical: ".historical-line",
+    low: ".low-emission-line",
+    high: ".high-emission-line",
+  };
+
+  const targetSelector = lineSelectorMap[scenario];
+  if (!targetSelector) return;
+
+  const dimOpacity = 0.2;
+
+  d3.selectAll(".scenario-line").attr("opacity", function () {
+    const base = +d3.select(this).attr("data-base-opacity") || 0.7;
+    return dimOpacity;
+  });
+
+  d3.selectAll(targetSelector).attr("opacity", function () {
+    const base = +d3.select(this).attr("data-base-opacity") || 0.7;
+    return base;
+  });
+
+  d3.selectAll(".endpoint-label").attr("opacity", dimOpacity);
+  d3.selectAll(`.endpoint-label-${scenario}`).attr("opacity", 1);
+}
+
+function resetScenarioHighlight() {
+  d3.selectAll(".scenario-line").attr("opacity", function () {
+    return +d3.select(this).attr("data-base-opacity") || 0.7;
+  });
+  d3.selectAll(".endpoint-label").attr("opacity", 1);
+}
+
 // Update legend visual state based on activeScenarios array
 function updateLegendVisualState() {
   document.querySelectorAll(".legend-item").forEach((item) => {
@@ -211,6 +244,28 @@ function handleLegendClick(event) {
   drawChart();
 }
 
+function handleLegendHover(event) {
+  const legendItem = event.target.closest(".legend-item");
+  if (!legendItem) {
+    if (event.type === "mouseout") {
+      resetScenarioHighlight();
+    }
+    return;
+  }
+
+  const scenario = legendItem.dataset.scenario;
+  if (!scenario) {
+    if (event.type === "mouseout") resetScenarioHighlight();
+    return;
+  }
+
+  if (event.type === "mouseover") {
+    setScenarioHighlight(scenario);
+  } else if (event.type === "mouseout") {
+    resetScenarioHighlight();
+  }
+}
+
 // Set up button, legend, year window and regression toggle interactions
 function setupEventListeners() {
   if (regionNavListenersAttached) return;
@@ -237,6 +292,12 @@ function setupEventListeners() {
   // Remove any existing listeners first to avoid duplicates
   document.removeEventListener("click", handleLegendClick);
   document.addEventListener("click", handleLegendClick);
+
+  // Legend hover highlight to focus a single line
+  document.removeEventListener("mouseover", handleLegendHover);
+  document.removeEventListener("mouseout", handleLegendHover);
+  document.addEventListener("mouseover", handleLegendHover);
+  document.addEventListener("mouseout", handleLegendHover);
 
   const yearStartInput = document.getElementById("yearStartInput");
   const yearEndInput = document.getElementById("yearEndInput");
@@ -525,10 +586,18 @@ function drawChart() {
     .domain([domainStart, domainEnd])
     .range([margin.left, width - margin.right]);
 
+  const tagType = (data, type) => data.map((d) => ({ ...d, type }));
+
   // Bin data first, then calculate y-scale domain from binned data
-  const binnedHistorical = binDataByDecade(filteredHistorical);
-  let binnedLow = binDataByDecade(lowWithConnection);
-  let binnedHigh = binDataByDecade(highWithConnection);
+  const binnedHistorical = tagType(
+    binDataByDecade(filteredHistorical),
+    "historical"
+  );
+  let binnedLow = tagType(binDataByDecade(lowWithConnection), "low-emission");
+  let binnedHigh = tagType(
+    binDataByDecade(highWithConnection),
+    "high-emission"
+  );
 
   // Ensure continuity: make future lines start at the same point as historical data ends
   if (binnedHistorical.length > 0 && historicalInsideDomain) {
@@ -585,13 +654,26 @@ function drawChart() {
     (d) => d.value
   );
 
+  const yMin = d3.min(allValues);
+  const yMax = d3.max(allValues);
+  const yPad = (yMax - yMin || 0.05) * 0.06;
+
   const yScale = d3
     .scaleLinear()
-    .domain([d3.min(allValues), d3.max(allValues)])
+    .domain([yMin - yPad, yMax + yPad])
     .range([height - margin.bottom, margin.top]);
 
-  const xAxis = d3.axisBottom(xScale).tickFormat(d3.format("d"));
-  const yAxis = d3.axisLeft(yScale).tickFormat(d3.format(".2f"));
+  const xTickCount = Math.max(
+    4,
+    Math.min(10, Math.round((domainEnd - domainStart) / 25))
+  );
+
+  const xAxis = d3
+    .axisBottom(xScale)
+    .tickFormat(d3.format("d"))
+    .ticks(xTickCount);
+
+  const yAxis = d3.axisLeft(yScale).tickFormat(d3.format(".2f")).ticks(6);
 
   svg
     .append("g")
@@ -698,6 +780,12 @@ function drawChart() {
       .text("Future");
   }
 
+  const scenarioLabelMap = {
+    historical: "Historical",
+    "low-emission": "Low emissions (SSP1-2.6)",
+    "high-emission": "High emissions (SSP5-8.5)",
+  };
+
   const line = d3
     .line()
     .x((d) => xScale(d.year))
@@ -723,10 +811,12 @@ function drawChart() {
     const tooltipX = svgRect.left - slideRect.left + xPos + 10;
     const tooltipY = svgRect.top - slideRect.top + yPos - 40;
 
+    const scenarioLabel = scenarioLabelMap[d.type] || "Value";
+
     // Show bin range if this is binned data
-    let tooltipText = `Year: ${d.year}`;
+    let tooltipText = `<strong>${scenarioLabel}</strong> — ${currentRegion}<br>Year: ${d.year}`;
     if (d.binStart !== undefined && d.binEnd !== undefined) {
-      tooltipText = `Years: ${d.binStart}-${d.binEnd}<br>Center: ${d.year}`;
+      tooltipText = `<strong>${scenarioLabel}</strong> — ${currentRegion}<br>Years: ${d.binStart}-${d.binEnd}<br>Center: ${d.year}`;
     }
     tooltipText += `<br>Precipitation: ${d.value.toFixed(2)} mm/day`;
     if (d.count !== undefined) {
@@ -865,6 +955,59 @@ function drawChart() {
     return binnedData;
   }
 
+  function addEndpointLabel(
+    data,
+    className,
+    color,
+    text,
+    defaultYOffset = -10
+  ) {
+    if (!data || data.length === 0) return;
+    const n = data.length;
+    const last = data[n - 1];
+    const prev = n > 1 ? data[n - 2] : last;
+
+    // Offset label away from the line based on local slope so it does not sit on top of the line
+    const slope = n > 1 ? last.value - prev.value : 0;
+    const dynamicYOffset =
+      slope >= 0 ? defaultYOffset - 6 : defaultYOffset + 10;
+
+    const rawX = xScale(last.year);
+    const rawY = yScale(last.value) + dynamicYOffset;
+
+    // Keep labels inside plot area
+    const xPadding = 8;
+    const yPadding = 6;
+    const maxX = width - margin.right - xPadding;
+    const minX = margin.left + xPadding;
+    const maxY = height - margin.bottom - yPadding;
+    const minY = margin.top + yPadding;
+
+    const shouldFlipLeft = rawX > maxX;
+    const labelX = Math.min(Math.max(rawX, minX), maxX);
+    const labelY = Math.min(Math.max(rawY, minY), maxY);
+
+    const xOffset = shouldFlipLeft ? -10 : 10;
+    const anchor = shouldFlipLeft ? "end" : "start";
+
+    svg
+      .append("text")
+      .attr("class", `endpoint-label ${className}`)
+      .attr("x", labelX + xOffset)
+      .attr("y", labelY)
+      .attr("text-anchor", anchor)
+      .attr("fill", color)
+      .attr("font-size", "12px")
+      .attr("font-weight", "600")
+      .attr("data-base-opacity", 1)
+      .style("paint-order", "stroke fill")
+      .style("stroke", "#fff")
+      .style("stroke-width", "4px")
+      .style("stroke-linejoin", "round")
+      .style("pointer-events", "none")
+      .text(`${text}: ${last.value.toFixed(2)}`);
+  }
+
   // Historical line + invisible circles for tooltip
   if (activeScenarios.includes("historical")) {
     svg
@@ -875,8 +1018,17 @@ function drawChart() {
       .attr("stroke-width", 2)
       .attr("d", line)
       .attr("opacity", 0.7)
-      .attr("class", "historical-line")
+      .attr("data-base-opacity", 0.7)
+      .attr("class", "historical-line scenario-line")
       .style("pointer-events", "none");
+
+    addEndpointLabel(
+      binnedHistorical,
+      "endpoint-label-historical",
+      "#555",
+      "Historical",
+      -10
+    );
   }
 
   // Low emission (SSP 126)
@@ -889,8 +1041,11 @@ function drawChart() {
       .attr("stroke-width", 2)
       .attr("d", line)
       .attr("opacity", 0.7)
-      .attr("class", "low-emission-line")
+      .attr("data-base-opacity", 0.7)
+      .attr("class", "low-emission-line scenario-line")
       .style("pointer-events", "none");
+
+    addEndpointLabel(binnedLow, "endpoint-label-low", "#1e88e5", "Low", -14);
   }
 
   // High emission (SSP 585)
@@ -903,9 +1058,15 @@ function drawChart() {
       .attr("stroke-width", 2)
       .attr("d", line)
       .attr("opacity", 0.7)
-      .attr("class", "high-emission-line")
+      .attr("data-base-opacity", 0.7)
+      .attr("class", "high-emission-line scenario-line")
       .style("pointer-events", "none");
+
+    addEndpointLabel(binnedHigh, "endpoint-label-high", "#e53935", "High", -18);
   }
+
+  // Ensure default opacity after redraws before interaction highlights
+  resetScenarioHighlight();
 
   // Charles: draw smoothed regression curves when toggle is on
   // Use binned data for regression to maintain consistency
