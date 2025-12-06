@@ -264,52 +264,48 @@
             </div>
 
             <div class="regional-main">
-              <!-- Impact comparison panel -->
+              <!-- Precipitation statistics panel -->
               <div class="impact-column">
                 <div class="region-impact-panel">
                   <div class="impact-header">
-                    <div class="impact-title">What this means</div>
+                    <div class="impact-title">Precipitation Statistics</div>
                     <div class="impact-note">
-                      Illustrative impacts under each pathway
+                      Average precipitation by time period
                     </div>
                   </div>
                   <div class="impact-grid">
                     <div class="impact-card">
-                      <div class="impact-label">Farms impacted</div>
+                      <div class="impact-label">Historical Average</div>
                       <div class="impact-values">
-                        <div class="impact-value low">
-                          <span class="impact-chip">Low</span>
-                          <span id="impact-farms-low">—</span>
-                        </div>
-                        <div class="impact-value high">
-                          <span class="impact-chip">High</span>
-                          <span id="impact-farms-high">—</span>
+                        <div class="impact-value historical">
+                          <span class="impact-chip">1850-2014</span>
+                          <span id="precip-historical">—</span>
                         </div>
                       </div>
                     </div>
                     <div class="impact-card">
-                      <div class="impact-label">Economic loss</div>
+                      <div class="impact-label">Future Average (Low)</div>
                       <div class="impact-values">
                         <div class="impact-value low">
-                          <span class="impact-chip">Low</span>
-                          <span id="impact-damage-low">—</span>
+                          <span class="impact-chip">Low Emissions</span>
+                          <span id="precip-low">—</span>
                         </div>
-                        <div class="impact-value high">
-                          <span class="impact-chip">High</span>
-                          <span id="impact-damage-high">—</span>
+                        <div class="impact-value low-change">
+                          <span class="impact-chip">Change</span>
+                          <span id="precip-low-change">—</span>
                         </div>
                       </div>
                     </div>
                     <div class="impact-card">
-                      <div class="impact-label">People at risk</div>
+                      <div class="impact-label">Future Average (High)</div>
                       <div class="impact-values">
-                        <div class="impact-value low">
-                          <span class="impact-chip">Low</span>
-                          <span id="impact-people-low">—</span>
-                        </div>
                         <div class="impact-value high">
-                          <span class="impact-chip">High</span>
-                          <span id="impact-people-high">—</span>
+                          <span class="impact-chip">High Emissions</span>
+                          <span id="precip-high">—</span>
+                        </div>
+                        <div class="impact-value high-change">
+                          <span class="impact-chip">Change</span>
+                          <span id="precip-high-change">—</span>
                         </div>
                       </div>
                     </div>
@@ -485,15 +481,22 @@
           id="tooltip"
           style="
             position: absolute;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(17, 24, 39, 0.95);
             color: white;
-            padding: 0.5rem;
-            border-radius: 4px;
+            padding: 0.6rem 0.75rem;
+            border-radius: 6px;
             pointer-events: none;
             opacity: 0;
-            transition: opacity 0.2s;
+            transition: opacity 0.15s ease-out;
             font-size: 12px;
+            font-weight: 500;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+              sans-serif;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             z-index: 1000;
+            line-height: 1.5;
+            max-width: 220px;
           "
         ></div>
       </div>

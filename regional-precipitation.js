@@ -436,24 +436,62 @@ function formatCurrency(num) {
   return `$${formatNumber(num)}`;
 }
 
+function computePrecipitationStats(regionKey) {
+  if (!regionData || !futureData) return null;
+
+  const hist = regionData[regionKey] || [];
+  const fut = futureData[regionKey] || [];
+
+  const histMean = meanValue(hist, (d) => +d.pr * 86400);
+  const lowMean = meanValue(fut, (d) => +d.low_emissions_pr * 86400);
+  const highMean = meanValue(fut, (d) => +d.high_emissions_pr * 86400);
+
+  if (histMean == null || lowMean == null || highMean == null) return null;
+
+  const lowChange = histMean > 0 ? ((lowMean - histMean) / histMean) * 100 : 0;
+  const highChange =
+    histMean > 0 ? ((highMean - histMean) / histMean) * 100 : 0;
+
+  return {
+    historical: histMean,
+    low: lowMean,
+    high: highMean,
+    lowChange: lowChange,
+    highChange: highChange,
+  };
+}
+
+function formatPrecipitation(value) {
+  if (value == null || isNaN(value)) return "—";
+  return `${value.toFixed(2)} mm/day`;
+}
+
+function formatPercentChange(value) {
+  if (value == null || isNaN(value)) return "—";
+  const sign = value >= 0 ? "+" : "";
+  return `${sign}${value.toFixed(1)}%`;
+}
+
 function updateImpactPanel(region) {
   if (!regionData || !futureData) return;
   const regionKey = region.toLowerCase();
-  const impacts = computeImpacts(regionKey);
+  const stats = computePrecipitationStats(regionKey);
 
-  const farmsLowEl = document.getElementById("impact-farms-low");
-  const farmsHighEl = document.getElementById("impact-farms-high");
-  const dmgLowEl = document.getElementById("impact-damage-low");
-  const dmgHighEl = document.getElementById("impact-damage-high");
-  const pplLowEl = document.getElementById("impact-people-low");
-  const pplHighEl = document.getElementById("impact-people-high");
+  if (!stats) return;
 
-  if (farmsLowEl) farmsLowEl.textContent = formatNumber(impacts.low.farms);
-  if (farmsHighEl) farmsHighEl.textContent = formatNumber(impacts.high.farms);
-  if (dmgLowEl) dmgLowEl.textContent = formatCurrency(impacts.low.damage);
-  if (dmgHighEl) dmgHighEl.textContent = formatCurrency(impacts.high.damage);
-  if (pplLowEl) pplLowEl.textContent = formatNumber(impacts.low.people);
-  if (pplHighEl) pplHighEl.textContent = formatNumber(impacts.high.people);
+  const histEl = document.getElementById("precip-historical");
+  const lowEl = document.getElementById("precip-low");
+  const highEl = document.getElementById("precip-high");
+  const lowChangeEl = document.getElementById("precip-low-change");
+  const highChangeEl = document.getElementById("precip-high-change");
+
+  if (histEl) histEl.textContent = formatPrecipitation(stats.historical);
+  if (lowEl) lowEl.textContent = formatPrecipitation(stats.low);
+  if (highEl) highEl.textContent = formatPrecipitation(stats.high);
+  if (lowChangeEl)
+    lowChangeEl.textContent = formatPercentChange(stats.lowChange);
+  if (highChangeEl)
+    highChangeEl.textContent = formatPercentChange(stats.highChange);
 }
 
 // Charles: build a smoothed trend curve using moving average
@@ -675,41 +713,126 @@ function drawChart() {
 
   const yAxis = d3.axisLeft(yScale).tickFormat(d3.format(".2f")).ticks(6);
 
-  svg
+  // Add subtle gridlines
+  const gridLines = svg.append("g").attr("class", "grid-lines");
+
+  // Vertical gridlines
+  gridLines
+    .selectAll(".grid-line-vertical")
+    .data(xAxis.scale().ticks(xTickCount))
+    .enter()
+    .append("line")
+    .attr("class", "grid-line-vertical")
+    .attr("x1", (d) => xScale(d))
+    .attr("x2", (d) => xScale(d))
+    .attr("y1", margin.top)
+    .attr("y2", height - margin.bottom)
+    .attr("stroke", "#e5e7eb")
+    .attr("stroke-width", 1)
+    .attr("opacity", 0.6);
+
+  // Horizontal gridlines
+  gridLines
+    .selectAll(".grid-line-horizontal")
+    .data(yAxis.scale().ticks(6))
+    .enter()
+    .append("line")
+    .attr("class", "grid-line-horizontal")
+    .attr("x1", margin.left)
+    .attr("x2", width - margin.right)
+    .attr("y1", (d) => yScale(d))
+    .attr("y2", (d) => yScale(d))
+    .attr("stroke", "#e5e7eb")
+    .attr("stroke-width", 1)
+    .attr("opacity", 0.6);
+
+  // X-axis with improved styling
+  const xAxisGroup = svg
     .append("g")
     .attr("transform", `translate(0,${height - margin.bottom})`)
-    .call(xAxis)
-    .style("font-size", "12px");
+    .attr("class", "x-axis")
+    .call(xAxis);
 
-  svg
+  xAxisGroup
+    .selectAll("text")
+    .style("font-size", "11px")
+    .style("fill", "#6b7280")
+    .style("font-weight", "500")
+    .style(
+      "font-family",
+      "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    );
+
+  xAxisGroup
+    .selectAll("line")
+    .attr("stroke", "#9ca3af")
+    .attr("stroke-width", 1);
+
+  xAxisGroup
+    .selectAll("path")
+    .attr("stroke", "#9ca3af")
+    .attr("stroke-width", 1.5);
+
+  // Y-axis with improved styling
+  const yAxisGroup = svg
     .append("g")
     .attr("transform", `translate(${margin.left},0)`)
-    .call(yAxis)
-    .style("font-size", "12px");
+    .attr("class", "y-axis")
+    .call(yAxis);
 
-  // Add axis labels
+  yAxisGroup
+    .selectAll("text")
+    .style("font-size", "11px")
+    .style("fill", "#6b7280")
+    .style("font-weight", "500")
+    .style(
+      "font-family",
+      "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    );
+
+  yAxisGroup
+    .selectAll("line")
+    .attr("stroke", "#9ca3af")
+    .attr("stroke-width", 1);
+
+  yAxisGroup
+    .selectAll("path")
+    .attr("stroke", "#9ca3af")
+    .attr("stroke-width", 1.5);
+
+  // Add axis labels with improved styling
   svg
     .append("text")
     .attr("transform", "rotate(-90)")
-    .attr("y", margin.left - 80)
+    .attr("y", margin.left - 75)
     .attr("x", -height / 2)
     .style("text-anchor", "middle")
-    .style("font-size", "14px")
-    .style("fill", "#333")
-    .style("font-weight", "500")
+    .style("font-size", "13px")
+    .style("fill", "#374151")
+    .style("font-weight", "600")
+    .style(
+      "font-family",
+      "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    )
+    .style("letter-spacing", "0.01em")
     .text("Precipitation (mm/day)");
 
   svg
     .append("text")
     .attr("x", width / 2)
-    .attr("y", height - margin.bottom + 45)
+    .attr("y", height - margin.bottom + 42)
     .style("text-anchor", "middle")
-    .style("font-size", "14px")
-    .style("fill", "#333")
-    .style("font-weight", "500")
+    .style("font-size", "13px")
+    .style("fill", "#374151")
+    .style("font-weight", "600")
+    .style(
+      "font-family",
+      "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    )
+    .style("letter-spacing", "0.01em")
     .text("Year");
 
-  // Charles: dashed line at 2014 if inside range
+  // Charles: dashed line at 2014 if inside range - improved styling
   if (2014 >= domainStart && 2014 <= domainEnd) {
     svg
       .append("line")
@@ -717,18 +840,30 @@ function drawChart() {
       .attr("x2", xScale(2014))
       .attr("y1", margin.top)
       .attr("y2", height - margin.bottom)
-      .attr("stroke", "#999")
-      .attr("stroke-width", 2)
-      .attr("stroke-dasharray", "5,5");
+      .attr("stroke", "#6b7280")
+      .attr("stroke-width", 1.5)
+      .attr("stroke-dasharray", "4,4")
+      .attr("opacity", 0.7)
+      .style("pointer-events", "none");
 
     // Label for the vertical line
     svg
       .append("text")
       .attr("x", xScale(2014))
-      .attr("y", height - margin.bottom + 30)
+      .attr("y", height - margin.bottom + 28)
       .attr("text-anchor", "middle")
-      .attr("fill", "#999")
-      .style("font-size", "12px")
+      .attr("fill", "#6b7280")
+      .style("font-size", "11px")
+      .style("font-weight", "600")
+      .style(
+        "font-family",
+        "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+      )
+      .style("background", "white")
+      .style("paint-order", "stroke fill")
+      .style("stroke", "white")
+      .style("stroke-width", "3px")
+      .style("stroke-linejoin", "round")
       .text("2014");
   }
 
@@ -750,11 +885,16 @@ function drawChart() {
     svg
       .append("text")
       .attr("x", histLabelX)
-      .attr("y", margin.top - 10)
+      .attr("y", margin.top - 12)
       .attr("text-anchor", "middle")
-      .attr("fill", "#999")
-      .style("font-size", "16px")
-      .style("font-weight", "500")
+      .attr("fill", "#4b5563")
+      .style("font-size", "14px")
+      .style("font-weight", "600")
+      .style(
+        "font-family",
+        "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+      )
+      .style("letter-spacing", "0.02em")
       .text("Historical");
   }
 
@@ -772,11 +912,16 @@ function drawChart() {
     svg
       .append("text")
       .attr("x", futLabelX)
-      .attr("y", margin.top - 10)
+      .attr("y", margin.top - 12)
       .attr("text-anchor", "middle")
-      .attr("fill", "#ff9800")
-      .style("font-size", "16px")
-      .style("font-weight", "500")
+      .attr("fill", "#4b5563")
+      .style("font-size", "14px")
+      .style("font-weight", "600")
+      .style(
+        "font-family",
+        "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+      )
+      .style("letter-spacing", "0.02em")
       .text("Future");
   }
 
@@ -997,14 +1142,19 @@ function drawChart() {
       .attr("y", labelY)
       .attr("text-anchor", anchor)
       .attr("fill", color)
-      .attr("font-size", "12px")
+      .attr("font-size", "11px")
       .attr("font-weight", "600")
       .attr("data-base-opacity", 1)
       .style("paint-order", "stroke fill")
       .style("stroke", "#fff")
-      .style("stroke-width", "4px")
+      .style("stroke-width", "5px")
       .style("stroke-linejoin", "round")
       .style("pointer-events", "none")
+      .style(
+        "font-family",
+        "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+      )
+      .style("letter-spacing", "0.01em")
       .text(`${text}: ${last.value.toFixed(2)}`);
   }
 
@@ -1014,18 +1164,20 @@ function drawChart() {
       .append("path")
       .datum(binnedHistorical)
       .attr("fill", "none")
-      .attr("stroke", "#888")
-      .attr("stroke-width", 2)
+      .attr("stroke", "#6b7280")
+      .attr("stroke-width", 2.5)
       .attr("d", line)
-      .attr("opacity", 0.7)
-      .attr("data-base-opacity", 0.7)
+      .attr("opacity", 0.85)
+      .attr("data-base-opacity", 0.85)
       .attr("class", "historical-line scenario-line")
-      .style("pointer-events", "none");
+      .style("pointer-events", "none")
+      .style("stroke-linecap", "round")
+      .style("stroke-linejoin", "round");
 
     addEndpointLabel(
       binnedHistorical,
       "endpoint-label-historical",
-      "#555",
+      "#6b7280",
       "Historical",
       -10
     );
@@ -1037,15 +1189,17 @@ function drawChart() {
       .append("path")
       .datum(binnedLow)
       .attr("fill", "none")
-      .attr("stroke", "#1e88e5")
-      .attr("stroke-width", 2)
+      .attr("stroke", "#2563eb")
+      .attr("stroke-width", 2.5)
       .attr("d", line)
-      .attr("opacity", 0.7)
-      .attr("data-base-opacity", 0.7)
+      .attr("opacity", 0.85)
+      .attr("data-base-opacity", 0.85)
       .attr("class", "low-emission-line scenario-line")
-      .style("pointer-events", "none");
+      .style("pointer-events", "none")
+      .style("stroke-linecap", "round")
+      .style("stroke-linejoin", "round");
 
-    addEndpointLabel(binnedLow, "endpoint-label-low", "#1e88e5", "Low", -14);
+    addEndpointLabel(binnedLow, "endpoint-label-low", "#2563eb", "Low", -14);
   }
 
   // High emission (SSP 585)
@@ -1054,15 +1208,17 @@ function drawChart() {
       .append("path")
       .datum(binnedHigh)
       .attr("fill", "none")
-      .attr("stroke", "#e53935")
-      .attr("stroke-width", 2)
+      .attr("stroke", "#dc2626")
+      .attr("stroke-width", 2.5)
       .attr("d", line)
-      .attr("opacity", 0.7)
-      .attr("data-base-opacity", 0.7)
+      .attr("opacity", 0.85)
+      .attr("data-base-opacity", 0.85)
       .attr("class", "high-emission-line scenario-line")
-      .style("pointer-events", "none");
+      .style("pointer-events", "none")
+      .style("stroke-linecap", "round")
+      .style("stroke-linejoin", "round");
 
-    addEndpointLabel(binnedHigh, "endpoint-label-high", "#e53935", "High", -18);
+    addEndpointLabel(binnedHigh, "endpoint-label-high", "#dc2626", "High", -18);
   }
 
   // Ensure default opacity after redraws before interaction highlights
@@ -1089,11 +1245,12 @@ function drawChart() {
           .append("path")
           .datum(regHist)
           .attr("fill", "none")
-          .attr("stroke", "#555")
+          .attr("stroke", "#6b7280")
           .attr("stroke-width", 1.5)
-          .attr("stroke-dasharray", "6,4")
-          .attr("opacity", 0.6)
-          .attr("d", regLine);
+          .attr("stroke-dasharray", "5,4")
+          .attr("opacity", 0.5)
+          .attr("d", regLine)
+          .style("stroke-linecap", "round");
       }
     }
 
@@ -1122,11 +1279,12 @@ function drawChart() {
           .append("path")
           .datum(regLow)
           .attr("fill", "none")
-          .attr("stroke", "#0d47a1")
+          .attr("stroke", "#2563eb")
           .attr("stroke-width", 1.5)
-          .attr("stroke-dasharray", "6,4")
-          .attr("opacity", 0.6)
-          .attr("d", regLine);
+          .attr("stroke-dasharray", "5,4")
+          .attr("opacity", 0.5)
+          .attr("d", regLine)
+          .style("stroke-linecap", "round");
       }
     }
 
@@ -1154,11 +1312,12 @@ function drawChart() {
           .append("path")
           .datum(regHigh)
           .attr("fill", "none")
-          .attr("stroke", "#b71c1c")
+          .attr("stroke", "#dc2626")
           .attr("stroke-width", 1.5)
-          .attr("stroke-dasharray", "6,4")
-          .attr("opacity", 0.6)
-          .attr("d", regLine);
+          .attr("stroke-dasharray", "5,4")
+          .attr("opacity", 0.5)
+          .attr("d", regLine)
+          .style("stroke-linecap", "round");
       }
     }
   }
@@ -1238,13 +1397,13 @@ function drawChart() {
             ".historical-line, .low-emission-line, .high-emission-line"
           )
           .each(function () {
-            d3.select(this).attr("opacity", 0.7).attr("stroke-width", 2);
+            d3.select(this).attr("opacity", 0.85).attr("stroke-width", 2.5);
           });
 
         // Highlight nearest line
         const nearestLine = svg.select(`.${nearest.lineClass}`);
         if (!nearestLine.empty()) {
-          nearestLine.attr("opacity", 1).attr("stroke-width", 3);
+          nearestLine.attr("opacity", 1).attr("stroke-width", 3.5);
           currentHighlightedLine = nearest.lineClass;
 
           // Dim other lines
@@ -1255,7 +1414,7 @@ function drawChart() {
             .filter(function () {
               return !d3.select(this).classed(nearest.lineClass);
             })
-            .attr("opacity", 0.3);
+            .attr("opacity", 0.25);
         }
       }
 
@@ -1275,8 +1434,8 @@ function drawChart() {
           .selectAll(
             ".historical-line, .low-emission-line, .high-emission-line"
           )
-          .attr("opacity", 0.7)
-          .attr("stroke-width", 2);
+          .attr("opacity", 0.85)
+          .attr("stroke-width", 2.5);
         currentHighlightedLine = null;
         hideTooltip();
         currentTooltipData = null;
@@ -1288,8 +1447,8 @@ function drawChart() {
     // Reset all lines when mouse leaves the chart area
     svg
       .selectAll(".historical-line, .low-emission-line, .high-emission-line")
-      .attr("opacity", 0.7)
-      .attr("stroke-width", 2);
+      .attr("opacity", 0.85)
+      .attr("stroke-width", 2.5);
     currentHighlightedLine = null;
     hideTooltip();
     currentTooltipData = null;
