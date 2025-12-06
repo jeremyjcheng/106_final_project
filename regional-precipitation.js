@@ -83,7 +83,7 @@ function getChartDimensions() {
 
   // Keep the chart responsive to its column, with reasonable bounds
   const width = Math.max(900, Math.min(containerWidth - 20, 1500));
-  const height = 440;
+  const height = 550;
   const margin = { top: 40, right: 80, bottom: 20, left: 90 };
 
   return { width, height, margin };

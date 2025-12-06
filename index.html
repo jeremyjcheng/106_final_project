@@ -319,80 +319,31 @@
                   <svg id="chartSvg"></svg>
                 </div>
 
-                <div
-                  class="legend-row"
-                  style="
-                    display: flex;
-                    justify-content: center;
-                    gap: 1.5rem;
-                    margin-top: 0;
-                    margin-bottom: 0.5rem;
-                    flex-wrap: wrap;
-                  "
-                >
-                  <div
-                    class="legend-item active"
-                    data-scenario="historical"
-                    style="
-                      display: flex;
-                      align-items: center;
-                      gap: 0.5rem;
-                      cursor: pointer;
-                    "
-                  >
+                <div class="legend-row">
+                  <div class="legend-item active" data-scenario="historical">
                     <div
                       class="legend-box selected"
-                      style="width: 20px; height: 3px; background: #888"
+                      style="width: 20px; height: 3px; background: #6b7280"
                     ></div>
-                    <span style="font-size: 14px">Historical</span>
+                    <span>Historical</span>
                   </div>
-                  <div
-                    class="legend-item active"
-                    data-scenario="low"
-                    style="
-                      display: flex;
-                      align-items: center;
-                      gap: 0.5rem;
-                      cursor: pointer;
-                    "
-                  >
+                  <div class="legend-item active" data-scenario="low">
                     <div
                       class="legend-box selected"
-                      style="width: 20px; height: 3px; background: #1e88e5"
+                      style="width: 20px; height: 3px; background: #2563eb"
                     ></div>
-                    <span style="font-size: 14px"
-                      >Low Emissions (SSP1-2.6)</span
-                    >
+                    <span>Low Emissions (SSP1-2.6)</span>
                   </div>
-                  <div
-                    class="legend-item active"
-                    data-scenario="high"
-                    style="
-                      display: flex;
-                      align-items: center;
-                      gap: 0.5rem;
-                      cursor: pointer;
-                    "
-                  >
+                  <div class="legend-item active" data-scenario="high">
                     <div
                       class="legend-box selected"
-                      style="width: 20px; height: 3px; background: #e53935"
+                      style="width: 20px; height: 3px; background: #dc2626"
                     ></div>
-                    <span style="font-size: 14px"
-                      >High Emissions (SSP5-8.5)</span
-                    >
+                    <span>High Emissions (SSP5-8.5)</span>
                   </div>
-                  <div
-                    class="legend-item"
-                    id="regressionToggle"
-                    style="
-                      display: flex;
-                      align-items: center;
-                      gap: 0.5rem;
-                      cursor: pointer;
-                    "
-                  >
+                  <div class="legend-item" id="regressionToggle">
                     <div
+                      class="legend-box-dashed"
                       style="
                         width: 20px;
                         height: 2px;
@@ -400,7 +351,7 @@
                         border-top: 1px dashed #999;
                       "
                     ></div>
-                    <span style="font-size: 14px">Trend Lines</span>
+                    <span>Trend Lines</span>
                   </div>
                 </div>
 
