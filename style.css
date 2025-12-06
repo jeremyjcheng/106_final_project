@@ -79,18 +79,24 @@ canvas {
 }
 
 #regional-slide {
-  padding: 0;
+  padding: 1rem 0;
+  overflow: hidden !important;
 }
 
 #regional-slide .slide-content {
-  max-width: none;
+  max-width: 1350px;
   width: 100%;
-  padding: 1rem 0 3rem 0;
+  padding: 0.5rem 1rem 1.5rem 1rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  max-height: calc(100vh - 2rem);
 }
 
 #regional-slide .regional-chart-container {
-  max-width: none;
+  max-width: 1350px;
   width: 100%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .regional-chart-text {
@@ -113,14 +119,14 @@ canvas {
 .regional-chart-container {
   width: 100%;
   max-width: none;
-  margin: 0 0 3rem 0;
+  margin: 0 0 1.5rem 0;
   background-color: white;
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 1.1rem;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.35rem;
 }
 
 .chart-svg-wrapper {
@@ -128,7 +134,7 @@ canvas {
   justify-content: center;
   align-items: center;
   width: 100%;
-  min-height: 520px;
+  min-height: 440px;
   overflow: visible;
   margin: 0;
 }
@@ -140,8 +146,8 @@ canvas {
 
 .regional-main {
   display: grid;
-  grid-template-columns: minmax(300px, 1.05fr) minmax(640px, 2fr);
-  gap: 1.35rem;
+  grid-template-columns: minmax(260px, 0.95fr) minmax(760px, 2.6fr);
+  gap: 1.1rem;
   align-items: start;
 }
 
