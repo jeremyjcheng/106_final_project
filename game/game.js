@@ -305,6 +305,7 @@ function createPrecipitationChart(containerId, totalEmissions) {
 
   axisGroup
     .selectAll("text")
+    .style("font-family", "Georgia, serif")
     .style("font-size", "12px")
     .style("font-weight", "600")
     .style("fill", "#2d3748");
@@ -324,6 +325,7 @@ function createPrecipitationChart(containerId, totalEmissions) {
     .attr("x", width / 2)
     .attr("y", -20)
     .attr("text-anchor", "middle")
+    .style("font-family", "Georgia, serif")
     .style("font-size", "16px")
     .style("font-weight", "700")
     .style("fill", "#2d3748")
@@ -350,6 +352,7 @@ function createPrecipitationChart(containerId, totalEmissions) {
     .attr("x", width / 2)
     .attr("y", currentY - 10)
     .attr("text-anchor", "middle")
+    .style("font-family", "Georgia, serif")
     .style("font-size", "14px")
     .style("font-weight", "700")
     .style("fill", "#f59e0b")
@@ -381,6 +384,7 @@ function createPrecipitationChart(containerId, totalEmissions) {
     .attr("x", width / 2)
     .attr("y", projectedY - 10)
     .attr("text-anchor", "middle")
+    .style("font-family", "Georgia, serif")
     .style("font-size", "14px")
     .style("font-weight", "700")
     .style("fill", "#14b8a6")
@@ -1236,11 +1240,7 @@ function generateGreatCirclePath(start, end, numPoints) {
 function createFoodComparison(containerId, burgers) {
   // DATA
   const foods = [
-    { name: "Beef Burgers", 
-      emoji: "🍔", 
-      value: burgers, 
-      color: "#ef4444" 
-    },
+    { name: "Beef Burgers", emoji: "🍔", value: burgers, color: "#ef4444" },
     {
       name: "Chicken Meals",
       emoji: "🍗",
@@ -1310,7 +1310,6 @@ function createFoodComparison(containerId, burgers) {
       .duration(1500)
       .delay(i * 200)
       .attr("width", xScale(food.value));
-      
 
     // VALUE TEXT (fade in)
     g.append("text")
@@ -1359,12 +1358,12 @@ function createLightingViz(containerId, hours) {
     .style("margin", "0 auto")
     .style("cursor", "pointer")
     .style("transition", "all 0.3s ease")
-    .on("mouseenter", function() {
+    .on("mouseenter", function () {
       d3.select(this)
         .style("transform", "translateY(-5px)")
         .style("box-shadow", "0 15px 35px rgba(0,0,0,0.3)");
     })
-    .on("mouseleave", function() {
+    .on("mouseleave", function () {
       d3.select(this)
         .style("transform", "translateY(0)")
         .style("box-shadow", "0 10px 25px rgba(0,0,0,0.2)");

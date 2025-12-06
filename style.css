@@ -60,10 +60,11 @@ canvas {
 }
 
 .slide.scrollable {
-  overflow-y: auto;
-  overflow-x: hidden;
-  justify-content: center;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  justify-content: flex-start;
   padding: 2rem;
+  align-items: stretch;
 }
 
 
@@ -832,4 +833,186 @@ canvas {
 
 @keyframes blink {
   50% { opacity: 0; }
+}
+
+/* ==========================================================================
+   Takeaways Slide Styles
+   ========================================================================== */
+
+.takeaways-container {
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.takeaways-header {
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.takeaways-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2e86ab;
+  margin-bottom: 0.75rem;
+}
+
+.takeaways-divider {
+  width: 100px;
+  height: 4px;
+  background: linear-gradient(90deg, #2e86ab 0%, #14b8a6 100%);
+  margin: 0 auto;
+  border-radius: 2px;
+}
+
+.takeaways-main-message {
+  background: linear-gradient(135deg, #e8f4f8 0%, #f0f8ff 100%);
+  border-left: 5px solid #2e86ab;
+  border-radius: 12px;
+  padding: 1.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  position: relative;
+  width: 100%;
+}
+
+.message-icon {
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.main-message-text {
+  font-size: 1.15rem;
+  line-height: 1.7;
+  color: #2d3748;
+  text-align: center;
+  margin: 0;
+}
+
+.takeaways-key-points {
+  display: flex;
+  justify-content: space-around;
+  gap: 1.5rem;
+  width: 100%;
+  margin: 0.5rem 0;
+}
+
+.key-point {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1rem;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.key-point:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.key-point-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.key-point-text {
+  font-size: 0.95rem;
+  color: #4a5568;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.main-message-text strong {
+  color: #2e86ab;
+  font-weight: 700;
+}
+
+.takeaways-action {
+  background: linear-gradient(135deg, #2e86ab 0%, #14b8a6 100%);
+  border-radius: 12px;
+  padding: 1.75rem;
+  color: white;
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(46, 134, 171, 0.3);
+  width: 100%;
+}
+
+.takeaways-action h3 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+.takeaways-action p {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin: 0;
+  opacity: 0.95;
+}
+
+@media (max-width: 768px) {
+  .takeaways-container {
+    padding: 1.5rem 1rem;
+    gap: 1.25rem;
+  }
+
+  .takeaways-header h1 {
+    font-size: 2rem;
+  }
+
+  .main-message-text {
+    font-size: 1rem;
+  }
+
+  .takeaways-main-message {
+    padding: 1.5rem;
+  }
+
+  .message-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .takeaways-key-points {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .key-point {
+    padding: 0.75rem;
+  }
+
+  .key-point-icon {
+    font-size: 1.75rem;
+  }
+
+  .key-point-text {
+    font-size: 0.9rem;
+  }
+
+  .takeaways-action {
+    padding: 1.5rem;
+  }
+
+  .takeaways-action h3 {
+    font-size: 1.5rem;
+  }
+
+  .takeaways-action p {
+    font-size: 0.95rem;
+  }
 }
