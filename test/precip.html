@@ -208,7 +208,12 @@
 
       .axis-label {
         font-size: 14px;
-        font-family: sans-serif;
+        font-family: "Georgia", serif;
+      }
+
+      .x-axis text,
+      .y-axis text {
+        font-family: "Georgia", serif !important;
       }
 
       h1 {
@@ -654,6 +659,7 @@
           .attr("x", 25)
           .attr("y", 24)
           .attr("font-size", "12px")
+          .attr("font-family", "Georgia, serif")
           .attr("fill", "#333")
           .attr("class", "legend-high-text")
           .style("opacity", 0)
@@ -675,6 +681,7 @@
           .attr("x", 25)
           .attr("y", 44)
           .attr("font-size", "12px")
+          .attr("font-family", "Georgia, serif")
           .attr("fill", "#333")
           .attr("class", "legend-low-text")
           .style("opacity", 0)
@@ -686,6 +693,7 @@
           .attr("x", width / 2)
           .attr("y", height - 25)
           .attr("text-anchor", "middle")
+          .attr("font-family", "Georgia, serif")
           .text("Year");
 
         svg
@@ -695,6 +703,7 @@
           .attr("x", -height / 2)
           .attr("y", 30)
           .attr("text-anchor", "middle")
+          .attr("font-family", "Georgia, serif")
           .text("Precipitation (mm/day)");
 
         svg
@@ -866,11 +875,16 @@
               .duration(1000)
               .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
 
+            xAxisGroup.selectAll("text").style("font-family", "Georgia, serif");
+
             yAxisGroup
               .transition()
               .duration(1000)
               .call(d3.axisLeft(yScale).tickFormat(d3.format(".2f")))
               .on("end", () => {
+                yAxisGroup
+                  .selectAll("text")
+                  .style("font-family", "Georgia, serif");
                 histLine.attr("d", line);
                 const histLen = histLine.node().getTotalLength();
                 histLine
@@ -924,42 +938,47 @@
               .duration(1000)
               .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
 
+            xAxisGroup.selectAll("text").style("font-family", "Georgia, serif");
+
             yAxisGroup
               .transition()
               .duration(1000)
-              .call(d3.axisLeft(yScale).tickFormat(d3.format(".2f")))
-              .on("end", () => {
-                histLine.attr("d", line);
-                const histLen = histLine.node().getTotalLength();
-                histLine
-                  .attr("stroke-dasharray", histLen + " " + histLen)
-                  .attr("stroke-dashoffset", histLen)
-                  .transition()
-                  .duration(1000)
-                  .ease(d3.easeLinear)
-                  .attr("stroke-dashoffset", 0)
-                  .on("end", () => {
-                    const dustBowlStart = 1930;
-                    const dustBowlEnd = 1940;
-                    const xStart = xScale(dustBowlStart);
-                    const xEnd = xScale(dustBowlEnd);
-                    const width = xEnd - xStart;
+              .call(d3.axisLeft(yScale).tickFormat(d3.format(".2f")));
 
-                    dustBowlAnnotation
-                      .select("rect")
-                      .attr("x", xStart)
-                      .attr("width", width);
+            yAxisGroup.selectAll("text").style("font-family", "Georgia, serif");
 
-                    dustBowlAnnotation
-                      .select("text")
-                      .attr("x", xStart + width / 2);
+            setTimeout(() => {
+              histLine.attr("d", line);
+              const histLen = histLine.node().getTotalLength();
+              histLine
+                .attr("stroke-dasharray", histLen + " " + histLen)
+                .attr("stroke-dashoffset", histLen)
+                .transition()
+                .duration(1000)
+                .ease(d3.easeLinear)
+                .attr("stroke-dashoffset", 0)
+                .on("end", () => {
+                  const dustBowlStart = 1930;
+                  const dustBowlEnd = 1940;
+                  const xStart = xScale(dustBowlStart);
+                  const xEnd = xScale(dustBowlEnd);
+                  const width = xEnd - xStart;
 
-                    dustBowlAnnotation
-                      .transition()
-                      .duration(500)
-                      .style("opacity", 1);
-                  });
-              });
+                  dustBowlAnnotation
+                    .select("rect")
+                    .attr("x", xStart)
+                    .attr("width", width);
+
+                  dustBowlAnnotation
+                    .select("text")
+                    .attr("x", xStart + width / 2);
+
+                  dustBowlAnnotation
+                    .transition()
+                    .duration(500)
+                    .style("opacity", 1);
+                });
+            });
 
             highLine.transition().duration(1000).style("opacity", 0);
             lowLine.transition().duration(1000).style("opacity", 0);
@@ -977,11 +996,16 @@
               .duration(1000)
               .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
 
+            xAxisGroup.selectAll("text").style("font-family", "Georgia, serif");
+
             yAxisGroup
               .transition()
               .duration(1000)
               .call(d3.axisLeft(yScale).tickFormat(d3.format(".2f")))
               .on("end", () => {
+                yAxisGroup
+                  .selectAll("text")
+                  .style("font-family", "Georgia, serif");
                 histLine.attr("d", line);
                 const histLen = histLine.node().getTotalLength();
                 histLine
@@ -1039,17 +1063,22 @@
                   .tickFormat(d3.format("d"))
               );
 
+            xAxisGroup.selectAll("text").style("font-family", "Georgia, serif");
+
             yAxisGroup
               .transition()
               .duration(1000)
-              .call(d3.axisLeft(yScale).tickFormat(d3.format(".2f")))
-              .on("end", () => {
-                histLine.attr("d", line);
-                const histLen = histLine.node().getTotalLength();
-                histLine
-                  .attr("stroke-dasharray", histLen + " " + histLen)
-                  .attr("stroke-dashoffset", 0);
-              });
+              .call(d3.axisLeft(yScale).tickFormat(d3.format(".2f")));
+
+            yAxisGroup.selectAll("text").style("font-family", "Georgia, serif");
+
+            setTimeout(() => {
+              histLine.attr("d", line);
+              const histLen = histLine.node().getTotalLength();
+              histLine
+                .attr("stroke-dasharray", histLen + " " + histLen)
+                .attr("stroke-dashoffset", 0);
+            }, 1000);
 
             highLine.transition().duration(1000).style("opacity", 0);
             lowLine.transition().duration(1000).style("opacity", 0);
@@ -1080,56 +1109,61 @@
               .duration(1000)
               .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
 
+            xAxisGroup.selectAll("text").style("font-family", "Georgia, serif");
+
             yAxisGroup
               .transition()
               .duration(1000)
-              .call(d3.axisLeft(yScale).tickFormat(d3.format(".2f")))
-              .on("end", () => {
-                // Show transition line at 2014
-                const transitionYear = 2014;
-                transitionLineGroup
-                  .select("line")
-                  .attr("x1", xScale(transitionYear))
-                  .attr("x2", xScale(transitionYear));
+              .call(d3.axisLeft(yScale).tickFormat(d3.format(".2f")));
 
-                transitionLineGroup
-                  .transition()
-                  .duration(500)
-                  .style("opacity", 1);
-                highLine.attr("d", line).style("opacity", 1);
+            yAxisGroup.selectAll("text").style("font-family", "Georgia, serif");
 
-                const lastHigh = high[high.length - 1];
-                highEndDot
-                  .attr("cx", xScale(lastHigh.year))
-                  .attr("cy", yScale(lastHigh.pr))
-                  .transition()
-                  .delay(500)
-                  .duration(500)
-                  .style("opacity", 1);
+            setTimeout(() => {
+              // Show transition line at 2014
+              const transitionYear = 2014;
+              transitionLineGroup
+                .select("line")
+                .attr("x1", xScale(transitionYear))
+                .attr("x2", xScale(transitionYear));
 
-                lowEndDot.transition().duration(500).style("opacity", 0);
+              transitionLineGroup
+                .transition()
+                .duration(500)
+                .style("opacity", 1);
+              highLine.attr("d", line).style("opacity", 1);
 
-                const highLen = highLine.node().getTotalLength();
-                highLine
-                  .attr("stroke-dasharray", highLen + " " + highLen)
-                  .attr("stroke-dashoffset", highLen)
-                  .transition()
-                  .duration(500)
-                  .ease(d3.easeLinear)
-                  .attr("stroke-dashoffset", 0);
+              const lastHigh = high[high.length - 1];
+              highEndDot
+                .attr("cx", xScale(lastHigh.year))
+                .attr("cy", yScale(lastHigh.pr))
+                .transition()
+                .delay(500)
+                .duration(500)
+                .style("opacity", 1);
 
-                // Show high emissions in legend
-                legend
-                  .select(".legend-high-text")
-                  .transition()
-                  .duration(500)
-                  .style("opacity", 1);
-                legend
-                  .select("line:nth-of-type(2)")
-                  .transition()
-                  .duration(500)
-                  .style("opacity", 1);
-              });
+              lowEndDot.transition().duration(500).style("opacity", 0);
+
+              const highLen = highLine.node().getTotalLength();
+              highLine
+                .attr("stroke-dasharray", highLen + " " + highLen)
+                .attr("stroke-dashoffset", highLen)
+                .transition()
+                .duration(500)
+                .ease(d3.easeLinear)
+                .attr("stroke-dashoffset", 0);
+
+              // Show high emissions in legend
+              legend
+                .select(".legend-high-text")
+                .transition()
+                .duration(500)
+                .style("opacity", 1);
+              legend
+                .select("line:nth-of-type(2)")
+                .transition()
+                .duration(500)
+                .style("opacity", 1);
+            });
 
             histLine
               .transition()
@@ -1152,11 +1186,16 @@
               .duration(1000)
               .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
 
+            xAxisGroup.selectAll("text").style("font-family", "Georgia, serif");
+
             yAxisGroup
               .transition()
               .duration(1000)
               .call(d3.axisLeft(yScale).tickFormat(d3.format(".2f")))
               .on("end", () => {
+                yAxisGroup
+                  .selectAll("text")
+                  .style("font-family", "Georgia, serif");
                 const lastHigh2 = high[high.length - 1];
                 highEndDot
                   .attr("cx", xScale(lastHigh2.year))

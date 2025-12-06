@@ -55,6 +55,7 @@ let activeScenarios = ["historical", "low", "high"]; // Array of active scenario
 const regions = ["Northeast", "Midwest", "South", "Northwest"];
 let regionData = null;
 let futureData = null;
+let regionNavListenersAttached = false; // prevent duplicate nav listeners
 
 // Charles: year range chosen by user (null means full range)
 let yearStart = null;
@@ -72,6 +73,9 @@ function initializeRegionalChart() {
   if (regionalChartInitialized) {
     return;
   }
+
+  // Guard immediately so repeated calls while data loads do not re-attach listeners
+  regionalChartInitialized = true;
 
   initializeRegionDots();
   initializeLegendState();
@@ -95,7 +99,6 @@ function initializeRegionalChart() {
       if (regionData && futureData) {
         setYearInputLimits();
         drawChart();
-        regionalChartInitialized = true;
       } else {
         svg
           .select("text")
@@ -189,6 +192,8 @@ function handleLegendClick(event) {
 
 // Set up button, legend, year window and regression toggle interactions
 function setupEventListeners() {
+  if (regionNavListenersAttached) return;
+
   const prevBtn = document.getElementById("prevBtn");
   const nextBtn = document.getElementById("nextBtn");
 
@@ -203,6 +208,8 @@ function setupEventListeners() {
       navigateRegion("next");
     });
   }
+
+  regionNavListenersAttached = true;
 
   // Charles: scenario legend click to filter which lines are visible
   // Use event delegation on document to handle clicks, which is more robust
