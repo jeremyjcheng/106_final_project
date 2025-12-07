@@ -331,13 +331,13 @@ canvas {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  min-height: 460px;
+  min-height: 500px;
 }
 
 .rate-card-title {
   font-weight: 600;
   color: #1f4b99;
-  font-size: 15px;
+  font-size: 25px;
   margin-bottom: 0.4rem;
   text-align: center;
 }
@@ -345,7 +345,7 @@ canvas {
 #rateSvg {
   width: 100%;
   height: auto;
-  min-height: 420px;
+  min-height: 500px;
   display: block;
   flex: 1 1 auto;
 }

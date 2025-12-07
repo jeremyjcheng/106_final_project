@@ -1495,9 +1495,9 @@ function drawChart() {
       .append("g")
       .attr("transform", `translate(0,${innerHeight})`)
       .call(xAxisBand)
-      .style("font-size", "12px");
+      .style("font-size", "20px");
 
-    containerGroup.append("g").call(rateYAxis).style("font-size", "12px");
+    containerGroup.append("g").call(rateYAxis).style("font-size", "13px");
 
     // Zero line
     containerGroup
@@ -1537,7 +1537,7 @@ function drawChart() {
     // Labels are minimal: show only decade tick marks already handled by axis; remove dense ticks
     containerGroup
       .selectAll(".tick text")
-      .style("font-size", "12px")
+      .style("font-size", "13px")
       .style("fill", "#475569");
 
     // Highlight handler
