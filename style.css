@@ -79,8 +79,9 @@ canvas {
 }
 
 #regional-slide {
-  padding: 1rem 0;
-  overflow: hidden !important;
+  padding: 1rem 0 3.5rem;
+  overflow-y: auto !important;
+  overflow-x: visible !important;
 }
 
 #impact-choices-slide {
