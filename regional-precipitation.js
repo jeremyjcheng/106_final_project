@@ -787,6 +787,9 @@ function drawChart() {
     "high-emission": "High emissions (SSP5-8.5)",
   };
 
+  // Track where endpoint labels are placed to avoid overlapping them
+  const endpointLabelPositions = [];
+
   const line = d3
     .line()
     .x((d) => xScale(d.year))
@@ -961,20 +964,41 @@ function drawChart() {
     className,
     color,
     text,
-    defaultYOffset = -10
+    defaultYOffset = -10,
+    labelPositions = null,
+    pathNode = null
   ) {
     if (!data || data.length === 0) return;
     const n = data.length;
     const last = data[n - 1];
     const prev = n > 1 ? data[n - 2] : last;
 
-    // Offset label away from the line based on local slope so it does not sit on top of the line
+    // Offset label using the end-of-path normal so it sits a few pixels off the line
     const slope = n > 1 ? last.value - prev.value : 0;
-    const dynamicYOffset =
-      slope >= 0 ? defaultYOffset - 6 : defaultYOffset + 10;
+    let endpoint = { x: xScale(last.year), y: yScale(last.value) };
+    let normal = { x: 0, y: -1 };
+    if (pathNode) {
+      const totalLen = pathNode.getTotalLength();
+      const delta = Math.max(2, totalLen * 0.01);
+      const p1 = pathNode.getPointAtLength(totalLen);
+      const p0 = pathNode.getPointAtLength(Math.max(0, totalLen - delta));
+      const dx = p1.x - p0.x;
+      const dy = p1.y - p0.y;
+      let nx = -dy;
+      let ny = dx;
+      const norm = Math.hypot(nx, ny) || 1;
+      nx /= norm;
+      ny /= norm;
+      // Favor an upward offset if possible
+      const dir = ny < 0 ? 1 : -1;
+      normal = { x: nx * dir, y: ny * dir };
+      endpoint = p1;
+    }
 
-    const rawX = xScale(last.year);
-    const rawY = yScale(last.value) + dynamicYOffset;
+    const offsetMag = 8;
+    const rawX = endpoint.x + normal.x * offsetMag;
+    const baseY = endpoint.y + normal.y * offsetMag;
+    let rawY = baseY;
 
     // Keep labels inside plot area
     const xPadding = 8;
@@ -986,15 +1010,40 @@ function drawChart() {
 
     const shouldFlipLeft = rawX > maxX;
     const labelX = Math.min(Math.max(rawX, minX), maxX);
-    const labelY = Math.min(Math.max(rawY, minY), maxY);
+    let labelY = Math.min(Math.max(rawY, minY), maxY);
 
-    const xOffset = shouldFlipLeft ? -10 : 10;
-    const anchor = shouldFlipLeft ? "end" : "start";
+    // Ensure the label is visibly off the line even when slope is flat
+    const minLineGap = 6;
+    if (Math.abs(labelY - baseY) < minLineGap) {
+      labelY = baseY + (slope >= 0 ? -minLineGap : minLineGap);
+      labelY = Math.min(Math.max(labelY, minY), maxY);
+    }
+
+    // Keep a small vertical gap between stacked labels so they do not cover each other
+    if (labelPositions) {
+      const minGap = 16;
+      let attempts = 0;
+      while (
+        labelPositions.some((y) => Math.abs(y - labelY) < minGap) &&
+        attempts < 12
+      ) {
+        labelY += minGap;
+        if (labelY > maxY) {
+          labelY = Math.max(minY, rawY - minGap * (attempts + 1));
+        }
+        attempts++;
+      }
+      labelPositions.push(labelY);
+    }
+
+    const xOffset = normal.x * 6 || (shouldFlipLeft ? -6 : 6);
+    const anchor = xOffset < 0 ? "end" : "start";
+    const connectorX = labelX + xOffset;
 
     svg
       .append("text")
       .attr("class", `endpoint-label ${className}`)
-      .attr("x", labelX + xOffset)
+      .attr("x", connectorX)
       .attr("y", labelY)
       .attr("text-anchor", anchor)
       .attr("fill", color)
@@ -1011,7 +1060,7 @@ function drawChart() {
 
   // Historical line + invisible circles for tooltip
   if (activeScenarios.includes("historical")) {
-    svg
+    const histPath = svg
       .append("path")
       .datum(binnedHistorical)
       .attr("fill", "none")
@@ -1028,13 +1077,15 @@ function drawChart() {
       "endpoint-label-historical",
       "#555",
       "Historical",
-      -10
+      -10,
+      endpointLabelPositions,
+      histPath.node()
     );
   }
 
   // Low emission (SSP 126)
   if (activeScenarios.includes("low")) {
-    svg
+    const lowPath = svg
       .append("path")
       .datum(binnedLow)
       .attr("fill", "none")
@@ -1046,12 +1097,20 @@ function drawChart() {
       .attr("class", "low-emission-line scenario-line")
       .style("pointer-events", "none");
 
-    addEndpointLabel(binnedLow, "endpoint-label-low", "#1e88e5", "Low", -14);
+    addEndpointLabel(
+      binnedLow,
+      "endpoint-label-low",
+      "#1e88e5",
+      "Low",
+      -14,
+      endpointLabelPositions,
+      lowPath.node()
+    );
   }
 
   // High emission (SSP 585)
   if (activeScenarios.includes("high")) {
-    svg
+    const highPath = svg
       .append("path")
       .datum(binnedHigh)
       .attr("fill", "none")
@@ -1063,7 +1122,15 @@ function drawChart() {
       .attr("class", "high-emission-line scenario-line")
       .style("pointer-events", "none");
 
-    addEndpointLabel(binnedHigh, "endpoint-label-high", "#e53935", "High", -18);
+    addEndpointLabel(
+      binnedHigh,
+      "endpoint-label-high",
+      "#e53935",
+      "High",
+      -18,
+      endpointLabelPositions,
+      highPath.node()
+    );
   }
 
   // Ensure default opacity after redraws before interaction highlights
