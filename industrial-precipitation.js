@@ -880,10 +880,10 @@ function createImpactComparisonChart() {
       100
     ).toFixed(0)}% vs low)`;
     summaryValue.text(avoidedLabel);
-    const metricNarrative = metricNarratives[metricDef.key];
-    if (metricNarrative) {
-      contextBody.text(metricNarrative);
-    }
+
+    
+    contextBody.text( "Higher emissions mean more farms, people, and dollars are exposed to heavy summer rainfall and flooding.");
+    
 
     const pctAvoided =
       totalLow > 0 ? ((totalGap / totalLow) * 100).toFixed(0) : "—";
