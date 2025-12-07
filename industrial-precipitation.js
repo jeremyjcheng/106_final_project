@@ -595,21 +595,45 @@ function createImpactComparisonChart() {
     .style("margin-bottom", "0.75rem")
     .text("High vs low emissions. Gap = avoidable impact.");
 
-  const callout = container
-    .append("div")
-    .style("background", "#f2f8f2")
-    .style("border", "1px solid #dfe7df")
-    .style("border-radius", "10px")
-    .style("padding", "0.6rem 0.9rem")
-    .style("font-size", "13px")
-    .style("color", "#1f2937")
-    .style("margin-bottom", "0.75rem")
-    .style("font-weight", "600");
-
   const svg = container
     .append("svg")
     .attr("width", width)
     .attr("height", height);
+
+  const infoPanel = container.append("div").attr("class", "impact-info-panel");
+
+  const summarySection = infoPanel
+    .append("div")
+    .attr("class", "impact-info-section impact-summary-section");
+  summarySection
+    .append("div")
+    .attr("class", "impact-info-label")
+    .text("Avoided Impact");
+  const summaryValue = summarySection
+    .append("div")
+    .attr("class", "impact-info-value");
+
+  const contextSection = infoPanel
+    .append("div")
+    .attr("class", "impact-info-section impact-context-section");
+  contextSection
+    .append("div")
+    .attr("class", "impact-info-label")
+    .text("Why It Matters");
+  const contextBody = contextSection
+    .append("div")
+    .attr("class", "impact-info-text");
+
+  const calloutSection = infoPanel
+    .append("div")
+    .attr("class", "impact-info-section impact-callout-section");
+  calloutSection
+    .append("div")
+    .attr("class", "impact-info-label")
+    .text("Key Takeaway");
+  const calloutText = calloutSection
+    .append("div")
+    .attr("class", "impact-info-text");
 
   const g = svg
     .append("g")
@@ -694,10 +718,6 @@ function createImpactComparisonChart() {
   });
 
   const deltaGroup = g.append("g").attr("class", "delta-labels");
-  const summaryDiv = container
-    .append("div")
-    .attr("class", "impact-summary")
-    .style("margin-top", "0.35rem");
   const xAxisLabel = svg
     .append("text")
     .attr("class", "impact-axis-label")
@@ -855,21 +875,23 @@ function createImpactComparisonChart() {
     valueLabels.exit().remove();
 
     // Callout aggregate + summary (moved outside SVG to avoid overlap)
-    const avoidedLabel = `Avoided: +${formatValue(
-      totalGap,
-      metricDef.type
-    )} (${((totalGap / totalLow) * 100).toFixed(0)}% vs low)`;
-    summaryDiv.html(
-      `<div class="summary-title">Avoided impact (High – Low)</div><div class="summary-value">${avoidedLabel}</div>`
-    );
+    const avoidedLabel = `+${formatValue(totalGap, metricDef.type)} (${(
+      (totalGap / totalLow) *
+      100
+    ).toFixed(0)}% vs low)`;
+    summaryValue.text(avoidedLabel);
+    const metricNarrative = metricNarratives[metricDef.key];
+    if (metricNarrative) {
+      contextBody.text(metricNarrative);
+    }
 
     const pctAvoided =
       totalLow > 0 ? ((totalGap / totalLow) * 100).toFixed(0) : "—";
-    callout.text(
+    calloutText.text(
       `Low emissions avoid ${formatValue(
         totalGap,
         metricDef.type
-      )} (${pctAvoided}% reduction) across all regions for this metric.`
+      )} (${pctAvoided}% reduction) across all regions. Choosing the low-emissions pathway materially shrinks exposure.`
     );
   }
 
