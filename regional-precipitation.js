@@ -1375,60 +1375,49 @@ function drawChart() {
   // ------------------------------
   // Rate of change chart
   // ------------------------------
-  const renderRateChart = (containerGroup, innerWidth, innerHeight, titleY) => {
-    containerGroup
-      .append("g")
-      .attr("transform", `translate(0,${innerHeight})`)
-      .call(rateXAxis)
-      .style("font-size", "12px");
+  // Render compact bar chart of rate-of-change per decade
+  const renderRateBarChart = (
+    containerGroup,
+    innerWidth,
+    innerHeight,
+    highlightRef
+  ) => {
+    const series = [];
+    if (activeScenarios.includes("historical")) {
+      series.push({ key: "historical", color: "#555", data: rateHistorical });
+    }
+    if (activeScenarios.includes("low")) {
+      series.push({ key: "low-emission", color: "#1e88e5", data: rateLow });
+    }
+    if (activeScenarios.includes("high")) {
+      series.push({ key: "high-emission", color: "#e53935", data: rateHigh });
+    }
 
-    containerGroup.append("g").call(rateYAxis).style("font-size", "12px");
+    const allBars = series.flatMap((s) =>
+      (s.data || []).map((d) => ({
+        ...d,
+        scenario: s.key,
+        color: s.color,
+      }))
+    );
 
-    containerGroup
-      .append("line")
-      .attr("x1", 0)
-      .attr("x2", innerWidth)
-      .attr("y1", rateYScale(0))
-      .attr("y2", rateYScale(0))
-      .attr("stroke", "#ccc")
-      .attr("stroke-width", 1.5)
-      .attr("stroke-dasharray", "4,3");
+    const seriesKeys = series.map((s) => s.key);
 
-    const rateLine = d3
-      .line()
-      .x((d) => rateXScale(d.year))
-      .y((d) => rateYScale(d.value))
-      .curve(d3.curveMonotoneX);
+    if (seriesKeys.length === 0) {
+      containerGroup
+        .append("text")
+        .attr("x", innerWidth / 2)
+        .attr("y", innerHeight / 2)
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .style("fill", "#777")
+        .text("Select at least one scenario to view rates.");
+      highlightRef.current = () => {};
+      return;
+    }
 
-    const drawRateSeries = (data, color, className) => {
-      if (!data || data.length === 0) return;
-
-      const group = containerGroup.append("g").attr("class", className);
-
-      group
-        .append("path")
-        .datum(data)
-        .attr("fill", "none")
-        .attr("stroke", color)
-        .attr("stroke-width", 2)
-        .attr("opacity", 0.9)
-        .attr("d", rateLine);
-
-      group
-        .selectAll("circle")
-        .data(data)
-        .enter()
-        .append("circle")
-        .attr("cx", (d) => rateXScale(d.year))
-        .attr("cy", (d) => rateYScale(d.value))
-        .attr("r", 5)
-        .attr("fill", color)
-        .attr("opacity", 0.95)
-        .on("mouseover", showRateTooltip)
-        .on("mouseout", hideTooltip);
-    };
-
-    if (rateValues.length === 0) {
+    // If no data, show message
+    if (allBars.length === 0) {
       containerGroup
         .append("text")
         .attr("x", innerWidth / 2)
@@ -1437,29 +1426,141 @@ function drawChart() {
         .style("font-size", "12px")
         .style("fill", "#777")
         .text("Rate of change appears when at least two decades are visible.");
-    } else {
-      if (activeScenarios.includes("historical")) {
-        drawRateSeries(rateHistorical, "#555", "rate-historical-line");
-      }
-      if (activeScenarios.includes("low")) {
-        drawRateSeries(rateLow, "#1e88e5", "rate-low-line");
-      }
-      if (activeScenarios.includes("high")) {
-        drawRateSeries(rateHigh, "#e53935", "rate-high-line");
-      }
+      highlightRef.current = () => {};
+      return;
     }
 
+    // Build decade domain using start-of-span, rounded to decade
+    const decadeDomain = Array.from(
+      new Set(
+        allBars.map((d) => {
+          const start =
+            d.spanStart ?? d.fromYear ?? Math.floor(d.year / 10) * 10;
+          return Math.floor(start / 10) * 10;
+        })
+      )
+    ).sort((a, b) => a - b);
+
+    const xBand = d3
+      .scaleBand()
+      .domain(decadeDomain)
+      .range([0, innerWidth])
+      .paddingInner(0)
+      .paddingOuter(0);
+
+    const innerBand = d3
+      .scaleBand()
+      .domain(seriesKeys)
+      .range([0, xBand.bandwidth()])
+      .padding(0);
+
+    // Build per-decade data while keeping consistent slots for each active series
+    const decadeData = decadeDomain.map((decade) => {
+      const items = series.map((s) => {
+        const match = (s.data || []).find((d) => {
+          const start =
+            d.spanStart ?? d.fromYear ?? Math.floor(d.year / 10) * 10;
+          return Math.floor(start / 10) * 10 === decade;
+        });
+        return {
+          decade,
+          scenario: s.key,
+          color: s.color,
+          value: match ? match.value : null,
+        };
+      });
+      return { decade, items };
+    });
+
+    const tickTarget = Math.min(6, decadeDomain.length);
+    const tickValues = Array.from(
+      new Set(
+        d3
+          .ticks(
+            decadeDomain[0],
+            decadeDomain[decadeDomain.length - 1],
+            tickTarget
+          )
+          .map((t) => Math.floor(t / 10) * 10)
+      )
+    ).filter((d) => decadeDomain.includes(d));
+
+    const xAxisBand = d3
+      .axisBottom(xBand)
+      .tickFormat(d3.format("d"))
+      .tickValues(tickValues);
+
+    // Prepare axis
     containerGroup
-      .append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", -46)
-      .attr("x", -(innerHeight / 2))
-      .style("text-anchor", "middle")
-      .style("font-size", "13px")
-      .style("fill", "#333")
-      .style("font-weight", "500")
-      .text("mm/day change per decade");
+      .append("g")
+      .attr("transform", `translate(0,${innerHeight})`)
+      .call(xAxisBand)
+      .style("font-size", "12px");
+
+    containerGroup.append("g").call(rateYAxis).style("font-size", "12px");
+
+    // Zero line
+    containerGroup
+      .append("line")
+      .attr("x1", 0)
+      .attr("x2", innerWidth)
+      .attr("y1", rateYScale(0))
+      .attr("y2", rateYScale(0))
+      .attr("stroke", "#cbd5e1")
+      .attr("stroke-width", 1.2)
+      .attr("stroke-dasharray", "4,3");
+
+    const barsGroup = containerGroup.append("g").attr("class", "rate-bars");
+
+    const bars = barsGroup
+      .selectAll("g.decade")
+      .data(decadeData)
+      .enter()
+      .append("g")
+      .attr("class", "decade-group")
+      .attr("transform", (d) => `translate(${xBand(d.decade)},0)`)
+      .selectAll("rect")
+      .data((d) => d.items)
+      .enter()
+      .append("rect")
+      .attr("class", "rate-bar")
+      .attr("x", (d) => innerBand(d.scenario))
+      .attr("width", innerBand.bandwidth())
+      .attr("y", (d) => rateYScale(Math.max(0, d.value ?? 0)))
+      .attr("height", (d) =>
+        d.value == null ? 0 : Math.abs(rateYScale(d.value) - rateYScale(0))
+      )
+      .attr("fill", (d) => d.color)
+      .attr("fill-opacity", (d) => (d.value == null ? 0 : 0.9))
+      .attr("stroke", "none");
+
+    // Labels are minimal: show only decade tick marks already handled by axis; remove dense ticks
+    containerGroup
+      .selectAll(".tick text")
+      .style("font-size", "12px")
+      .style("fill", "#475569");
+
+    // Highlight handler
+    const highlight = (year) => {
+      if (year == null) {
+        bars.classed("rate-bar-highlight", false).attr("opacity", 0.9);
+        return;
+      }
+      const decade = Math.floor(year / 10) * 10;
+      bars
+        .classed(
+          "rate-bar-highlight",
+          (d) => d.decade === decade && d.value != null
+        )
+        .attr("opacity", (d) =>
+          d.decade === decade && d.value != null ? 1 : 0.4
+        );
+    };
+
+    highlightRef.current = highlight;
   };
+
+  const rateHighlightRef = { current: () => {} };
 
   if (hasSeparateRate) {
     const rateSvg = d3.select("#rateSvg");
@@ -1495,7 +1596,7 @@ function drawChart() {
       rateXScale.range([0, innerW]);
       rateYScale.range([innerH, 0]);
 
-      renderRateChart(outer, innerW, innerH, -8);
+      renderRateBarChart(outer, innerW, innerH, rateHighlightRef);
     }
   } else {
     const rateGroup = svg
@@ -1520,7 +1621,12 @@ function drawChart() {
         `translate(${rateInsetMargin.left},${rateInsetMargin.top})`
       );
 
-    renderRateChart(rateInner, rateInnerWidth, rateInnerHeight, -10);
+    renderRateBarChart(
+      rateInner,
+      rateInnerWidth,
+      rateInnerHeight,
+      rateHighlightRef
+    );
   }
 
   // Add invisible overlay for distance-based line detection
@@ -1633,6 +1739,7 @@ function drawChart() {
         showTooltip(event, nearest.point);
         currentTooltipData = nearest.point;
       }
+      rateHighlightRef.current(nearest.point.year);
     } else {
       // No line within 10px, reset highlighting
       if (currentHighlightedLine) {
@@ -1646,6 +1753,7 @@ function drawChart() {
         hideTooltip();
         currentTooltipData = null;
       }
+      rateHighlightRef.current(null);
     }
   });
 
@@ -1658,6 +1766,7 @@ function drawChart() {
     currentHighlightedLine = null;
     hideTooltip();
     currentTooltipData = null;
+    rateHighlightRef.current(null);
   });
 }
 
