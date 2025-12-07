@@ -186,6 +186,49 @@
         }
       }
 
+      #bathtub-animation {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-family: "Georgia", serif;
+        text-align: center;
+        padding: 20px;
+      }
+
+      #bathtub-animation.active {
+        display: flex;
+      }
+
+      .bathtub-container {
+        font-size: 60px;
+        margin-bottom: 20px;
+        line-height: 1.4;
+        max-width: 600px;
+      }
+
+      .volume-text {
+        font-size: 24px;
+        font-weight: bold;
+        color: #2e86ab;
+        margin-bottom: 10px;
+      }
+
+      .counter {
+        font-size: 48px;
+        font-weight: bold;
+        color: #e74c3c;
+        margin-bottom: 20px;
+        transition: all 0.05s ease-out;
+      }
+
+      .description {
+        font-size: 16px;
+        color: #555;
+        max-width: 500px;
+        line-height: 1.6;
+      }
+
       .step.active {
         opacity: 1;
       }
@@ -282,6 +325,9 @@
           transform: translateY(0);
         }
       }
+      .step[data-step="6"] .rain-container {
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -298,9 +344,7 @@
           <div class="step-content">
             <p>
               For more than a century, from 1850 to 2014, the rhythm of
-              America's seasons has been quietly shifting. Each winter storm and
-              summer downpour carries the imprint of changing climate forces:
-              some natural, others unmistakably shaped by human decisions.
+              America's seasons has been quietly shifting. 
             </p>
           </div>
           <div class="rain-container">
@@ -315,9 +359,8 @@
         <div class="step" data-step="1">
           <div class="step-content">
             <p>
-              Around the 1930s, summer rainfall in the Midwest and South dropped
-              sharply-the
-              <span class="highlight-yellow">Dust Bowl drought.</span>
+              Around the 1930s, the rainfall in the U.S. dropped
+              due to the<span class="highlight-yellow">Dust Bowl drought.</span>
               Over-farming broke down soil structure; dust storms formed,
               rainfall decreased, and the region fell into years of severe
               drought.
@@ -412,10 +455,51 @@
             <div class="ground"></div>
           </div>
         </div>
+        <div class="step" data-step="6">
+          <div class="step-content">
+            <p>
+              The difference in precipitation level under two different
+              scenarios is 0.36mm/day. It may not seem a lot at first glance.
+            </p>
+          </div>
+          <div class="rain-container">
+            <div class="clouds">
+              <div class="cloud"></div>
+              <div class="cloud"></div>
+              <div class="cloud"></div>
+            </div>
+            <div class="ground"></div>
+          </div>
+        </div>
+
+        <div class="step" data-step="7">
+          <div class="step-content">
+            <p>
+              But if we convert to annual global water volume, that's 74
+              trillion cubic meters of extra rainfall per year.
+            </p>
+          </div>
+          <div class="rain-container">
+            <div class="clouds">
+              <div class="cloud"></div>
+              <div class="cloud"></div>
+              <div class="cloud"></div>
+            </div>
+            <div class="ground"></div>
+          </div>
+        </div>
       </div>
 
       <div id="line-plot">
         <svg id="lineChart"></svg>
+        <div id="bathtub-animation">
+          <div class="bathtub-container" id="bathtub-emojis">🛁</div>
+          <div class="volume-text">74 trillion m³ of extra rainfall</div>
+          <div class="counter" id="bathtub-counter">0 trillion bathtubs</div>
+          <div class="description">
+            That's enough water to fill 500 trillion bathtubs every year
+          </div>
+        </div>
       </div>
     </div>
 
@@ -426,7 +510,6 @@
       // Rain configuration for each step
       const rainConfig = {
         0: {
-          // Historical baseline - light rain
           cloudColor: "#d3d3d3",
           raindrops: 20,
           rainHeight: 15,
@@ -434,7 +517,6 @@
           rippleFrequency: 800,
         },
         1: {
-          // Dust Bowl - sparse rain
           cloudColor: "#c9a961",
           raindrops: 8,
           rainHeight: 10,
@@ -442,7 +524,6 @@
           rippleFrequency: 1200,
         },
         2: {
-          // Industrial pollution - reduced rain
           cloudColor: "#6b6b6b",
           raindrops: 15,
           rainHeight: 12,
@@ -450,7 +531,6 @@
           rippleFrequency: 900,
         },
         3: {
-          // Transition point - moderate rain
           cloudColor: "#a0a0a0",
           raindrops: 25,
           rainHeight: 18,
@@ -458,7 +538,6 @@
           rippleFrequency: 600,
         },
         4: {
-          // High emissions - intense rain
           cloudColor: "#4a4a4a",
           raindrops: 50,
           rainHeight: 25,
@@ -466,9 +545,24 @@
           rippleFrequency: 300,
         },
         5: {
-          // Low emissions - moderate rain
           cloudColor: "#808080",
           raindrops: 30,
+          rainHeight: 20,
+          rainDuration: [1, 1.8],
+          rippleFrequency: 500,
+        },
+        6: {
+          // Step 6 - Comparison view
+          cloudColor: "#808080",
+          raindrops: 30,
+          rainHeight: 20,
+          rainDuration: [1, 1.8],
+          rippleFrequency: 500,
+        },
+        7: {
+          // Step 7 - Volume visualization (no rain)
+          cloudColor: "#808080",
+          raindrops: 0,
           rainHeight: 20,
           rainDuration: [1, 1.8],
           rippleFrequency: 500,
@@ -549,29 +643,31 @@
         const [hist, low, high] = await Promise.all([
           d3.csv("pr_1850_2010.csv", (d) => ({
             year: +d.year,
-            pr: +d.pr * 86400, // Convert to mm/day
+            pr: +d.pr * 86400,
           })),
           d3.csv("projected_low_2025_2100.csv", (d) => ({
             year: +d.year,
-            pr: +d.pr * 86400, // Convert to mm/day
+            pr: +d.pr * 86400,
           })),
           d3.csv("projected_high_2025_2100.csv", (d) => ({
             year: +d.year,
-            pr: +d.pr * 86400, // Convert to mm/day
+            pr: +d.pr * 86400,
           })),
         ]);
 
-        // Create connection point at 2014 using the last historical value
+        // Get the last historical point
         const lastHistPoint = hist[hist.length - 1];
+        
+        // Create a connection point at 2014
         const connectionPoint2014 = { year: 2014, pr: lastHistPoint.pr };
 
-        // Extend historical data to 2014 if it doesn't already reach there
-        let histExtended = hist;
+        // Extend historical data to include 2014 if needed
+        let histExtended = [...hist];
         if (lastHistPoint.year < 2014) {
-          histExtended = [...hist, connectionPoint2014];
+          histExtended.push(connectionPoint2014);
         }
 
-        // Connect future lines starting at 2014
+        // Start both future projections at 2014 with the same value
         const highWithConnection = [connectionPoint2014, ...high];
         const lowWithConnection = [connectionPoint2014, ...low];
 
@@ -1262,6 +1358,206 @@
               .attr("x1", xScale(transitionYear))
               .attr("x2", xScale(transitionYear))
               .style("opacity", 1);
+
+          } else if (step === 6) {
+            svg.style("display", "block");
+            d3.select("#bathtub-animation").classed("active", false);
+
+            // Zoom into 2014-2100 and show difference
+            const futureData = [...high, ...low];
+            xScale.domain([2014, 2100]);
+            yScale.domain(d3.extent(futureData, (d) => d.pr));
+
+            xAxisGroup
+              .transition()
+              .duration(1000)
+              .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
+
+            xAxisGroup.selectAll("text").style("font-family", "Georgia, serif");
+
+            yAxisGroup
+              .transition()
+              .duration(1000)
+              .call(d3.axisLeft(yScale).tickFormat(d3.format(".2f")));
+
+            yAxisGroup.selectAll("text").style("font-family", "Georgia, serif");
+
+            setTimeout(() => {
+              // Hide historical line
+              histLine.transition().duration(500).style("opacity", 0);
+
+              // 1️⃣ SNAP path to new scale (NO transition)
+              highLine
+                .interrupt()
+                .attr("d", line)
+                .attr("stroke-dasharray", "none")
+                .attr("stroke-dashoffset", 0);
+
+              // 2️⃣ THEN fade it in
+              highLine
+                .transition()
+                .duration(500)
+                .style("opacity", 1);
+
+              lowLine
+                .interrupt()
+                .attr("d", line)
+                .attr("stroke-dasharray", "none")
+                .attr("stroke-dashoffset", 0);
+
+              lowLine
+                .transition()
+                .duration(500)
+                .style("opacity", 1);
+
+
+              const lastHigh = high[high.length - 1];
+              const lastLow = low[low.length - 1];
+
+              // Show endpoint dots with new scale positions
+              highEndDot
+                .transition()
+                .duration(1000)
+                .attr("cx", xScale(lastHigh.year))
+                .attr("cy", yScale(lastHigh.pr))
+                .style("opacity", 1);
+
+              lowEndDot
+                .transition()
+                .duration(1000)
+                .attr("cx", xScale(lastLow.year))
+                .attr("cy", yScale(lastLow.pr))
+                .style("opacity", 1);
+
+              // Add annotation showing the difference
+              setTimeout(() => {
+                const diffAnnotation = svg.selectAll(".diff-annotation").data([0]);
+                const diffGroup = diffAnnotation
+                  .enter()
+                  .append("g")
+                  .attr("class", "diff-annotation")
+                  .merge(diffAnnotation);
+
+                // Clear previous annotations
+                diffGroup.selectAll("*").remove();
+
+                // Draw vertical line between the two points at 2100
+                diffGroup
+                  .append("line")
+                  .attr("x1", xScale(2100))
+                  .attr("x2", xScale(2100))
+                  .attr("y1", yScale(lastLow.pr))
+                  .attr("y2", yScale(lastHigh.pr))
+                  .attr("stroke", "#666")
+                  .attr("stroke-width", 2)
+                  .attr("stroke-dasharray", "3,3");
+
+                // Add arrows/ticks at both ends
+                diffGroup
+                  .append("line")
+                  .attr("x1", xScale(2100) - 5)
+                  .attr("x2", xScale(2100) + 5)
+                  .attr("y1", yScale(lastLow.pr))
+                  .attr("y2", yScale(lastLow.pr))
+                  .attr("stroke", "#666")
+                  .attr("stroke-width", 2);
+
+                diffGroup
+                  .append("line")
+                  .attr("x1", xScale(2100) - 5)
+                  .attr("x2", xScale(2100) + 5)
+                  .attr("y1", yScale(lastHigh.pr))
+                  .attr("y2", yScale(lastHigh.pr))
+                  .attr("stroke", "#666")
+                  .attr("stroke-width", 2);
+
+                // Add text showing the difference
+                const diff = Math.abs(lastHigh.pr - lastLow.pr);
+                diffGroup
+                  .append("text")
+                  .attr("x", xScale(2100) + 15)
+                  .attr("y", (yScale(lastLow.pr) + yScale(lastHigh.pr)) / 2)
+                  .attr("text-anchor", "start")
+                  .attr("font-size", "14px")
+                  .attr("font-weight", "bold")
+                  .attr("font-family", "Georgia, serif")
+                  .attr("fill", "#e74c3c")
+                  .text(`Δ = ${diff.toFixed(2)} mm/day`);
+
+                diffGroup.style("opacity", 0).transition().duration(500).style("opacity", 1);
+              }, 1000);
+
+              // Show legends
+              legend
+                .select(".legend-high-text")
+                .transition()
+                .duration(500)
+                .style("opacity", 1);
+              legend
+                .select("line:nth-of-type(2)")
+                .transition()
+                .duration(500)
+                .style("opacity", 1);
+              legend
+                .select(".legend-low-text")
+                .transition()
+                .duration(500)
+                .style("opacity", 1);
+              legend
+                .select("line:nth-of-type(3)")
+                .transition()
+                .duration(500)
+                .style("opacity", 1);
+            }, 1000);
+
+            // Hide annotations from previous steps
+            dustBowlAnnotation.transition().duration(500).style("opacity", 0);
+            pollutionAnnotation.transition().duration(500).style("opacity", 0);
+            transitionLineGroup.transition().duration(500).style("opacity", 0);
+            
+          } else if (step === 7) {
+            // Hide chart, show bathtub animation
+            svg.style("display", "none");
+            d3.select("#bathtub-animation").classed("active", true);
+
+            // Hide any diff annotations from previous step
+            svg.selectAll(".diff-annotation").transition().duration(500).style("opacity", 0);
+
+            // Animate bathtub counter
+            const targetCount = 500;
+            const duration = 3000;
+            const steps = 60;
+            const increment = targetCount / steps;
+            let currentCount = 0;
+
+            const bathtubEmojis = d3.select("#bathtub-emojis");
+            const counter = d3.select("#bathtub-counter");
+
+            // Reset
+            bathtubEmojis.html("🛁");
+            counter.text("0 trillion bathtubs");
+
+            const interval = setInterval(() => {
+              currentCount += increment;
+              if (currentCount >= targetCount) {
+                currentCount = targetCount;
+                clearInterval(interval);
+              }
+
+              counter.text(`${Math.round(currentCount)} trillion bathtubs`);
+
+              // Add more bathtub emojis as count increases
+              const numEmojis = Math.min(Math.floor(currentCount / 50) + 1, 15);
+              let emojiString = "";
+              for (let i = 0; i < numEmojis; i++) {
+                emojiString += "🛁";
+                // Add line breaks every 5 emojis for better display
+                if ((i + 1) % 5 === 0 && i < numEmojis - 1) {
+                  emojiString += "<br>";
+                }
+              }
+              bathtubEmojis.html(emojiString);
+            }, duration / steps);
           }
         }
 
