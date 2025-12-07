@@ -268,28 +268,29 @@ function handleLegendHover(event) {
 
 // Set up button, legend, year window and regression toggle interactions
 function setupEventListeners() {
-  if (regionNavListenersAttached) return;
-
   const prevBtn = document.getElementById("prevBtn");
   const nextBtn = document.getElementById("nextBtn");
 
-  if (prevBtn) {
-    prevBtn.addEventListener("click", () => {
-      navigateRegion("prev");
-    });
-  }
+  // Attach navigation buttons only once, but allow other listeners to refresh
+  if (!regionNavListenersAttached) {
+    if (prevBtn) {
+      prevBtn.addEventListener("click", () => {
+        navigateRegion("prev");
+      });
+    }
 
-  if (nextBtn) {
-    nextBtn.addEventListener("click", () => {
-      navigateRegion("next");
-    });
-  }
+    if (nextBtn) {
+      nextBtn.addEventListener("click", () => {
+        navigateRegion("next");
+      });
+    }
 
-  regionNavListenersAttached = true;
+    regionNavListenersAttached = true;
+  }
 
   // Charles: scenario legend click to filter which lines are visible
-  // Use event delegation on document to handle clicks, which is more robust
-  // Remove any existing listeners first to avoid duplicates
+  // Use event delegation on document to handle clicks, which is more robust.
+  // Always re-bind delegated listeners in case the slide is re-activated.
   document.removeEventListener("click", handleLegendClick);
   document.addEventListener("click", handleLegendClick);
 
@@ -1296,51 +1297,37 @@ function drawChart() {
   });
 }
 
-// Initialize chart when DOM is ready
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => {
-    if (!regionalChartInitialized) {
-      const slide4 = document.querySelector(".slide:nth-child(5)");
-      if (slide4 && slide4.classList.contains("active")) {
-        initializeRegionalChart();
-      }
-    }
-  });
-} else {
-  if (!regionalChartInitialized) {
-    const slide4 = document.querySelector(".slide:nth-child(5)");
-    if (slide4 && slide4.classList.contains("active")) {
-      initializeRegionalChart();
-    }
+function initializeRegionalChartIfActive(regionalSlide) {
+  if (
+    regionalSlide &&
+    regionalSlide.classList.contains("active") &&
+    !regionalChartInitialized
+  ) {
+    initializeRegionalChart();
   }
 }
 
-// Recreate chart when slide becomes active (for slide transitions)
+// Ensure controls are wired and chart initializes when the regional slide is active
 document.addEventListener("DOMContentLoaded", () => {
-  const observer = new MutationObserver(() => {
-    const slide4 = document.querySelector(".slide:nth-child(5)");
-    if (slide4) {
-      const isActive = slide4.classList.contains("active");
+  // Always wire controls so the nav buttons work even if chart init is delayed
+  setupEventListeners();
 
-      if (isActive && !regionalChartInitialized) {
-        setTimeout(() => {
-          if (!regionalChartInitialized) {
-            initializeRegionalChart();
-          }
-        }, 100);
-      } else if (!isActive && regionalChartInitialized) {
-        // Reset flag when slide becomes inactive
+  const regionalSlide = document.getElementById("regional-slide");
+  initializeRegionalChartIfActive(regionalSlide);
+
+  if (regionalSlide) {
+    const observer = new MutationObserver(() => {
+      if (regionalSlide.classList.contains("active")) {
+        initializeRegionalChartIfActive(regionalSlide);
+      } else if (regionalChartInitialized) {
+        // Allow a clean re-init when the user returns to this slide
         regionalChartInitialized = false;
       }
-    }
-  });
+    });
 
-  const slidesContainer = document.querySelector(".slides-container");
-  if (slidesContainer) {
-    observer.observe(slidesContainer, {
+    observer.observe(regionalSlide, {
       attributes: true,
       attributeFilter: ["class"],
-      subtree: true,
     });
   }
 });
