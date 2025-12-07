@@ -328,12 +328,16 @@ canvas {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
   padding: 0.75rem 0.75rem 0.65rem 0.75rem;
   overflow: visible;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-height: 500px;
 }
 
 .rate-card-title {
   font-weight: 600;
   color: #1f4b99;
-  font-size: 15px;
+  font-size: 25px;
   margin-bottom: 0.4rem;
   text-align: center;
 }
@@ -341,8 +345,18 @@ canvas {
 #rateSvg {
   width: 100%;
   height: auto;
-  min-height: 340px;
+  min-height: 500px;
   display: block;
+  flex: 1 1 auto;
+}
+
+.rate-bars .rate-bar {
+  transition: opacity 150ms ease, stroke 150ms ease, stroke-width 150ms ease;
+}
+
+.rate-bar-highlight {
+  stroke: #1f2937;
+  stroke-width: 1.2px;
 }
 
 .chart-column {
@@ -364,6 +378,9 @@ canvas {
   .chart-column {
     width: 100%;
   }
+  .region-impact-panel.full-width-panel {
+    grid-column: 1;
+  }
 }
 
 /* Regional impact panel */
@@ -375,6 +392,12 @@ canvas {
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
   max-width: 1000px;
+}
+
+.region-impact-panel.full-width-panel {
+  grid-column: 1 / -1;
+  margin-top: 0.25rem;
+  max-width: none;
 }
 
 .impact-header {
@@ -398,9 +421,10 @@ canvas {
 }
 
 .impact-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 0.75rem;
+  align-items: flex-end;
 }
 
 .impact-card {
@@ -412,6 +436,7 @@ canvas {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  flex: 1 1 220px;
 }
 
 .impact-label {
@@ -463,6 +488,9 @@ canvas {
 @media (max-width: 640px) {
   .impact-values {
     grid-template-columns: 1fr;
+  }
+  .impact-grid {
+    flex-direction: column;
   }
 }
 
