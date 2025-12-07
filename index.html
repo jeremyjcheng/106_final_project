@@ -46,155 +46,8 @@
           </div>
         </div>
       </div>
-      <!-- Slide 3: Industrial revolution + land use texts -->
-      <div class="slide scrollable">
-        <div
-          class="slide-content"
-          style="grid-template-columns: 1fr; max-width: 900px; gap: 1.5rem"
-        >
-          <div class="slide-text">
-            <h2>
-              Along the long timeline of the past, some marks of human influence
-            </h2>
-            <p>
-              Over more than 170 years of summer rainfall records, a quiet story
-              unfolds. Natural swings in precipitation once shaped the nation’s
-              regions almost entirely on their own, but as the decades progress,
-              subtle shifts begin to emerge-patterns that no longer align with
-              nature alone. These long timelines reveal the early fingerprints
-              of human influence, faint at first, but growing clearer as
-              emissions rise and the climate system responds.
-            </p>
 
-            <p style="color: #888">
-              💡Tip: Click any <u>legend</u> item to show or hide a region.
-              <u>Hover</u> over the lines to explore summer precipitation values
-              for each year.
-            </p>
-          </div>
-          <div class="slide-viz-industrial">
-            <div id="industrial-precipitation-chart"></div>
-          </div>
-
-          <!-- Key Insights Container -->
-          <div class="insights-container">
-            <div class="insights-header">
-              <h3><span>🔍</span> Key Insights</h3>
-              <button
-                class="insights-toggle"
-                aria-label="Toggle insights"
-                type="button"
-              >
-                <svg
-                  class="arrow-icon"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <polyline points="6 9 10 13 14 9"></polyline>
-                </svg>
-              </button>
-            </div>
-
-            <div class="insights-content">
-              <!-- Northeast -->
-              <details class="insight-item">
-                <summary class="insight-summary">
-                  <span class="region-title"
-                    >Northeast: The Wettest Region</span
-                  >
-                  <span class="detail-arrow">▼</span>
-                </summary>
-                <div class="insight-detail">
-                  The Northeast sits downwind of the Atlantic Ocean, giving it
-                  abundant moisture year-round. With warming temperatures, the
-                  atmosphere holds more water vapor, which amplifies heavy
-                  summer rainfall events. This causes the Northeast to show the
-                  strongest upward trend in precipitation over the past century.
-                </div>
-              </details>
-
-              <!-- South -->
-              <details class="insight-item">
-                <summary class="insight-summary">
-                  <span class="region-title"
-                    >South: Humid, Volatile, and Influenced by the Gulf</span
-                  >
-                  <span class="detail-arrow">▼</span>
-                </summary>
-                <div class="insight-detail">
-                  The South is directly exposed to warm, moisture-rich air from
-                  the Gulf of Mexico, leading to high rainfall but also large
-                  year-to-year swings. Tropical systems, heat-driven
-                  thunderstorms, and drought cycles all collide here, creating a
-                  wet but highly variable summer precipitation pattern.
-                </div>
-              </details>
-
-              <!-- Midwest -->
-              <details class="insight-item">
-                <summary class="insight-summary">
-                  <span class="region-title"
-                    >Midwest: Moderate but Gradually Increasing</span
-                  >
-                  <span class="detail-arrow">▼</span>
-                </summary>
-                <div class="insight-detail">
-                  The Midwest's rainfall is shaped by storm tracks that pull
-                  moisture northward from the Gulf. As warming strengthens this
-                  moisture transport and intensifies convective storms, the
-                  region shows a slow but noticeable rise in summer
-                  precipitation, especially in the late 20th century.
-                </div>
-              </details>
-
-              <!-- West -->
-              <details class="insight-item">
-                <summary class="insight-summary">
-                  <span class="region-title"
-                    >West: The Driest and Most Stable</span
-                  >
-                  <span class="detail-arrow">▼</span>
-                </summary>
-                <div class="insight-detail">
-                  The West's summer precipitation is shaped by its distance from
-                  major moisture sources and the rain shadow effect of mountain
-                  ranges. With less atmospheric moisture to begin with, warming
-                  has a more muted effect here. The region shows the most stable
-                  precipitation pattern, with minimal long-term trends compared
-                  to the wetter eastern regions.
-                </div>
-              </details>
-            </div>
-          </div>
-          <div class="invisible-separator"></div>
-        </div>
-      </div>
-
-      <!-- Slide 3b: Impact comparison (High vs Low) -->
-      <div
-        class="slide scrollable impact-choices-slide"
-        id="impact-choices-slide"
-      >
-        <div class="slide-content impact-choices-content">
-          <div class="slide-text">
-            <h2>Emissions Choices: Who Bears the Impact?</h2>
-            <p>
-              Compare how many farms, people, and dollars are exposed under low
-              vs. high emissions. The gap shows what we avoid by choosing the
-              low-emission pathway.
-            </p>
-          </div>
-          <div id="impact-comparison-chart" class="impact-chart-shell"></div>
-        </div>
-      </div>
-
-      <!-- Slide 4: Regional Precipitation Chart -->
+      <!-- Slide 3b: Regional Precipitation Chart -->
       <div class="slide scrollable" id="regional-slide">
         <div
           class="slide-content regional-chart-slide"
@@ -502,6 +355,24 @@
             z-index: 1000;
           "
         ></div>
+      </div>
+
+      <!-- Slide 4: Impact comparison (High vs Low) -->
+      <div
+        class="slide scrollable impact-choices-slide"
+        id="impact-choices-slide"
+      >
+        <div class="slide-content impact-choices-content">
+          <div class="slide-text">
+            <h2>Emissions Choices: Who Bears the Impact?</h2>
+            <p>
+              Compare how many farms, people, and dollars are exposed under low
+              vs. high emissions. The gap shows what we avoid by choosing the
+              low-emission pathway.
+            </p>
+          </div>
+          <div id="impact-comparison-chart" class="impact-chart-shell"></div>
+        </div>
       </div>
 
       <!-- Slide 5: Climate Choices Game -->

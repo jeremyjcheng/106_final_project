@@ -210,39 +210,46 @@ const insightsToggle = document.querySelector('.insights-toggle');
 const insightsContent = document.querySelector('.insights-content');
 const insightsContainer = document.querySelector('.insights-container');
 
-// Prevent the toggle button from triggering slide navigation
-insightsToggle.addEventListener('click', (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-  e.stopImmediatePropagation();
-  
-  insightsToggle.classList.toggle('collapsed');
-  insightsContent.classList.toggle('collapsed');
-});
-
-// Prevent details/summary from triggering slide navigation
-const insightItems = document.querySelectorAll('.insight-item');
-insightItems.forEach(item => {
-  const summary = item.querySelector('.insight-summary');
-  
-  summary.addEventListener('click', (e) => {
+if (insightsToggle && insightsContent) {
+  // Prevent the toggle button from triggering slide navigation
+  insightsToggle.addEventListener('click', (e) => {
+    e.preventDefault();
     e.stopPropagation();
     e.stopImmediatePropagation();
+
+    insightsToggle.classList.toggle('collapsed');
+    insightsContent.classList.toggle('collapsed');
   });
-});
+}
+
+// Prevent details/summary from triggering slide navigation
+if (insightsContent) {
+  const insightItems = insightsContent.querySelectorAll('.insight-item');
+  insightItems.forEach(item => {
+    const summary = item.querySelector('.insight-summary');
+    if (summary) {
+      summary.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+      });
+    }
+  });
+}
 
 // Stop all events from bubbling up from the insights container
-insightsContainer.addEventListener('click', (e) => {
-  e.stopPropagation();
-});
+if (insightsContainer) {
+  insightsContainer.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
 
-insightsContainer.addEventListener('touchstart', (e) => {
-  e.stopPropagation();
-}, { passive: true });
+  insightsContainer.addEventListener('touchstart', (e) => {
+    e.stopPropagation();
+  }, { passive: true });
 
-insightsContainer.addEventListener('mousedown', (e) => {
-  e.stopPropagation();
-});
+  insightsContainer.addEventListener('mousedown', (e) => {
+    e.stopPropagation();
+  });
+}
 
 // typewriter
 function typewriterEffect(element, speed = 50) {
