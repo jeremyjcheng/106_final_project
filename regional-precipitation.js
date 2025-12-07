@@ -1671,10 +1671,27 @@ function initializeRegionalChartIfActive(regionalSlide) {
   }
 }
 
+function placeImpactPanelFullWidth() {
+  const regionalMain = document.querySelector(".regional-main");
+  const impactPanel = document.querySelector(".region-impact-panel");
+
+  if (!regionalMain || !impactPanel) return;
+
+  // Move the impact panel to the bottom of the layout so it can span full width
+  if (impactPanel.parentElement !== regionalMain) {
+    regionalMain.appendChild(impactPanel);
+  }
+
+  impactPanel.classList.add("full-width-panel");
+}
+
 // Ensure controls are wired and chart initializes when the regional slide is active
 document.addEventListener("DOMContentLoaded", () => {
   // Always wire controls so the nav buttons work even if chart init is delayed
   setupEventListeners();
+
+  // Allow the impact cards to stretch horizontally across the bottom
+  placeImpactPanelFullWidth();
 
   const regionalSlide = document.getElementById("regional-slide");
   initializeRegionalChartIfActive(regionalSlide);
