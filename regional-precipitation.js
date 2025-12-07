@@ -489,6 +489,34 @@ function computeRegressionLine(data) {
   return result;
 }
 
+// Compute change in precipitation per decade between adjacent binned points
+function computeRateOfChange(binnedData, scenarioType) {
+  if (!binnedData || binnedData.length < 2) return [];
+
+  const deltas = [];
+
+  for (let i = 1; i < binnedData.length; i++) {
+    const prev = binnedData[i - 1];
+    const curr = binnedData[i];
+    const yearDelta = curr.year - prev.year;
+    if (yearDelta === 0) continue;
+
+    const ratePerDecade = (curr.value - prev.value) / (yearDelta / 10);
+
+    deltas.push({
+      year: (prev.year + curr.year) / 2, // midpoint of the two bins
+      value: ratePerDecade,
+      spanStart: prev.binStart ?? prev.year,
+      spanEnd: curr.binEnd ?? curr.year,
+      fromYear: prev.year,
+      toYear: curr.year,
+      type: scenarioType,
+    });
+  }
+
+  return deltas;
+}
+
 // Core drawing function (called whenever state changes)
 function drawChart() {
   if (!regionData || !futureData) {
@@ -497,6 +525,28 @@ function drawChart() {
   }
 
   const { width, height, margin } = getChartDimensions();
+  const hasSeparateRate = !!document.getElementById("rateSvg");
+  const rateCardWidth = 540;
+  const rateCardHeight = 340;
+  const rateCardMargin = { top: 14, right: 14, bottom: 30, left: 54 };
+  const rateCardInnerWidth =
+    rateCardWidth - rateCardMargin.left - rateCardMargin.right;
+  const rateCardInnerHeight =
+    rateCardHeight - rateCardMargin.top - rateCardMargin.bottom;
+  const rateInsetHeight = 170;
+  const rateInsetWidth = Math.min(
+    440,
+    Math.max(280, width - margin.left - margin.right - 60)
+  );
+  const rateInsetMargin = { top: 16, right: 18, bottom: 32, left: 56 };
+  const rateInnerWidth =
+    rateInsetWidth - rateInsetMargin.left - rateInsetMargin.right;
+  const rateInnerHeight =
+    rateInsetHeight - rateInsetMargin.top - rateInsetMargin.bottom;
+  const rateOrigin = {
+    x: margin.left + 10,
+    y: height - margin.bottom - rateInsetHeight - 12,
+  };
 
   d3.select("#chartSvg").selectAll("*").remove();
 
@@ -651,6 +701,32 @@ function drawChart() {
     }
   }
 
+  // Compute decadal change (rate of change) series
+  const rateHistorical = computeRateOfChange(binnedHistorical, "historical");
+  const rateLow = computeRateOfChange(binnedLow, "low-emission");
+  const rateHigh = computeRateOfChange(binnedHigh, "high-emission");
+
+  // Ensure future rate lines start where historical leaves off
+  const lastHistRate = rateHistorical.length
+    ? rateHistorical[rateHistorical.length - 1]
+    : null;
+  if (lastHistRate) {
+    if (rateLow.length) {
+      if (rateLow[0].year > lastHistRate.year) {
+        rateLow.unshift({ ...lastHistRate, type: "low-emission" });
+      } else if (rateLow[0].year === lastHistRate.year) {
+        rateLow[0].value = lastHistRate.value;
+      }
+    }
+    if (rateHigh.length) {
+      if (rateHigh[0].year > lastHistRate.year) {
+        rateHigh.unshift({ ...lastHistRate, type: "high-emission" });
+      } else if (rateHigh[0].year === lastHistRate.year) {
+        rateHigh[0].value = lastHistRate.value;
+      }
+    }
+  }
+
   const allValues = [...binnedHistorical, ...binnedLow, ...binnedHigh].map(
     (d) => d.value
   );
@@ -675,6 +751,34 @@ function drawChart() {
     .ticks(xTickCount);
 
   const yAxis = d3.axisLeft(yScale).tickFormat(d3.format(".2f")).ticks(6);
+
+  const rateValues = [...rateHistorical, ...rateLow, ...rateHigh].map(
+    (d) => d.value
+  );
+  const rateMin = rateValues.length ? d3.min(rateValues) : 0;
+  const rateMax = rateValues.length ? d3.max(rateValues) : 0;
+  const ratePad = (rateMax - rateMin || 0.1) * 0.3;
+  const rateDomainMin = Math.min(rateMin - ratePad, 0);
+  const rateDomainMax = Math.max(rateMax + ratePad, 0);
+
+  const rateXScale = d3
+    .scaleLinear()
+    .domain([domainStart, domainEnd])
+    .range(hasSeparateRate ? [0, rateCardInnerWidth] : [0, rateInnerWidth]);
+
+  const rateYScale = d3
+    .scaleLinear()
+    .domain([rateDomainMin, rateDomainMax])
+    .range(hasSeparateRate ? [rateCardInnerHeight, 0] : [rateInnerHeight, 0]);
+
+  const rateXAxis = d3
+    .axisBottom(rateXScale)
+    .tickFormat(d3.format("d"))
+    .ticks(xTickCount);
+  const rateYAxis = d3
+    .axisLeft(rateYScale)
+    .tickFormat(d3.format(".2f"))
+    .ticks(4);
 
   svg
     .append("g")
@@ -836,6 +940,43 @@ function drawChart() {
 
   const hideTooltip = function () {
     tooltip.classed("visible", false);
+  };
+
+  const showRateTooltip = function (event, d) {
+    const tooltipNode = tooltip.node();
+    if (!tooltipNode) return;
+
+    const slideElement = tooltipNode.closest(".slide");
+    if (!slideElement) return;
+
+    const targetSvg =
+      hasSeparateRate && event.target && event.target.ownerSVGElement
+        ? event.target.ownerSVGElement
+        : svgNode;
+    const svgRect = targetSvg.getBoundingClientRect();
+    const slideRect = slideElement.getBoundingClientRect();
+
+    const xPos = hasSeparateRate
+      ? rateCardMargin.left + rateXScale(d.year)
+      : rateOrigin.x + rateInsetMargin.left + rateXScale(d.year);
+    const yPos = hasSeparateRate
+      ? rateCardMargin.top + rateYScale(d.value)
+      : rateOrigin.y + rateInsetMargin.top + rateYScale(d.value);
+
+    const tooltipX = svgRect.left - slideRect.left + xPos + 10;
+    const tooltipY = svgRect.top - slideRect.top + yPos - 32;
+
+    const scenarioLabel = scenarioLabelMap[d.type] || "Rate of change";
+    let tooltipText = `<strong>Rate of change — ${scenarioLabel}</strong><br>Span: ${
+      d.fromYear
+    }-${d.toYear}<br>Δ per decade: ${d.value.toFixed(2)} mm/day`;
+    tooltipText += `<br>Midpoint: ${d.year.toFixed(0)}`;
+
+    tooltip
+      .html(tooltipText)
+      .style("left", tooltipX + "px")
+      .style("top", tooltipY + "px")
+      .classed("visible", true);
   };
 
   // Helper function to calculate distance from point to line segment
@@ -1231,6 +1372,157 @@ function drawChart() {
     }
   }
 
+  // ------------------------------
+  // Rate of change chart
+  // ------------------------------
+  const renderRateChart = (containerGroup, innerWidth, innerHeight, titleY) => {
+    containerGroup
+      .append("g")
+      .attr("transform", `translate(0,${innerHeight})`)
+      .call(rateXAxis)
+      .style("font-size", "12px");
+
+    containerGroup.append("g").call(rateYAxis).style("font-size", "12px");
+
+    containerGroup
+      .append("line")
+      .attr("x1", 0)
+      .attr("x2", innerWidth)
+      .attr("y1", rateYScale(0))
+      .attr("y2", rateYScale(0))
+      .attr("stroke", "#ccc")
+      .attr("stroke-width", 1.5)
+      .attr("stroke-dasharray", "4,3");
+
+    const rateLine = d3
+      .line()
+      .x((d) => rateXScale(d.year))
+      .y((d) => rateYScale(d.value))
+      .curve(d3.curveMonotoneX);
+
+    const drawRateSeries = (data, color, className) => {
+      if (!data || data.length === 0) return;
+
+      const group = containerGroup.append("g").attr("class", className);
+
+      group
+        .append("path")
+        .datum(data)
+        .attr("fill", "none")
+        .attr("stroke", color)
+        .attr("stroke-width", 2)
+        .attr("opacity", 0.9)
+        .attr("d", rateLine);
+
+      group
+        .selectAll("circle")
+        .data(data)
+        .enter()
+        .append("circle")
+        .attr("cx", (d) => rateXScale(d.year))
+        .attr("cy", (d) => rateYScale(d.value))
+        .attr("r", 5)
+        .attr("fill", color)
+        .attr("opacity", 0.95)
+        .on("mouseover", showRateTooltip)
+        .on("mouseout", hideTooltip);
+    };
+
+    if (rateValues.length === 0) {
+      containerGroup
+        .append("text")
+        .attr("x", innerWidth / 2)
+        .attr("y", innerHeight / 2)
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .style("fill", "#777")
+        .text("Rate of change appears when at least two decades are visible.");
+    } else {
+      if (activeScenarios.includes("historical")) {
+        drawRateSeries(rateHistorical, "#555", "rate-historical-line");
+      }
+      if (activeScenarios.includes("low")) {
+        drawRateSeries(rateLow, "#1e88e5", "rate-low-line");
+      }
+      if (activeScenarios.includes("high")) {
+        drawRateSeries(rateHigh, "#e53935", "rate-high-line");
+      }
+    }
+
+    containerGroup
+      .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", -46)
+      .attr("x", -(innerHeight / 2))
+      .style("text-anchor", "middle")
+      .style("font-size", "13px")
+      .style("fill", "#333")
+      .style("font-weight", "500")
+      .text("mm/day change per decade");
+  };
+
+  if (hasSeparateRate) {
+    const rateSvg = d3.select("#rateSvg");
+    if (!rateSvg.empty()) {
+      const svgEl = rateSvg.node();
+      const rect = svgEl ? svgEl.getBoundingClientRect() : null;
+      const cardW = Math.max(rateCardWidth, rect?.width || 0);
+      const cardH = Math.max(rateCardHeight, rect?.height || 0);
+      const innerW = Math.max(
+        260,
+        cardW - rateCardMargin.left - rateCardMargin.right
+      );
+      const innerH = Math.max(
+        200,
+        cardH - rateCardMargin.top - rateCardMargin.bottom
+      );
+
+      rateSvg
+        .attr("width", cardW)
+        .attr("height", cardH)
+        .attr("viewBox", `0 0 ${cardW} ${cardH}`)
+        .attr("preserveAspectRatio", "xMidYMid meet");
+      rateSvg.selectAll("*").remove();
+
+      const outer = rateSvg
+        .append("g")
+        .attr(
+          "transform",
+          `translate(${rateCardMargin.left},${rateCardMargin.top})`
+        );
+
+      // Re-scale to the measured space
+      rateXScale.range([0, innerW]);
+      rateYScale.range([innerH, 0]);
+
+      renderRateChart(outer, innerW, innerH, -8);
+    }
+  } else {
+    const rateGroup = svg
+      .append("g")
+      .attr("class", "rate-chart")
+      .attr("transform", `translate(${rateOrigin.x},${rateOrigin.y})`);
+
+    rateGroup
+      .append("rect")
+      .attr("width", rateInsetWidth)
+      .attr("height", rateInsetHeight)
+      .attr("rx", 8)
+      .attr("ry", 8)
+      .attr("fill", "#f8fbff")
+      .attr("stroke", "#d7e3f4")
+      .attr("stroke-width", 1);
+
+    const rateInner = rateGroup
+      .append("g")
+      .attr(
+        "transform",
+        `translate(${rateInsetMargin.left},${rateInsetMargin.top})`
+      );
+
+    renderRateChart(rateInner, rateInnerWidth, rateInnerHeight, -10);
+  }
+
   // Add invisible overlay for distance-based line detection
   // This makes it easier to interact with lines by detecting when mouse is within 10px
   const overlay = svg
@@ -1238,7 +1530,12 @@ function drawChart() {
     .attr("x", margin.left)
     .attr("y", margin.top)
     .attr("width", width - margin.left - margin.right)
-    .attr("height", height - margin.top - margin.bottom)
+    .attr(
+      "height",
+      hasSeparateRate
+        ? height - margin.top - margin.bottom
+        : Math.max(0, rateOrigin.y - margin.top - 8)
+    )
     .attr("fill", "transparent")
     .attr("pointer-events", "all")
     .style("cursor", "crosshair");
