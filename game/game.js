@@ -1,36 +1,36 @@
 const emissionsData = {
   vacation: {
-    "International flight": 1000,
-    "Domestic flight": 300,
-    "Multiple flights per year": 2000,
-    "Road trip (gas car)": 150,
-    "Road trip (electric vehicle)": 50,
-    "Train or bus vacation": 30,
+    "International flight": 900,
+    "Domestic flight": 239,
+    "Multiple flights per year": 598,
+    "Road trip (gas car)": 172,
+    "Road trip (electric vehicle)": 44,
+    "Train or bus vacation": 20,
   },
   commute: {
     "Walk/Bike": 0,
-    "Public transit": 20,
-    "Drive small car": 150,
-    "Drive SUV": 300,
-    "Drive EV": 50,
+    "Public transit": 196,
+    "Drive small car": 378,
+    "Drive SUV": 550,
+    "Drive EV": 97,
   },
   distance: {
-    "Short (0–5 miles)": 10,
-    "Medium (5–20 miles)": 50,
-    "Long (20–50+ miles)": 200,
+    "Short (0–5 miles)": 303,
+    "Medium (5–20 miles)": 605,
+    "Long (20–50+ miles)": 1514,
   },
   shopping: {
-    "Buy frequently from global stores": 100,
-    "Buy less and buy local": 30,
-    "Buy second-hand": 10,
+    "Buy frequently from global stores": 1000,
+    "Buy less and buy local": 400,
+    "Buy second-hand": 100,
   },
   diet: {
-    "High-meat diet": 500,
-    "Moderate-meat diet": 250,
-    Vegetarian: 100,
-    Vegan: 50,
+    "High-meat diet": 4435,
+    "Moderate-meat diet": 2385,
+    Vegetarian: 700,
+    Vegan: 550,
   },
-  housing: { Apartment: 100, "Small house": 200, "Large house": 400 },
+  housing: { Apartment: 1919, "Small house": 3256, "Large house": 4710 },
 };
 
 const imagesData = {
@@ -86,6 +86,66 @@ const categories = {
 
 let currentSlide = 0;
 let slides = [];
+
+function createTitleSlide() {
+  const container = d3.select(".slides-container");
+
+  const titleSlide = container
+    .append("div")
+    .attr("class", "slide title-slide active") // first slide starts active
+    .style("display", "flex")
+    .style("flex-direction", "column")
+    .style("justify-content", "center")
+    .style("align-items", "center")
+    .style("height", "100vh")
+    .style("background", "linear-gradient(135deg, #293aa8 0%, #5c3db2 50%, #7A3E9D 100%)")
+    .style("color", "white")
+    .style("text-align", "center");
+
+  // Title
+  titleSlide
+    .append("h1")
+    .html("Climate Choices Game ")
+    .style("font-size", "4rem")
+    .style("font-weight", "800")
+    .style("color", "white")
+    .style("text-shadow", "2px 2px 8px rgba(0,0,0,0.7)")
+    .style("margin-bottom", "1rem");
+
+  // Subtitle
+  titleSlide
+    .append("p")
+    .text("Make choices to see your carbon impact!")
+    .style("font-size", "2rem")
+    .style("margin-bottom", "2rem")
+    .style("text-shadow", "1px 1px 6px rgba(0,0,0,0.6)");
+
+  // Start button
+  const startBtn = titleSlide
+    .append("button")
+    .attr("id", "start-game")
+    .text("Start Game")
+    .style("padding", "1rem 2.5rem")
+    .style("font-size", "1.3rem")
+    .style("border-radius", "12px")
+    .style("border", "none")
+    .style("background", "#ff6ec4")
+    .style("color", "white")
+    .style("cursor", "pointer")
+    .style("box-shadow", "0 4px 10px rgba(0,0,0,0.3)")
+    .on("mouseover", function () {
+      d3.select(this).style("background", "#7873f5");
+    })
+    .on("mouseout", function () {
+      d3.select(this).style("background", "#ff6ec4");
+    })
+    .on("click", () => {
+      nextSlide(); // go to first question slide
+    });
+
+  return titleSlide;
+}
+
 
 function updateSlide() {
   slides.forEach((s, i) => {
@@ -155,21 +215,77 @@ function restoreSelectedState() {
     }
   }
 }
+// 1️⃣ Create the title slide first
+createTitleSlide();
 
-// Initialize start game
+// 2️⃣ Then create all question slides (they stay hidden until navigated)
+createSlides();
+
+// 3️⃣ Select the Start Game button from the title slide and attach click
 d3.select("#start-game").on("click", () => {
-  createSlides();
-  nextSlide();
+  nextSlide(); // go to the first question slide
 });
+
 
 // Generate slides for each category
 function createSlides() {
   const container = d3.select(".slides-container");
+  const totalQuestions = Object.keys(categories).length;
   let slideIndex = 0;
 
   for (const category in categories) {
+    const currentQuestionNum = slideIndex + 1;
     const slide = container.append("div").attr("class", "slide");
-    slide.append("h2").text(categories[category]);
+    
+    // Add progress indicator
+    const progress = slide.append("div")
+      .style("text-align", "center")
+      .style("margin-bottom", "30px");
+    
+    progress.append("div")
+      .style("font-size", "26px")
+      .style("color", "white")
+      .style("margin-bottom", "15px")
+      .style("font-weight", "700")
+      .style("text-shadow", "2px 2px 4px rgba(0,0,0,0.2)")
+      .text(`Question ${currentQuestionNum} of ${totalQuestions}`);
+    
+    // Progress bar
+    const progressBar = progress.append("div")
+      .style("width", "500px")
+      .style("height", "16px")
+      .style("background", "rgba(255, 255, 255, 0.3)")
+      .style("border-radius", "20px")
+      .style("margin", "0 auto")
+      .style("overflow", "hidden")
+      .style("box-shadow", "0 2px 8px rgba(0,0,0,0.15)");
+    
+    progressBar.append("div")
+      .style("width", `${(currentQuestionNum / totalQuestions) * 100}%`)
+      .style("height", "100%")
+      .style("background", "linear-gradient(90deg, #10b981, #34d399)")
+      .style("border-radius", "20px")
+      .style("transition", "width 0.5s ease")
+      .style("box-shadow", "0 0 10px rgba(16, 185, 129, 0.5)");
+    
+    // Category icon mapping
+    const categoryIcons = {
+      vacation: "✈️",
+      commute: "🚗",
+      distance: "📍",
+      shopping: "🛍️",
+      diet: "🍽️",
+      housing: "🏠"
+    };
+    
+    // Enhanced heading with icon
+    slide.append("div")
+      .style("text-align", "center")
+      .style("margin", "30px 0 40px 0")
+      .html(`
+        <div style="font-size: 80px; margin-bottom: 25px; filter: drop-shadow(3px 3px 6px rgba(0,0,0,0.2));">${categoryIcons[category]}</div>
+        <h2 style="font-size: 46px; color: white; font-weight: 800; margin: 0; text-shadow: 2px 2px 8px rgba(0,0,0,0.3);">${categories[category]}</h2>
+      `);
 
     const btnDiv = slide.append("div").attr("class", "buttons");
     const options = emissionsData[category];
@@ -197,7 +313,7 @@ function createSlides() {
       });
     });
 
-    // Add back button to each question slide (not the first one)
+    // Add back button to each question slide (except first)
     if (slideIndex > 0) {
       const backBtn = slide
         .append("button")
@@ -211,10 +327,18 @@ function createSlides() {
 
     slideIndex++;
   }
+  // END OF FOR LOOP - All question slides created above
 
   // Add final slide for total emissions
   const resultSlide = container.append("div").attr("class", "slide");
-  resultSlide.append("h1").text("Your Carbon Impact");
+  resultSlide
+    .append("h1")
+    .text("Your Carbon Impact")
+    .style("font-size", "48px")
+    .style("font-weight", "700")
+    .style("margin-bottom", "20px")
+    .style("color", "white");
+  
   resultSlide
     .append("div")
     .attr("class", "emissions-output")
@@ -246,6 +370,7 @@ function createSlides() {
     resetGame();
   });
 
+  // Collect all slides AFTER they're all created
   slides = document.querySelectorAll(".slide");
 
   // keyboard navigation
@@ -412,6 +537,9 @@ function showTotalEmissions() {
     if (userChoices[cat]) total += emissionsData[cat][userChoices[cat]];
   }
 
+  // Calculate 2100 total (75 years of emissions)
+  const total2100 = total * 75;
+
   // Classify emissions - simplified to two categories
   let classification = "";
   let classColor = "";
@@ -427,50 +555,132 @@ function showTotalEmissions() {
   let extremeRainfallDays = getExtremeRainfallDays(total);
   let lowEmissionImpact = getLowEmissionImpact(total);
 
-  d3.select("#final-emissions").html(`
-      <div class="results-header">
-        <h2>Our Future</h2>
-        <h3>Results Based On Your Answer:</h3>
-        <div class="results-total">${total} kg CO₂</div>
-        <div class="results-classification" style="color: ${classColor};">${classification}</div>
-      </div>
-      
-      <div class="results-grid">
-        <div class="results-box">
-          <h4>Your Precipitation Projection</h4>
-          <div id="precipitation-chart"></div>
+  // Use requestAnimationFrame to prevent blocking the UI
+  requestAnimationFrame(() => {
+    d3.select("#final-emissions").html(`
+        
+        <!-- SECTION 1: ANNUAL EMISSIONS & COMPARISON -->
+        <div style="background: #f0f9ff; border: 3px solid #3b82f6; border-radius: 20px; padding: 40px; margin-bottom: 60px;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <div style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; border-radius: 30px; font-size: 1.3em; font-weight: bold; margin-bottom: 15px;">
+              📊 YOUR ANNUAL EMISSIONS
+            </div>
+            <p style="color: #1e40af; font-size: 1.1em; margin: 15px 0 0 0;">
+              This represents your emissions <strong>per year</strong> — let's see how you compare to others
+            </p>
+          </div>
+          
+          <div style="background: white; border-radius: 16px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto;">
+            <div style="text-align: center;">
+              <div style="font-size: 0.9em; color: #6b7280; margin-bottom: 10px;">Annual Emissions</div>
+              <div style="font-size: 4em; font-weight: bold; color: #3b82f6;">${total.toLocaleString()}</div>
+              <div style="font-size: 1.2em; color: #6b7280;">kg CO₂/year</div>
+              <div style="display: inline-block; background: ${classColor === '#2e8b57' ? 'rgba(46,139,87,0.1)' : 'rgba(217,83,79,0.1)'}; padding: 12px 30px; border-radius: 30px; font-size: 1.1em; font-weight: 700; border: 2px solid ${classColor}; color: ${classColor}; margin-top: 20px;">${classification}</div>
+            </div>
+          </div>
+        
+          
+          <div id="annual-comparison" style="margin-top: 30px;"></div>
         </div>
         
-        <div class="results-box">
-          <h4>🌧️ Extreme Rainfall Days</h4>
-          <p><strong>Current scenario:</strong> ${extremeRainfallDays.current} days/year</p>
-          <p><strong>Low emission scenario:</strong> ${extremeRainfallDays.lowEmission} days/year</p>
-          <p style="margin-top: 15px; font-size: 0.9em; color: #888;">
-            <em>Extreme rainfall days can cause flooding, landslides, and infrastructure damage.</em>
+        <!-- DIVIDER -->
+        <div style="display: flex; align-items: center; gap: 20px; margin: 60px 0; color: #6b7280;">
+          <div style="flex: 1; height: 2px; background: #cbd5e0;"></div>
+          <div style="font-size: 1.5em; font-weight: bold; padding: 10px 20px; background: #f3f4f6; border-radius: 30px;">
+            ⏰ FAST FORWARD TO 2100
+          </div>
+          <div style="flex: 1; height: 2px; background: #cbd5e0;"></div>
+        </div>
+        
+        <!-- SECTION 2: LIFETIME EMISSIONS & VISUALIZATIONS -->
+        <div style="background: #fef3c7; border: 3px solid #f59e0b; border-radius: 20px; padding: 40px; margin-bottom: 40px;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <div style="display: inline-block; background: #f59e0b; color: white; padding: 12px 30px; border-radius: 30px; font-size: 1.3em; font-weight: bold; margin-bottom: 15px;">
+              🌍 YOUR LIFETIME IMPACT (BY 2100)
+            </div>
+            <p style="color: #92400e; font-size: 1.1em; margin: 15px 0 0 0;">
+              If you maintain these habits for <strong>75 years</strong>, here's your total environmental impact
+            </p>
+          </div>
+          
+          <div style="background: white; border-radius: 16px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto;">
+            <div style="text-align: center;">
+              <div style="font-size: 0.9em; color: #6b7280; margin-bottom: 10px;">Lifetime Total (2025 → 2100)</div>
+              <div style="font-size: 4em; font-weight: bold; color: #f59e0b;">${total2100.toLocaleString()}</div>
+              <div style="font-size: 1.2em; color: #6b7280; margin-bottom: 15px;">kg CO₂ total</div>
+              <div style="font-size: 0.9em; color: #6b7280; padding: 10px; background: #f9fafb; border-radius: 8px;">
+                <strong>${total.toLocaleString()} kg/year</strong> × <strong>75 years</strong> = <strong>${total2100.toLocaleString()} kg</strong>
+              </div>
+            </div>
+          </div>
+          
+          <div style="background: rgba(245, 158, 11, 0.1); padding: 20px; border-radius: 12px; margin-top: 30px; text-align: center; border: 2px dashed #f59e0b;">
+            <strong style="color: #92400e;">💡 Note:</strong>
+            <span style="color: #92400e;"> The visualizations below show this 75-year total in real-world terms</span>
+          </div>
+          
+          <div id="co2-equivalency" style="margin-top: 30px;"></div>
+        </div>
+
+        <div class="results-info-box" style="background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-left: 5px solid #3b82f6;">
+          <h4 style="margin: 0 0 15px 0; font-size: 1.2em; color: #2d3748;">🌍 How Carbon Emissions Affect Precipitation</h4>
+          <p style="line-height: 1.8; color: rgb(0, 1, 2); margin: 0; font-size: 20px;">
+            Carbon dioxide traps heat in Earth's atmosphere. Warmer air holds approximately 7% more moisture 
+            per degree Celsius of warming. This extra moisture leads to more intense precipitation events 
+            and increases the frequency of extreme rainfall days, resulting in flooding, erosion, and 
+            infrastructure damage.
           </p>
         </div>
-      </div>
+        
+        <div class="results-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-bottom: 30px;">
+          <div class="results-box" style="background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <h4 style="margin: 0 0 20px 0; font-size: 1.6em; color: #2d3748;">🌧️ Your Precipitation Impact</h4>
+            <div id="precipitation-chart"></div>
+          </div>
       
-      <div class="results-info-box">
-        <h4>💡 Understanding the Impact</h4>
-        <p>${lowEmissionImpact}</p>
-      </div>
-      
-      <div class="results-info-box">
-        <h4>🌍 How Carbon Emissions Affect Precipitation</h4>
-        <p>
-          Carbon dioxide traps heat in Earth's atmosphere. Warmer air holds approximately 7% more moisture 
-          per degree Celsius of warming. This extra moisture leads to more intense precipitation events 
-          and increases the frequency of extreme rainfall days, resulting in flooding, erosion, and 
-          infrastructure damage.
-        </p>
-      </div>
-    `);
+          
+          <div class="results-box" style="background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <h4 style="margin: 0 0 20px 0; font-size: 1.2em; color: #2d3748;">⚠️ Extreme Weather Events</h4>
+            <div style="background: #fef3c7; padding: 20px; border-radius: 12px; margin-bottom: 15px; border-left: 4px solid #f59e0b;">
+              <div style="font-size: 0.9em; color: #92400e; margin-bottom: 5px;">Your Scenario</div>
+              <div style="font-size: 2.5em; font-weight: bold; color: #d97706;">${extremeRainfallDays.current}</div>
+              <div style="font-size: 0.9em; color: #92400e;">extreme rainfall days/year</div>
+            </div>
+            <div style="background: #d1fae5; padding: 20px; border-radius: 12px; border-left: 4px solid #10b981;">
+              <div style="font-size: 0.9em; color: #065f46; margin-bottom: 5px;">Low Emission Goal</div>
+              <div style="font-size: 2.5em; font-weight: bold; color: #059669;">${extremeRainfallDays.lowEmission}</div>
+              <div style="font-size: 0.9em; color: #065f46;">extreme rainfall days/year</div>
+            </div>
+            <p style="margin-top: 15px; font-size: 0.85em; color: #6b7280; line-height: 1.5;">
+              <em>Extreme rainfall causes flooding, landslides, and infrastructure damage.</em>
+            </p>
+          </div>
+        </div>
+        
+        <div class="results-info-box" style="background: linear-gradient(135deg, #fef3c7 100%,#fef3c7 100%); padding: 30px; border-radius: 16px; color: white; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+          <h4 style="margin: 0 0 15px 0; font-size: 1.5em;color: #d97706;">💡 Understanding Your Impact</h4>
+          <p style="line-height: 1.8; color: #d97706; margin: 0; font-size: 20px;">${lowEmissionImpact}</p>
+        </div>
+        
 
-  // Create the D3 chart after the HTML is inserted
-  createPrecipitationChart("precipitation-chart", total);
+      `);
+
+    // Create the D3 chart after the HTML is inserted (defer heavy operations)
+    requestAnimationFrame(() => {
+      createPrecipitationChart("precipitation-chart", total);
+
+      // Create percentile viz in annual section
+      setTimeout(() => {
+        createPercentileViz('annual-comparison', total);
+      }, 100);
+
+      // Create CO2 equivalencies visualization with slight delay
+      setTimeout(() => {
+        showCO2Equivalencies(total, total2100);
+      }, 200);
+    });
+  });
 }
-
 function getExtremeRainfallDays(total) {
   let current, lowEmission;
 
@@ -520,238 +730,96 @@ function resetGame() {
   d3.selectAll(".slide").classed("active", false);
   d3.select(".title-slide").classed("active", true);
 }
-function showCO2Equivalencies(total) {
-  // --- Equivalency math ---
+
+function showCO2Equivalencies(total, total2100) {
+  // --- Equivalency math based on LIFETIME emissions ---
   const equivalencies = [
     {
       label: "Miles of driving",
-      value: Math.round(total / 0.404),
-      icon: "../assets/car.png",
-    },
-    {
-      label: "Hours of lighting",
-      value: Math.round((total / 0.417) * 10),
-      icon: "../assets/light.png",
-    },
-    {
-      label: "Number of Meals 🍔 🥗 🍗",
-      value: Math.round(total / 5),
-      icon: "../assets/burger.png",
-    },
-    {
-      label: "Trees to absorb it",
-      value: Math.ceil(total / 22),
-      icon: "../assets/tree.png",
-    },
-  ];
-
-  // Clear previous content
-  const container = d3.select("#co2-equivalency");
-  container.selectAll("*").remove();
-
-  container.append("h3").text("Your CO₂ in Real-World Terms");
-
-  // Create SVG for icon grid
-  const svgWidth = 400,
-    svgHeight = 250;
-  const iconSize = 40,
-    padding = 20;
-  const svg = container
-    .append("svg")
-    .attr("width", svgWidth)
-    .attr("height", svgHeight);
-
-  equivalencies.forEach((eq, i) => {
-    const x = (i % 2) * (svgWidth / 2) + padding;
-    const y = Math.floor(i / 2) * (svgHeight / 2) + padding;
-
-    const group = svg.append("g").attr("transform", `translate(${x},${y})`);
-
-    // Icon image
-    group
-      .append("image")
-      .attr("href", eq.icon)
-      .attr("width", iconSize)
-      .attr("height", iconSize);
-
-    // Animated number
-    const numberText = group
-      .append("text")
-      .attr("x", iconSize + 10)
-      .attr("y", iconSize / 2)
-      .attr("dy", "0.35em")
-      .style("font-size", "16px")
-      .style("font-weight", "700")
-      .text("0");
-
-    animateNumberD3(numberText, eq.value);
-
-    // Label
-    group
-      .append("text")
-      .attr("x", 0)
-      .attr("y", iconSize + 15)
-      .style("font-size", "12px")
-      .text(eq.label);
-  });
-}
-
-// Animate D3 text counting
-function animateNumberD3(selection, targetValue) {
-  selection
-    .transition()
-    .duration(1200)
-    .tween("text", function () {
-      const i = d3.interpolateNumber(0, targetValue);
-      return function (t) {
-        this.textContent = Math.round(i(t));
-      };
-    });
-}
-
-function showTotalEmissions() {
-  let total = 0;
-  for (const cat in userChoices) {
-    if (userChoices[cat]) total += emissionsData[cat][userChoices[cat]];
-  }
-
-  // Classify emissions - simplified to two categories
-  let classification = "";
-  let classColor = "";
-
-  if (total < 1100) {
-    classification = "Low Emissions 🌱";
-    classColor = "#2e8b57";
-  } else {
-    classification = "High Emissions ⚠️";
-    classColor = "#d9534f";
-  }
-
-  let extremeRainfallDays = getExtremeRainfallDays(total);
-  let lowEmissionImpact = getLowEmissionImpact(total);
-
-  // Use requestAnimationFrame to prevent blocking the UI
-  requestAnimationFrame(() => {
-    d3.select("#final-emissions").html(`
-        <div class="results-header">
-          <h2>Our Future</h2>
-          <h3>Results Based On Your Answer:</h3>
-          <div class="results-total">${total} kg CO₂</div>
-          <div class="results-classification" style="color: ${classColor};">${classification}</div>
-        </div>
-        
-        <div class="results-grid">
-          <div class="results-box">
-            <h4>Your Precipitation Projection</h4>
-            <div id="precipitation-chart"></div>
-          </div>
-          
-          <div class="results-box">
-            <h4>🌧️ Extreme Rainfall Days</h4>
-            <p><strong>Current scenario:</strong> ${extremeRainfallDays.current} days/year</p>
-            <p><strong>Low emission scenario:</strong> ${extremeRainfallDays.lowEmission} days/year</p>
-            <p style="margin-top: 15px; font-size: 0.9em; color: #888;">
-              <em>Extreme rainfall days can cause flooding, landslides, and infrastructure damage.</em>
-            </p>
-          </div>
-        </div>
-        
-        <div class="results-box">
-          <div id="co2-equivalency"></div>
-        </div>
-        
-        <div class="results-info-box">
-          <h4>💡 Understanding the Impact</h4>
-          <p>${lowEmissionImpact}</p>
-        </div>
-        
-        <div class="results-info-box">
-          <h4>🌍 How Carbon Emissions Affect Precipitation</h4>
-          <p>
-            Carbon dioxide traps heat in Earth's atmosphere. Warmer air holds approximately 7% more moisture 
-            per degree Celsius of warming. This extra moisture leads to more intense precipitation events 
-            and increases the frequency of extreme rainfall days, resulting in flooding, erosion, and 
-            infrastructure damage.
-          </p>
-        </div>
-      `);
-
-    // Create the D3 chart after the HTML is inserted (defer heavy operations)
-    requestAnimationFrame(() => {
-      createPrecipitationChart("precipitation-chart", total);
-
-      // Create CO2 equivalencies visualization with slight delay
-      setTimeout(() => {
-        showCO2Equivalencies(total);
-      }, 100);
-    });
-  });
-}
-
-function showCO2Equivalencies(total) {
-  // --- Equivalency math ---
-  const equivalencies = [
-    {
-      label: "Miles of driving",
-      value: Math.round(total / 0.404),
+      value: Math.round(total2100 / 0.404),
       type: "driving",
     },
     {
       label: "Hours of lighting",
-      value: Math.round((total / 0.417) * 10),
+      value: Math.round((total2100 / 0.417) * 10),
       type: "lighting",
     },
-    { label: "Burgers 🍔", value: Math.round(total / 5), type: "burgers" },
+    { label: "Burgers 🍔", value: Math.round(total2100 / 5), type: "burgers" },
     {
       label: "Trees to absorb it",
-      value: Math.ceil(total / 22),
+      value: Math.ceil(total2100 / 22),
       type: "trees",
+      total2100: total2100,
     },
   ];
 
   // Clear previous content
   const container = d3.select("#co2-equivalency");
   container.selectAll("*").remove();
-
-  container
-    .append("h3")
-    .style("text-align", "center")
-    .style("margin-bottom", "30px")
-    .style("font-size", "24px")
-    .text("Your CO₂ in Real-World Terms");
 
   // Create individual viz containers
   equivalencies.forEach((eq, index) => {
     const vizBox = container
       .append("div")
       .style("margin-bottom", "40px")
-      .style("padding", "20px")
+      .style("padding", "25px")
       .style("background", "#f8f9fa")
-      .style("border-radius", "12px");
+      .style("border-radius", "16px")
+      .style("border", "2px solid #e2e8f0")
+      .style("transition", "all 0.3s ease")
+      .on("mouseenter", function() {
+        d3.select(this)
+          .style("border-color", "#3b82f6")
+          .style("box-shadow", "0 4px 12px rgba(59, 130, 246, 0.2)");
+      })
+      .on("mouseleave", function() {
+        d3.select(this)
+          .style("border-color", "#e2e8f0")
+          .style("box-shadow", "none");
+      });
 
-    vizBox
-      .append("h4")
-      .style("text-align", "center")
-      .style("margin-bottom", "15px")
-      .style("color", "#2d3748")
-      .text(`${eq.value.toLocaleString()} ${eq.label}`);
-
-    // Add city input for driving visualization ONLY
-    if (eq.type === "driving") {
-      const inputContainer = vizBox
-        .append("div")
-        .attr("id", "city-input-container")
+    // Only show the header for non-percentile visualizations
+    if (eq.type !== "percentile") {
+      vizBox
+        .append("h4")
         .style("text-align", "center")
-        .style("margin-bottom", "20px");
+        .style("margin-bottom", "20px")
+        .style("color", "#1f2937")
+        .style("font-size", "1.4em")
+        .html(`<span style="font-size: 2em; font-weight: bold; color: #3b82f6;">${eq.value.toLocaleString()}</span><br><span style="font-size: 0.8em; color: #6b7280;">${eq.label}</span>`);
+    }
 
-      inputContainer
+    // Add city input for driving visualization ONLY (using D3 only)
+    if (eq.type === "driving") {
+      const inputForm = vizBox
+        .append("form")
+        .attr("id", "city-input-form")
+        .style("text-align", "center")
+        .style("margin-bottom", "20px")
+        .on("submit", function(event) {
+          event.preventDefault();
+          const cityName = d3.select("#city-input").property("value").trim();
+          if (cityName) {
+            d3.select("#city-message")
+              .text("Loading new map...")
+              .style("color", "#3b82f6");
+            d3.select(`#viz-${eq.type}`).selectAll("*").remove();
+            createDrivingViz(`viz-${eq.type}`, eq.value, cityName);
+          } else {
+            d3.select("#city-message")
+              .text("Please enter a city name")
+              .style("color", "#dc2626");
+          }
+        });
+
+      inputForm
         .append("label")
         .style("font-size", "14px")
         .style("color", "#475569")
         .style("margin-right", "10px")
-        .text("Your city:");
+        .text("Your city: ");
 
-      const input = inputContainer
+      inputForm
         .append("input")
         .attr("type", "text")
         .attr("id", "city-input")
@@ -759,32 +827,25 @@ function showCO2Equivalencies(total) {
         .style("padding", "8px 12px")
         .style("border", "2px solid #cbd5e0")
         .style("border-radius", "6px")
-        .style("font-size", "14px")
+        .style("font-size", "20px")
         .style("width", "200px")
         .style("margin-right", "10px");
 
-      const button = inputContainer
+      const submitBtn = inputForm
         .append("button")
+        .attr("type", "submit")
         .attr("id", "city-submit")
         .style("padding", "8px 16px")
         .style("background", "#3b82f6")
         .style("color", "white")
         .style("border", "none")
         .style("border-radius", "6px")
-        .style("font-size", "14px")
+        .style("font-size", "20px")
         .style("cursor", "pointer")
         .style("font-weight", "600")
         .text("Show Route");
 
-      const messageDiv = inputContainer
-        .append("div")
-        .attr("id", "city-message")
-        .style("margin-top", "10px")
-        .style("font-size", "13px")
-        .style("min-height", "20px");
-
-      // Button hover effect
-      button
+      submitBtn
         .on("mouseenter", function () {
           d3.select(this).style("background", "#2563eb");
         })
@@ -792,35 +853,16 @@ function showCO2Equivalencies(total) {
           d3.select(this).style("background", "#3b82f6");
         });
 
-      // Handle city submission
-      button.on("click", () => {
-        const cityName = input.property("value").trim();
-        if (cityName) {
-          d3.select("#city-message")
-            .text("Loading new map...")
-            .style("color", "#3b82f6");
-          // Clear the viz area before creating new map
-          d3.select(`#viz-${eq.type}`).selectAll("*").remove();
-          createDrivingViz(`viz-${eq.type}`, eq.value, cityName);
-        } else {
-          d3.select("#city-message")
-            .text("Please enter a city name")
-            .style("color", "#dc2626");
-        }
-      });
-
-      // Allow Enter key to submit
-      input.on("keypress", function (event) {
-        if (event.key === "Enter") {
-          button.node().click();
-        }
-      });
-
-      // Show initial helpful message
-      d3.select("#city-message")
-        .text("💡 Default: San Diego, CA. Enter your city to update the route!")
+      vizBox
+        .append("div")
+        .attr("id", "city-message")
+        .style("text-align", "center")
+        .style("margin-top", "10px")
+        .style("font-size", "13px")
+        .style("min-height", "20px")
         .style("color", "#059669")
-        .style("font-weight", "600");
+        .style("font-weight", "600")
+        .text("💡 Default: San Diego, CA. Enter your city to update the route!");
     }
 
     // Create the viz container div
@@ -831,7 +873,9 @@ function showCO2Equivalencies(total) {
     // Use requestAnimationFrame for smoother rendering
     setTimeout(() => {
       requestAnimationFrame(() => {
-        if (eq.type === "driving") {
+        if (eq.type === "percentile") {
+          createPercentileViz(vizId, eq.value);
+        } else if (eq.type === "driving") {
           // Show default map with San Diego as starting point
           createDrivingViz(vizId, eq.value, "San Diego, CA");
         } else if (eq.type === "lighting") {
@@ -839,11 +883,220 @@ function showCO2Equivalencies(total) {
         } else if (eq.type === "burgers") {
           createFoodComparison(`#${vizId}`, eq.value);
         } else if (eq.type === "trees") {
-          createTreesViz(vizId, eq.value);
+          createTreesViz(vizId, eq.value, eq.total2100);
         }
       });
     }, index * 300); // Increased delay slightly for better performance
   });
+}
+
+// Function to calculate percentile based on emissions
+function getEmissionsPercentile(totalEmissions) {
+  // Real-world benchmarks (kg CO2 per year)
+  const benchmarks = [
+    { percentile: 1, emissions: 500, label: "Ultra Low", description: "bottom 1%" },
+    { percentile: 5, emissions: 1500, label: "Very Low", description: "bottom 5%" },
+    { percentile: 10, emissions: 2500, label: "Low", description: "bottom 10%" },
+    { percentile: 25, emissions: 4000, label: "Below Average", description: "bottom 25%" },
+    { percentile: 50, emissions: 8000, label: "Average", description: "middle 50%" },
+    { percentile: 75, emissions: 12000, label: "Above Average", description: "top 25%" },
+    { percentile: 90, emissions: 16000, label: "High", description: "top 10%" },
+    { percentile: 95, emissions: 20000, label: "Very High", description: "top 5%" },
+    { percentile: 99, emissions: 25000, label: "Ultra High", description: "top 1%" }
+  ];
+  
+  // Find where user falls
+  for (let i = 0; i < benchmarks.length; i++) {
+    if (totalEmissions <= benchmarks[i].emissions) {
+      return benchmarks[i];
+    }
+  }
+  
+  // If higher than top 1%
+  return { 
+    percentile: 99.9, 
+    emissions: totalEmissions, 
+    label: "Extreme", 
+    description: "top 0.1%" 
+  };
+}
+
+// Function to get color based on percentile
+function getPercentileColor(percentile) {
+  if (percentile <= 10) return "#10b981"; // Green - Low
+  if (percentile <= 25) return "#3b82f6"; // Blue - Below Average
+  if (percentile <= 50) return "#f59e0b"; // Orange - Average
+  if (percentile <= 75) return "#ef4444"; // Red - Above Average
+  if (percentile <= 90) return "#dc2626"; // Dark Red - High
+  return "#991b1b"; // Darker Red - Very High
+}
+
+// Function to create percentile visualization card
+function createPercentileViz(containerId, totalEmissions) {
+  const container = d3.select(`#${containerId}`);
+  container.selectAll("*").remove();
+  
+  const percentileData = getEmissionsPercentile(totalEmissions);
+  const color = getPercentileColor(percentileData.percentile);
+  
+  // Create card
+  const card = container
+    .append("div")
+    .style("background", "white")
+    .style("border-radius", "16px")
+    .style("padding", "30px")
+    .style("box-shadow", "0 10px 25px rgba(0,0,0,0.1)")
+    .style("max-width", "500px")
+    .style("margin", "0 auto");
+  
+  // Title
+  card
+    .append("h3")
+    .style("text-align", "center")
+    .style("margin", "0 0 25px 0")
+    .style("font-size", "24px")
+    .style("font-weight", "700")
+    .style("color", "#1f2937")
+    .text("How You Compare");
+  
+  // Emissions label
+  card
+    .append("div")
+    .style("text-align", "center")
+    .style("font-size", "16px")
+    .style("color", "#6b7280")
+    .style("margin-bottom", "10px")
+    .text("Your Annual Emissions");
+  
+  // Emissions amount
+  card
+    .append("div")
+    .style("text-align", "center")
+    .style("font-size", "48px")
+    .style("font-weight", "bold")
+    .style("color", color)
+    .style("margin-bottom", "20px")
+    .text(`${totalEmissions.toLocaleString()} kg`);
+  
+  // Percentile badge
+  const badge = card
+    .append("div")
+    .style("text-align", "center")
+    .style("margin", "20px 0");
+  
+  badge
+    .append("span")
+    .style("display", "inline-block")
+    .style("background", color)
+    .style("color", "white")
+    .style("padding", "12px 30px")
+    .style("border-radius", "30px")
+    .style("font-weight", "bold")
+    .style("font-size", "20px")
+    .style("letter-spacing", "1px")
+    .text(percentileData.label.toUpperCase());
+  
+  // Percentile description
+  card
+    .append("div")
+    .style("text-align", "center")
+    .style("font-size", "18px")
+    .style("color", "#374151")
+    .style("margin-top", "15px")
+    .style("font-weight", "600")
+    .html(`You emit <span...>less than ${100 - percentileData.percentile}%</span> of people`);
+  
+  // Additional context
+  card
+    .append("div")
+    .style("text-align", "center")
+    .style("font-size", "14px")
+    .style("color", "#6b7280")
+    .style("margin-top", "8px")
+    .text(`(You're in the ${percentileData.description})`);
+  
+  // Divider
+  card
+    .append("hr")
+    .style("border", "none")
+    .style("border-top", "1px solid #e5e7eb")
+    .style("margin", "25px 0");
+  
+  // Context information
+  const contextBox = card
+    .append("div")
+    .style("background", "#f9fafb")
+    .style("border-radius", "8px")
+    .style("padding", "15px")
+    .style("margin-top", "20px");
+  
+  contextBox
+    .append("div")
+    .style("font-size", "20px")
+    .style("color", "#374151")
+    .style("line-height", "1.6")
+    .html(`
+      <strong>📊 Context:</strong><br>
+      • Global average: ~4,000 kg CO₂/year<br>
+      • US average: ~16,000 kg CO₂/year<br>
+      • Paris Agreement target: ~2,000 kg CO₂/year by 2050
+    `);
+  
+  // Progress bar showing where user falls
+  const progressContainer = card
+    .append("div")
+    .style("margin-top", "25px");
+  
+  progressContainer
+    .append("div")
+    .style("font-size", "20px")
+    .style("color", "#6b7280")
+    .style("margin-bottom", "10px")
+    .text("Your position:");
+  
+  const progressBar = progressContainer
+    .append("div")
+    .style("width", "100%")
+    .style("height", "30px")
+    .style("background", "linear-gradient(90deg, #10b981 0%, #f59e0b 50%, #dc2626 100%)")
+    .style("border-radius", "15px")
+    .style("position", "relative")
+    .style("box-shadow", "inset 0 2px 4px rgba(0,0,0,0.1)");
+  
+  // Marker on progress bar
+  progressBar
+    .append("div")
+    .style("position", "absolute")
+    .style("left", `${percentileData.percentile}%`)
+    .style("top", "50%")
+    .style("transform", "translate(-50%, -50%)")
+    .style("width", "20px")
+    .style("height", "20px")
+    .style("background", "white")
+    .style("border", `3px solid ${color}`)
+    .style("border-radius", "50%")
+    .style("box-shadow", "0 2px 8px rgba(0,0,0,0.3)");
+  
+  // Labels under progress bar
+  const labelsContainer = progressContainer
+    .append("div")
+    .style("display", "flex")
+    .style("justify-content", "space-between")
+    .style("margin-top", "8px")
+    .style("font-size", "20px")
+    .style("color", "#6b7280");
+  
+  labelsContainer
+    .append("span")
+    .text("Low");
+  
+  labelsContainer
+    .append("span")
+    .text("Average");
+  
+  labelsContainer
+    .append("span")
+    .text("High");
 }
 
 // 1. DRIVING VISUALIZATION - Mapbox with animated route from user's city
@@ -911,14 +1164,7 @@ function createDrivingViz(containerId, miles, startCity) {
       // Remove loading message
       loadingMsg.remove();
 
-      // Update message with success
-      d3.select("#city-message")
-        .text(
-          `✅ Map loaded! Showing route from ${startCityName.split(",")[0]}`
-        )
-        .style("color", "#059669");
-
-      // Create map container
+      // Create map container using D3
       const mapDiv = container
         .append("div")
         .attr("id", `map-${containerId}`)
@@ -928,7 +1174,7 @@ function createDrivingViz(containerId, miles, startCity) {
         .style("overflow", "hidden")
         .style("box-shadow", "0 4px 6px rgba(0,0,0,0.1)");
 
-      // Initialize Mapbox
+      // Initialize Mapbox (must use native API, not D3)
       mapboxgl.accessToken = MAPBOX_TOKEN;
 
       const map = new mapboxgl.Map({
@@ -939,7 +1185,7 @@ function createDrivingViz(containerId, miles, startCity) {
         interactive: true,
       });
 
-      // Add navigation controls
+      // Add navigation controls (native Mapbox)
       map.addControl(new mapboxgl.NavigationControl(), "top-right");
       map.addControl(new mapboxgl.FullscreenControl(), "top-right");
 
@@ -960,12 +1206,13 @@ function createDrivingViz(containerId, miles, startCity) {
           duration: 2000,
         });
 
-        // Add start marker with custom styling
-        const startMarkerEl = document.createElement("div");
-        startMarkerEl.className = "custom-marker";
-        startMarkerEl.innerHTML = "🏠";
-        startMarkerEl.style.fontSize = "36px";
-        startMarkerEl.style.cursor = "pointer";
+        // Add start marker - create element with D3
+        const startMarkerEl = d3.create("div")
+          .attr("class", "custom-marker")
+          .style("font-size", "36px")
+          .style("cursor", "pointer")
+          .text("🏠")
+          .node();
 
         new mapboxgl.Marker({ element: startMarkerEl })
           .setLngLat(startCoords)
@@ -979,12 +1226,13 @@ function createDrivingViz(containerId, miles, startCity) {
           )
           .addTo(map);
 
-        // Add end marker with custom styling
-        const endMarkerEl = document.createElement("div");
-        endMarkerEl.className = "custom-marker";
-        endMarkerEl.innerHTML = "🏁";
-        endMarkerEl.style.fontSize = "36px";
-        endMarkerEl.style.cursor = "pointer";
+        // Add end marker - create element with D3
+        const endMarkerEl = d3.create("div")
+          .attr("class", "custom-marker")
+          .style("font-size", "36px")
+          .style("cursor", "pointer")
+          .text("🏁")
+          .node();
 
         new mapboxgl.Marker({ element: endMarkerEl })
           .setLngLat(destination.coords)
@@ -1033,13 +1281,13 @@ function createDrivingViz(containerId, miles, startCity) {
           },
         });
 
-        // Info text below map - simpler, more visible
+        // Info text below map - using D3
         container
           .append("p")
           .style("text-align", "center")
           .style("margin-top", "15px")
           .style("color", "#1f2937")
-          .style("font-size", "15px")
+          .style("font-size", "20px")
           .style("line-height", "1.6")
           .html(`🚗 That's like driving from <strong>${
           startCityName.split(",")[0]
@@ -1054,10 +1302,11 @@ function createDrivingViz(containerId, miles, startCity) {
         let lastTime = 0;
         const frameDelay = 40; // Target 25fps
 
-        const carMarkerEl = document.createElement("div");
-        carMarkerEl.innerHTML = "🚗";
-        carMarkerEl.style.fontSize = "32px";
-        carMarkerEl.style.filter = "drop-shadow(2px 2px 4px rgba(0,0,0,0.3))";
+        const carMarkerEl = d3.create("div")
+          .style("font-size", "32px")
+          .style("filter", "drop-shadow(2px 2px 4px rgba(0,0,0,0.3))")
+          .text("🚗")
+          .node();
 
         const car = new mapboxgl.Marker({ element: carMarkerEl })
           .setLngLat(startCoords)
@@ -1236,32 +1485,47 @@ function generateGreatCirclePath(start, end, numPoints) {
   return path;
 }
 
-// food comparison
+// food comparison - NOW INTERACTIVE!
 function createFoodComparison(containerId, burgers) {
   // DATA
   const foods = [
-    { name: "Beef Burgers", emoji: "🍔", value: burgers, color: "#ef4444" },
-    {
-      name: "Chicken Meals",
-      emoji: "🍗",
-      value: Math.round(burgers * 2.5),
-      color: "#f97316",
-    },
-    {
-      name: "Vegetarian Meals",
-      emoji: "🥗",
-      value: Math.round(burgers * 5),
-      color: "#22c55e",
-    },
+    { name: "Beef Meals", emoji: "🍔", co2PerItem: 6.0, color: "#ef4444" },       // Avg beef meal footprint
+    { name: "Chicken Meals", emoji: "🍗", co2PerItem: 1.8, color: "#f97316" },   // Chicken is ~70% lower than beef
+    { name: "Vegetarian Meals", emoji: "🥗", co2PerItem: 0.8, color: "#22c55e" } // Plant-based is lowest
   ];
+  
+
+  // Calculate values based on total CO2 (burgers * 5 kg CO2)
+  const totalCO2 = burgers * 5;
+  foods.forEach(food => {
+    food.value = Math.round(totalCO2 / food.co2PerItem);
+  });
+
+  const container = d3.select(containerId);
+  container.html(""); // clear
+
+  // Add interactive explanation
+  container
+    .append("div")
+    .style("text-align", "center")
+    .style("margin-bottom", "5px")
+    .style("padding", "15px")
+    .style("background", "#eff6ff")
+    .style("border-radius", "8px")
+    .style("border", "2px solid #3b82f6")
+    .html(`
+      <div style="font-size: 0.9em; color: #1e40af; line-height: 1.6;">
+        <strong>💡 Interactive Comparison</strong><br>
+        Your emissions equal <strong>${burgers.toLocaleString()} beef burgers</strong> (${totalCO2.toLocaleString()} kg CO₂).<br>
+        Click the bars below to see equivalent meal counts!
+      </div>
+    `);
 
   // SVG SETUP
   const width = 800;
   const height = 300;
 
-  const svg = d3
-    .select(containerId)
-    .html("") // clear previous render
+  const svg = container
     .append("svg")
     .attr("width", width - 10)
     .attr("height", height);
@@ -1273,13 +1537,27 @@ function createFoodComparison(containerId, burgers) {
   const xScale = d3
     .scaleLinear()
     .domain([0, maxValue])
-    .range([0, width - 200]);
+    .range([0, width - 250]);
+
+  // Info display area
+  const infoBox = container
+    .append("div")
+    .attr("id", "food-info")
+    .style("text-align", "center")
+    .style("padding", "20px")
+    .style("margin-top", "20px")
+    .style("background", "#f9fafb")
+    .style("border-radius", "12px")
+    .style("min-height", "100px")
+    .style("border", "2px solid #e5e7eb")
+    .html(`<div style="color: #9ca3af; font-size: 1.1em;">👆 Click on a food type to learn more</div>`);
 
   // DRAW EACH ROW
   foods.forEach((food, i) => {
     const g = svg
       .append("g")
-      .attr("transform", `translate(150,${i * barSpacing + 30})`);
+      .attr("transform", `translate(150,${i * barSpacing + 30})`)
+      .style("cursor", "pointer");
 
     // EMOJI
     g.append("text")
@@ -1287,65 +1565,155 @@ function createFoodComparison(containerId, burgers) {
       .attr("y", barHeight / 2)
       .attr("text-anchor", "middle")
       .style("font-size", "32px")
+      .style("pointer-events", "none")
       .text(food.emoji);
 
     // LABEL
     g.append("text")
-      .attr("x", -90)
-      .attr("y", barHeight / 2 + 30)
-      .attr("text-anchor", "middle")
-      .style("font-size", "12px")
-      .style("fill", "#666")
-      .text(food.name);
+    .attr("x", 0)
+    .attr("y", -10) // above bar
+    .attr("text-anchor", "start")
+    .style("font-size", "16px")
+    .style("fill", "#666")
+    .text(food.name);
 
     // ANIMATED BAR
-    g.append("rect")
+    const bar = g.append("rect")
       .attr("x", 0)
       .attr("y", 0)
       .attr("width", 0)
       .attr("height", barHeight)
       .attr("fill", food.color)
       .attr("rx", 5)
+      .style("transition", "all 0.3s ease");
+
+    bar
       .transition()
       .duration(1500)
       .delay(i * 200)
       .attr("width", xScale(food.value));
 
     // VALUE TEXT (fade in)
-    g.append("text")
+    const valueText = g.append("text")
       .attr("x", 10)
       .attr("y", barHeight / 2 + 5)
       .style("font-size", "16px")
       .style("font-weight", "bold")
       .style("fill", "white")
       .style("opacity", 0)
-      .text(food.value)
+      .style("pointer-events", "none")
+      .text(food.value.toLocaleString());
+
+    valueText
       .transition()
       .duration(500)
       .delay(i * 200 + 1500)
       .style("opacity", 1);
+
+    // CLICK INTERACTION
+    g.on("click", function() {
+      // Highlight selected bar
+      svg.selectAll("rect")
+        .transition()
+        .duration(300)
+        .style("opacity", 0.4);
+      
+      bar
+        .transition()
+        .duration(300)
+        .style("opacity", 1);
+
+      // Update info box
+      const co2Info = food.co2PerItem === 5 ? "highest" : food.co2PerItem === 2 ? "moderate" : "lowest";
+      const comparison = food.name === "Beef Meals"
+      ? "Beef has the highest carbon footprint of any common protein. Cattle require large amounts of land, feed, and water, and they produce methane — making beef meals 3–4× more carbon-intensive than chicken and far higher than plant-based options."
+      : food.name === "Chicken Meals"
+      ? "Chicken has a significantly lower footprint than beef — about 70–80% fewer emissions per meal — because chickens require less land, less feed, and produce no methane."
+      : "Plant-based meals have the lowest carbon footprint. They typically use 80–90% fewer emissions than beef and 50–70% fewer than chicken, making them the most climate-friendly choice.";
+    
+
+      infoBox
+        .transition()
+        .duration(300)
+        .style("background", food.color === "#ef4444" ? "#fee2e2" : food.color === "#f97316" ? "#ffedd5" : "#dcfce7")
+        .style("border-color", food.color);
+
+      infoBox.html(`
+        <div style="font-size: 3em; margin-bottom: 10px;">${food.emoji}</div>
+        <div style="font-size: 1.5em; font-weight: bold; color: ${food.color}; margin-bottom: 10px;">
+          ${food.value.toLocaleString()} ${food.name}
+        </div>
+        <div style="color: #374151; font-size: 1em; line-height: 1.6; margin-bottom: 10px;">
+          <strong>~${food.co2PerItem} kg CO₂</strong> per meal (${co2Info} emissions)
+        </div>
+        <div style="color: #4b5563; font-size: 0.95em; line-height: 1.6;">
+          ${comparison}
+        </div>
+      `);
+    });
+
+    // HOVER EFFECT
+    g.on("mouseenter", function() {
+      if (bar.style("opacity") !== "0.4") {
+        bar
+          .transition()
+          .duration(200)
+          .attr("width", xScale(food.value) + 10);
+      }
+    }).on("mouseleave", function() {
+      if (bar.style("opacity") !== "0.4") {
+        bar
+          .transition()
+          .duration(200)
+          .attr("width", xScale(food.value));
+      }
+    });
   });
+
+  // Reset button
+  const resetBtn = container
+    .append("button")
+    .style("display", "block")
+    .style("margin", "15px auto 0")
+    .style("padding", "10px 20px")
+    .style("background", "#6b7280")
+    .style("color", "white")
+    .style("border", "none")
+    .style("border-radius", "8px")
+    .style("cursor", "pointer")
+    .style("font-weight", "600")
+    .style("font-size", "0.9em")
+    .text("Reset View")
+    .on("click", function() {
+      svg.selectAll("rect")
+        .transition()
+        .duration(300)
+        .style("opacity", 1);
+      
+      infoBox
+        .transition()
+        .duration(300)
+        .style("background", "#f9fafb")
+        .style("border-color", "#e5e7eb");
+
+      infoBox.html(`<div style="color: #9ca3af; font-size: 1.1em;">👆 Click on a food type to learn more</div>`);
+    })
+    .on("mouseenter", function() {
+      d3.select(this).style("background", "#4b5563");
+    })
+    .on("mouseleave", function() {
+      d3.select(this).style("background", "#6b7280");
+    });
 }
 // 2. LIGHTING VISUALIZATION - Electricity bill card
 function createLightingViz(containerId, hours) {
   const container = d3.select(`#${containerId}`);
   container.selectAll("*").remove();
-
+  
   // Calculate electricity cost (average $0.13 per kWh, 60W bulb)
   const kWh = (hours * 60) / 1000;
-  const cost = (kWh * 0.18).toFixed(2);
-
-  // Determine impact level
-  let impactLevel = "LOW";
-  let impactColor = "#22c55e";
-  if (hours > 100) {
-    impactLevel = "HIGH";
-    impactColor = "#ef4444";
-  } else if (hours > 50) {
-    impactLevel = "MEDIUM";
-    impactColor = "#f59e0b";
-  }
-
+  const cost = (kWh * 0.13).toFixed(2);
+  
   // Create electricity bill card
   const card = container
     .append("div")
@@ -1368,7 +1736,7 @@ function createLightingViz(containerId, hours) {
         .style("transform", "translateY(0)")
         .style("box-shadow", "0 10px 25px rgba(0,0,0,0.2)");
     });
-
+  
   // Header with lightbulb icon
   card
     .append("div")
@@ -1376,361 +1744,57 @@ function createLightingViz(containerId, hours) {
     .style("font-size", "64px")
     .style("margin-bottom", "20px")
     .text("💡");
-
-  // Title
-  card
-    .append("h3")
-    .style("text-align", "center")
-    .style("margin", "0 0 25px 0")
-    .style("font-size", "24px")
-    .style("font-weight", "700")
-    .text("Electricity Usage");
-
-  // Hours display with animation
-  const hoursDisplay = card
-    .append("div")
-    .style("text-align", "center")
-    .style("font-size", "48px")
-    .style("font-weight", "bold")
-    .style("margin-bottom", "10px")
-    .text("0");
-
-  // Animate the hours counter
-  hoursDisplay
-    .transition()
-    .duration(3000)
-    .tween("text", function () {
-      const i = d3.interpolateNumber(0, hours);
-      return function (t) {
-        this.textContent = Math.round(i(t)).toLocaleString();
-      };
-    });
-
-  card
-    .append("div")
-    .style("text-align", "center")
-    .style("font-size", "18px")
-    .style("opacity", "0.9")
-    .style("margin-bottom", "25px")
-    .text("Hours of Lighting");
-
+  
   // Divider
   card
     .append("hr")
     .style("border", "none")
     .style("border-top", "1px solid rgba(255,255,255,0.3)")
     .style("margin", "25px 0");
-
-  // Cost section
-  card
-    .append("div")
-    .style("display", "flex")
-    .style("justify-content", "space-between")
-    .style("align-items", "center")
-    .style("margin-bottom", "15px").html(`
-      <span style="font-size: 16px; opacity: 0.9;">Equivalent Cost:</span>
-      <span style="font-size: 32px; font-weight: bold;">$${cost}</span>
-    `);
-
-  // kWh info
-  card
-    .append("div")
-    .style("text-align", "right")
-    .style("font-size", "14px")
-    .style("opacity", "0.8")
-    .style("margin-bottom", "20px")
-    .text(`(${kWh.toFixed(1)} kWh @ $0.13/kWh)`);
-
-  // Impact level badge
+  
+  // Savings message
   card
     .append("div")
     .style("text-align", "center")
-    .style("margin-top", "20px")
-    .append("span")
-    .style("display", "inline-block")
-    .style("background", impactColor)
-    .style("padding", "10px 24px")
-    .style("border-radius", "25px")
+    .style("font-size", "20px")
+    .style("margin-bottom", "15px")
+    .text("You could've saved:");
+  
+  // Cost display
+  card
+    .append("div")
+    .style("text-align", "center")
+    .style("font-size", "48px")
     .style("font-weight", "bold")
-    .style("font-size", "16px")
-    .style("letter-spacing", "1px")
-    .text(`${impactLevel} IMPACT`);
-
-  // Additional info
+    .style("margin-bottom", "10px")
+    .text(`$${cost}`);
+  
+  // kWh info
+  card
+    .append("div")
+    .style("text-align", "center")
+    .style("font-size", "20px")
+    .style("opacity", "0.8")
+    .style("margin-bottom", "20px")
+    .text(`(${kWh.toFixed(1)} kWh @ $0.13/kWh)`);
+  
+  // Tip
   card
     .append("p")
     .style("text-align", "center")
     .style("margin-top", "20px")
-    .style("font-size", "13px")
+    .style("font-size", "20px")
     .style("opacity", "0.8")
     .style("line-height", "1.5")
     .style("color", "white")
-    .text(`💡 Tip: LED bulbs use 75% less energy than traditional bulbs!`);
+    .text("💡 Tip: LED bulbs use 75% less energy than traditional bulbs!");
 }
 
 // 3. TREES VISUALIZATION - Animated growing forest for 2100 emissions
-function createTreesViz(containerId, currentYearEmissions) {
+function createTreesViz(containerId, treesNeeded, total2100) {
   const container = d3.select(`#${containerId}`);
   container.selectAll("*").remove();
-
-  // Calculate 2100 emissions (75 years of emissions)
-  const emissions2100 = currentYearEmissions * 75;
-  const treesNeeded = Math.ceil(emissions2100 / 22); // Each tree absorbs 22kg CO2/year
-
-  const width = 700;
-  const height = 500;
-
-  // Main container with forest background
-  const vizContainer = container
-    .append("div")
-    .style("position", "relative")
-    .style("width", `${width}px`)
-    .style("margin", "0 auto");
-
-  // Info header
-  vizContainer
-    .append("div")
-    .style("text-align", "center")
-    .style("padding", "20px")
-    .style("background", "linear-gradient(135deg, #10b981 0%, #059669 100%)")
-    .style("border-radius", "12px 12px 0 0")
-    .style("color", "white").html(`
-      <h3 style="margin: 0 0 10px 0; font-size: 24px;">🌍 Trees Needed by 2100</h3>
-      <p style="margin: 5px 0; font-size: 16px; opacity: 0.95;">
-        Your annual emissions: <strong>${currentYearEmissions} kg CO₂</strong>
-      </p>
-      <p style="margin: 5px 0; font-size: 16px; opacity: 0.95;">
-        Total by 2100 (75 years): <strong>${emissions2100.toLocaleString()} kg CO₂</strong>
-      </p>
-      <div style="margin-top: 15px; padding: 12px; background: rgba(255,255,255,0.2); border-radius: 8px; display: inline-block;">
-        <div style="font-size: 48px; font-weight: bold;" id="tree-counter">0</div>
-        <div style="font-size: 14px; opacity: 0.9;">Trees Required</div>
-      </div>
-    `);
-
-  // SVG for animated forest
-  const svg = vizContainer
-    .append("svg")
-    .attr("width", width)
-    .attr("height", height)
-    .style(
-      "background",
-      "linear-gradient(to bottom, #87CEEB 0%, #b8dbd9 50%, #8B7355 100%)"
-    )
-    .style("display", "block")
-    .style("border-radius", "0 0 12px 12px");
-
-  const groundY = height - 100;
-
-  // Add sun
-  svg
-    .append("circle")
-    .attr("cx", width - 80)
-    .attr("cy", 60)
-    .attr("r", 40)
-    .attr("fill", "#FFD700")
-    .style("opacity", 0)
-    .transition()
-    .duration(1500)
-    .style("opacity", 0.8);
-
-  // Add clouds
-  for (let i = 0; i < 3; i++) {
-    const cloudGroup = svg.append("g");
-    const cloudX = 100 + i * 200;
-    const cloudY = 50 + Math.random() * 50;
-
-    [0, 20, 40].forEach((offset, j) => {
-      cloudGroup
-        .append("ellipse")
-        .attr("cx", cloudX + offset)
-        .attr("cy", cloudY)
-        .attr("rx", 25)
-        .attr("ry", 15)
-        .attr("fill", "white")
-        .style("opacity", 0)
-        .transition()
-        .duration(1000)
-        .delay(500 + i * 200)
-        .style("opacity", 0.7);
-    });
-  }
-
-  // Ground with grass texture
-  svg
-    .append("rect")
-    .attr("x", 0)
-    .attr("y", groundY)
-    .attr("width", width)
-    .attr("height", height - groundY)
-    .attr("fill", "#6B8E23");
-
-  // Add grass blades (optimized - use path for better performance)
-  const grassPath = d3.path();
-  for (let i = 0; i < 30; i++) {
-    // Reduced from 50 to 30
-    const x = Math.random() * width;
-    grassPath.moveTo(x, groundY);
-    grassPath.lineTo(x + (Math.random() - 0.5) * 5, groundY - 10);
-  }
-  svg
-    .append("path")
-    .attr("d", grassPath.toString())
-    .attr("stroke", "#556B2F")
-    .attr("stroke-width", 2)
-    .attr("fill", "none")
-    .style("opacity", 0.5);
-
-  // Animate tree counter
-  d3.select("#tree-counter")
-    .transition()
-    .duration(3000)
-    .tween("text", function () {
-      const i = d3.interpolateNumber(0, treesNeeded);
-      return function (t) {
-        this.textContent = Math.round(i(t)).toLocaleString();
-      };
-    });
-
-  // Create color palette for tree dots
-  const treeColors = [
-    "#228B22", // Forest Green
-    "#2E8B57", // Sea Green
-    "#3CB371", // Medium Sea Green
-    "#32CD32", // Lime Green
-    "#00FF00", // Lime
-    "#7CFC00", // Lawn Green
-    "#7FFF00", // Chartreuse
-    "#ADFF2F", // Green Yellow
-    "#9ACD32", // Yellow Green
-    "#00FA9A", // Medium Spring Green
-  ];
-
-  // Calculate ALL tree positions as colorful dots
-  const dotsPerRow = 40;
-  const dotSize = 8;
-  const dotSpacing = (width - 40) / dotsPerRow;
-  const verticalSpacing = 12;
-
-  const treePositions = [];
-  for (let i = 0; i < treesNeeded; i++) {
-    const row = Math.floor(i / dotsPerRow);
-    const col = i % dotsPerRow;
-
-    treePositions.push({
-      x: 20 + col * dotSpacing + Math.random() * 3, // Add slight randomness
-      y: groundY - 30 - row * verticalSpacing,
-      delay: i * 8, // Faster animation
-      size: dotSize + Math.random() * 3,
-      color: treeColors[Math.floor(Math.random() * treeColors.length)],
-    });
-  }
-
-  // Optimized batch animation for trees
-  // Limit the number of animated trees for performance
-  const maxAnimatedTrees = Math.min(treesNeeded, 500); // Cap at 500 for performance
-  const batchSize = 20; // Animate in batches
-  const batchDelay = 50; // Delay between batches
-
-  // Store references to tree dots for batch animation
-  const treeDots = [];
-
-  // Create all tree dots immediately (no animation for performance)
-  treePositions.slice(0, maxAnimatedTrees).forEach((pos, i) => {
-    const dot = svg
-      .append("circle")
-      .attr("cx", pos.x)
-      .attr("cy", pos.y) // Start at final position
-      .attr("r", pos.size)
-      .attr("fill", pos.color)
-      .attr("stroke", "rgba(255,255,255,0.4)")
-      .attr("stroke-width", 1)
-      .style("opacity", 0) // Start invisible
-      .style("filter", "drop-shadow(0px 2px 3px rgba(0,0,0,0.3))");
-
-    treeDots.push(dot);
-  });
-
-  // Batch animate trees in groups for better performance
-  let currentBatch = 0;
-  function animateBatch() {
-    const startIdx = currentBatch * batchSize;
-    const endIdx = Math.min(startIdx + batchSize, maxAnimatedTrees);
-
-    for (let i = startIdx; i < endIdx; i++) {
-      if (treeDots[i]) {
-        treeDots[i]
-          .transition()
-          .duration(400)
-          .ease(d3.easeBackOut)
-          .style("opacity", 1);
-      }
-    }
-
-    currentBatch++;
-    if (endIdx < maxAnimatedTrees) {
-      setTimeout(animateBatch, batchDelay);
-    } else {
-      // If there are more trees than animated, show them all at once
-      if (treesNeeded > maxAnimatedTrees) {
-        treePositions.slice(maxAnimatedTrees).forEach((pos) => {
-          svg
-            .append("circle")
-            .attr("cx", pos.x)
-            .attr("cy", pos.y)
-            .attr("r", pos.size)
-            .attr("fill", pos.color)
-            .attr("stroke", "rgba(255,255,255,0.4)")
-            .attr("stroke-width", 1)
-            .style("opacity", 0.8)
-            .style("filter", "drop-shadow(0px 2px 3px rgba(0,0,0,0.3))");
-        });
-      }
-    }
-  }
-
-  // Start batch animation
-  setTimeout(animateBatch, 500);
-
-  // Progress indicator
-  const progressText = svg
-    .append("text")
-    .attr("x", width / 2)
-    .attr("y", 180)
-    .attr("text-anchor", "middle")
-    .style("font-size", "18px")
-    .style("fill", "#2d5016")
-    .style("font-weight", "bold")
-    .style("opacity", 0)
-    .text("🌱 Forest Growing...");
-
-  progressText
-    .transition()
-    .delay(500)
-    .duration(1000)
-    .style("opacity", 1)
-    .transition()
-    .delay(treesNeeded * 8)
-    .duration(1000)
-    .style("opacity", 0);
-
-  // Completion message
-  setTimeout(() => {
-    svg
-      .append("text")
-      .attr("x", width / 2)
-      .attr("y", 180)
-      .attr("text-anchor", "middle")
-      .style("font-size", "20px")
-      .style("fill", "#059669")
-      .style("font-weight", "bold")
-      .style("opacity", 0)
-      .text(`✓ ${treesNeeded.toLocaleString()} Trees Complete!`)
-      .transition()
-      .duration(1000)
-      .style("opacity", 1);
-  }, treesNeeded * 8 + 1500);
-
+  
   // Calculate real-world comparison
   function getTreeComparison(numTrees) {
     if (numTrees < 50) {
@@ -1755,7 +1819,10 @@ function createTreesViz(containerId, currentYearEmissions) {
       )} acres! 🏔️`;
     }
   }
-
+  
+  // Create viz container (this was missing - you need to define vizContainer)
+  const vizContainer = container.append("div");
+  
   // Bottom info panel
   vizContainer
     .append("div")
@@ -1763,11 +1830,12 @@ function createTreesViz(containerId, currentYearEmissions) {
     .style("padding", "20px")
     .style("background", "#f3f4f6")
     .style("border-radius", "8px")
-    .style("text-align", "center").html(`
-      <p style="margin: 0 0 15px 0; font-size: 16px; color: #059669; line-height: 1.6; font-weight: 600;">
+    .style("text-align", "center")
+    .html(`
+      <p style="margin: 0 0 15px 0; font-size: 20px; color: #059669; line-height: 1.6; font-weight: 600;">
         📏 ${getTreeComparison(treesNeeded)}
       </p>
-      <p style="margin: 0; font-size: 14px; color: #374151; line-height: 1.6;">
+      <p style="margin: 0; font-size: 20px; color: #374151; line-height: 1.6;">
         🌲 Each mature tree absorbs approximately <strong>22 kg of CO₂ per year</strong>.<br>
         🌍 It would take <strong>${treesNeeded.toLocaleString()} trees</strong> growing for one year to offset your emissions by 2100.<br>
         💚 Or plant <strong>${Math.ceil(
