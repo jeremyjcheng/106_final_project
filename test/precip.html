@@ -474,7 +474,8 @@
           <div class="step-content">
             <p>
               The <b>difference</b> in precipitation level under two different
-              scenarios is <span class="font-red">0.36mm/day</span>. It may not seem a lot at first glance.
+              scenarios is <span class="font-red">0.36mm/day</span>.<br />
+              It may not seem a lot at first glance ...
             </p>
           </div>
           <div class="rain-container">
@@ -489,10 +490,12 @@
 
         <div class="step" data-step="7">
           <div class="step-content">
-            <p>
-              But if we convert to annual global water volume, that's <span class="font-red">1.4
-              trillion cubic meters</span> of extra rainfall per year.
-            </p>
+            <div class="final-text">
+              <p>
+                <b>BUT...</b> if we convert to annual U.S. water volume, that's <span class="font-red">1.4
+                trillion cubic meters</span> of extra rainfall per year.
+              </p>
+            </div>
           </div>
           <div class="rain-container">
             <div class="clouds">
@@ -979,6 +982,7 @@
         updateChart(0);
 
         function updateChart(step) {
+          
           if (step === 0) {
             xScale.domain(d3.extent(hist, (d) => d.year));
             yScale.domain(d3.extent(hist, (d) => d.pr));
@@ -1576,13 +1580,14 @@
             // Clear any existing interval first!
             if (bathtubInterval) {
                 clearInterval(bathtubInterval);
+                bathtubInterval = null;
             }
             // Animate bathtub counter
             const targetCount = 10;
             const duration = 1000;
             const steps = 10;
 
-            let currentCount = 0;  // ← Only need ONE counter
+            let currentCount = 0;  
 
             const bathtubEmojis = d3.select("#bathtub-emojis");
             const counter = d3.select("#bathtub-counter");
@@ -1591,12 +1596,7 @@
             bathtubEmojis.html("");
             counter.text("0 trillion bathtubs");
 
-            const interval = setInterval(() => {
-              if (currentCount >= targetCount) {  // ← Check before incrementing
-                clearInterval(interval);
-                bathtubInterval = null;
-                return;
-              }
+            bathtubInterval = setInterval(() => {
 
               currentCount += 1;
 
@@ -1605,6 +1605,13 @@
 
               // Add emoji
               bathtubEmojis.append("span").text("🛁");
+
+              // Stop at target
+              if (currentCount >= targetCount) {
+                clearInterval(bathtubInterval);
+                bathtubInterval = null;
+              }
+
             }, duration / steps);
           }
         }
@@ -1629,6 +1636,7 @@
 
       createRain();
       init();
+
     </script>
   </body>
 </html>
