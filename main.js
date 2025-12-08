@@ -169,7 +169,15 @@ document.addEventListener("DOMContentLoaded", () => {
         e.target.closest("button") ||
         e.target.closest("a") ||
         e.target.closest(".game-container") ||
-        e.target.closest("iframe")
+        e.target.closest("iframe") ||
+        e.target.closest(".chart-container") ||
+        e.target.closest(".regional-chart-container") ||
+        e.target.closest("input") ||
+        e.target.closest(".legend-item") ||
+        e.target.closest("svg") ||
+        e.target.closest("#chartSvg") ||
+        e.target.closest(".chart-svg-wrapper") ||
+        e.target.closest("label")
       ) {
         return;
       }
@@ -194,4 +202,73 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+});
+
+// Key insight
+// Toggle insights container - with event propagation prevention
+const insightsToggle = document.querySelector('.insights-toggle');
+const insightsContent = document.querySelector('.insights-content');
+const insightsContainer = document.querySelector('.insights-container');
+
+if (insightsToggle && insightsContent) {
+  // Prevent the toggle button from triggering slide navigation
+  insightsToggle.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+
+    insightsToggle.classList.toggle('collapsed');
+    insightsContent.classList.toggle('collapsed');
+  });
+}
+
+// Prevent details/summary from triggering slide navigation
+if (insightsContent) {
+  const insightItems = insightsContent.querySelectorAll('.insight-item');
+  insightItems.forEach(item => {
+    const summary = item.querySelector('.insight-summary');
+    if (summary) {
+      summary.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+      });
+    }
+  });
+}
+
+// Stop all events from bubbling up from the insights container
+if (insightsContainer) {
+  insightsContainer.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+
+  insightsContainer.addEventListener('touchstart', (e) => {
+    e.stopPropagation();
+  }, { passive: true });
+
+  insightsContainer.addEventListener('mousedown', (e) => {
+    e.stopPropagation();
+  });
+}
+
+// typewriter
+function typewriterEffect(element, speed = 50) {
+  const text = element.getAttribute('data-text');
+  const textElement = element.querySelector('.typewriter-text');
+  let index = 0;
+
+  function type() {
+    if (index < text.length) {
+      textElement.textContent += text.charAt(index);
+      index++;
+      setTimeout(type, speed);
+    }
+  }
+
+  type();
+}
+
+// Apply to all typewriter elements
+document.querySelectorAll('.typewriter').forEach(el => {
+  typewriterEffect(el, 50);
 });

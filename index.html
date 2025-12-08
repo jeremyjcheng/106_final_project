@@ -5,9 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>When It Rains: America's Changing Climate</title>
     <link rel="stylesheet" href="style.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☔</text></svg>"
+    />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
   </head>
   <body>
     <div class="slides-container">
+      <canvas id="rainCanvas"></canvas>
       <!-- Title Slide -->
       <div class="slide active title-slide">
         <h1>When It Rains: America's Changing Climate</h1>
@@ -19,108 +25,357 @@
         </p>
       </div>
 
-      <!-- About Slide -->
+      <!-- Slide 1: Scrollytelling -->
       <div class="slide">
-        <div class="slide-content">
-          <div class="slide-text">
-            <span class="slide-number">1</span>
-            <h2>The Quiet Shift in America’s Seasons</h2>
-            <p>
-              For more than a century, the rhythm of America’s seasons has been
-              quietly shifting. Each winter storm and summer downpour carries
-              the imprint of changing climate forces—some natural, others
-              unmistakably shaped by human decisions.
-            </p>
-            <p>
-              From industrial-era pollution that once suppressed rainfall, to
-              modern warming that fuels stronger moisture cycles and more
-              extreme rain events, decades of atmospheric change are written
-              into the long-term rise and fall of seasonal precipitation.
-            </p>
-            <p>
-              By tracing these patterns across regions and through time, we can
-              see how human activity has intertwined with Earth’s natural
-              climate systems, reshaping when, where, and how much rain falls
-              each year.
-            </p>
-          </div>
-          <div class="slide-viz">
-             <img
-                src="images/avg_historical.png"
-                style="width:100%; height:100%; object-fit:contain; border-radius:10px;"
-            />
-          </div>    
-        </div>
+        <iframe
+          src="./test/precip.html"
+          style="width: 100%; height: 100vh; border: none"
+        ></iframe>
       </div>
-
-      <!-- Slide 2: Industrial revolution + land use texts -->
+      <!-- Slide 2: Intro to Regions -->
       <div class="slide">
         <div class="slide-content">
-          <div class="slide-text">
-            <span class="slide-number">2</span>
-            <h2>From Smoke Stacks to Plowed Fields</h2>
-            <p>
-              Since the Industrial Revolution, greenhouse gases have warmed and
-              moistened the atmosphere, allowing winter storms to carry more
-              moisture and produce heavier cold-season precipitation. At the
-              same time, early industrial sulfate pollution suppressed cloud
-              formation in summer, limiting rainfall that would otherwise have
-              increased. As air pollution declined, both winter and summer
-              precipitation began to show clearer signs of strengthening.
-            </p>
-            <p>
-              Land clearing, farming, and deforestation have altered how the
-              surface stores and releases moisture, reshaping seasonal rainfall
-              patterns. In summer, irrigation can boost humidity and enhance
-              local storms, while over-plowed drylands become hotter and drier,
-              reducing rainfall. In winter, changes to vegetation and soil
-              modify surface energy and moisture, subtly influencing storm
-              tracks and cold-season precipitation.
-            </p>
-          </div>
-          
-        </div>
-      </div>
-
-      <!-- Slide 3: Regional summer 2-month precipitation + explanatory text -->
-      <div class="slide">
-        <div class="slide-content">
-          <div class="slide-text">
-            <span class="slide-number">3</span>
-            <h2>Summer Rainfall by Region, 1850–2020</h2>
-            <p>
-              Around the 1930s, the summer rainfall in the Midwest and the South
-              dropped sharply. This was the famous Dust Bowl drought—a classic
-              case of human land use and climate working together. Over-farming
-              and poor agricultural practices broke down soil structure; dust
-              storms formed, rainfall decreased, and the region fell into years
-              of severe drought. After the New Deal introduced soil conservation
-              policies, rainfall and climate gradually recovered.
-            </p>
-            <p>
-              In the 1950s, there was another major drought, along with the
-              peak of industrial pollution. Summer rainfall in the South, the
-              West, and parts of the Midwest dropped again. After World War II,
-              industrial emissions and sulfate aerosols from coal power plants
-              rose quickly, forming a heavy pollution belt over the eastern and
-              midwestern U.S. Studies show that these aerosols created a clear
-              “drying effect” in summer and fall, partly canceling out the
-              rainfall increase that greenhouse gases would normally cause—especially
-              in the Southeast and South.
-            </p>
-          </div>
-          <div class="slide-viz">
-            <img
-                src="images/summer_precipitation.png"
-                style="width:100%; height:100%; object-fit:contain; border-radius:10px;"
-  />
+          <div class="typewriter-container">
+            <div
+              class="typewriter"
+              data-text="Now that we understand the national trend, let’s zoom in on how each U.S. region compares."
+            >
+              <h1 class="typewriter-text"></h1>
+              <span class="cursor"></span>
+            </div>
           </div>
         </div>
       </div>
 
-    
+      <!-- Slide 3b: Regional Precipitation Chart -->
+      <div class="slide scrollable" id="regional-slide">
+        <div
+          class="slide-content regional-chart-slide"
+          style="grid-template-columns: 1fr; gap: 1.5rem"
+        >
+          <div class="slide-text regional-chart-text">
+            <h2>Regional Precipitation: Past and Future</h2>
+            <p>
+              Explore how precipitation patterns vary across different regions
+              of the United States, comparing historical data with future
+              projections under low and high emission scenarios.
+            </p>
+          </div>
+          <div class="chart-container regional-chart-container">
+            <!-- Region Navigation -->
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 1rem;
+                margin-bottom: 0.5rem;
+              "
+            >
+              <button
+                id="prevBtn"
+                style="
+                  background: #2e86ab;
+                  color: white;
+                  border: none;
+                  padding: 0.5rem 1rem;
+                  border-radius: 4px;
+                  cursor: pointer;
+                  font-size: 14px;
+                "
+              >
+                ← Prev
+              </button>
+              <div
+                id="dotsContainer"
+                style="display: flex; gap: 0.75rem; align-items: center"
+              ></div>
+              <span
+                id="regionName"
+                style="
+                  font-weight: 600;
+                  color: #2e86ab;
+                  min-width: 100px;
+                  text-align: center;
+                "
+                >Northeast</span
+              >
+              <button
+                id="nextBtn"
+                style="
+                  background: #2e86ab;
+                  color: white;
+                  border: none;
+                  padding: 0.5rem 1rem;
+                  border-radius: 4px;
+                  cursor: pointer;
+                  font-size: 14px;
+                "
+              >
+                Next →
+              </button>
+            </div>
 
-      <!-- Step 8: Climate Choices Game -->
+            <div class="regional-main">
+              <!-- Impact comparison panel -->
+              <div class="impact-column">
+                <!-- Rate-of-change card -->
+                <div class="rate-card">
+                  <div class="rate-card-title">Δ precipitation per decade</div>
+                  <svg id="rateSvg"></svg>
+                </div>
+
+                <div class="region-impact-panel">
+                  <div class="impact-header">
+                    <div class="impact-title">What this means</div>
+                    <div class="impact-note">
+                      Illustrative impacts under each pathway
+                    </div>
+                  </div>
+                  <div class="impact-grid">
+                    <div class="impact-card">
+                      <div class="impact-label">Farms impacted</div>
+                      <div class="impact-values">
+                        <div class="impact-value low">
+                          <span class="impact-chip">Low</span>
+                          <span id="impact-farms-low">—</span>
+                        </div>
+                        <div class="impact-value high">
+                          <span class="impact-chip">High</span>
+                          <span id="impact-farms-high">—</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="impact-card">
+                      <div class="impact-label">Economic loss</div>
+                      <div class="impact-values">
+                        <div class="impact-value low">
+                          <span class="impact-chip">Low</span>
+                          <span id="impact-damage-low">—</span>
+                        </div>
+                        <div class="impact-value high">
+                          <span class="impact-chip">High</span>
+                          <span id="impact-damage-high">—</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="impact-card">
+                      <div class="impact-label">People at risk</div>
+                      <div class="impact-values">
+                        <div class="impact-value low">
+                          <span class="impact-chip">Low</span>
+                          <span id="impact-people-low">—</span>
+                        </div>
+                        <div class="impact-value high">
+                          <span class="impact-chip">High</span>
+                          <span id="impact-people-high">—</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Chart + controls column -->
+              <div class="chart-column">
+                <div class="chart-svg-wrapper">
+                  <svg id="chartSvg"></svg>
+                </div>
+
+                <div
+                  class="legend-row"
+                  style="
+                    display: flex;
+                    justify-content: center;
+                    gap: 1.5rem;
+                    margin-top: 0;
+                    margin-bottom: 0.5rem;
+                    flex-wrap: wrap;
+                  "
+                >
+                  <div
+                    class="legend-item active"
+                    data-scenario="historical"
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 0.5rem;
+                      cursor: pointer;
+                    "
+                  >
+                    <div
+                      class="legend-box selected"
+                      style="width: 20px; height: 3px; background: #888"
+                    ></div>
+                    <span style="font-size: 14px">Historical</span>
+                  </div>
+                  <div
+                    class="legend-item active"
+                    data-scenario="low"
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 0.5rem;
+                      cursor: pointer;
+                    "
+                  >
+                    <div
+                      class="legend-box selected"
+                      style="width: 20px; height: 3px; background: #1e88e5"
+                    ></div>
+                    <span style="font-size: 14px"
+                      >Low Emissions (SSP1-2.6)</span
+                    >
+                  </div>
+                  <div
+                    class="legend-item active"
+                    data-scenario="high"
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 0.5rem;
+                      cursor: pointer;
+                    "
+                  >
+                    <div
+                      class="legend-box selected"
+                      style="width: 20px; height: 3px; background: #e53935"
+                    ></div>
+                    <span style="font-size: 14px"
+                      >High Emissions (SSP5-8.5)</span
+                    >
+                  </div>
+                  <div
+                    class="legend-item"
+                    id="regressionToggle"
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 0.5rem;
+                      cursor: pointer;
+                    "
+                  >
+                    <div
+                      style="
+                        width: 20px;
+                        height: 2px;
+                        background: #999;
+                        border-top: 1px dashed #999;
+                      "
+                    ></div>
+                    <span style="font-size: 14px">Trend Lines</span>
+                  </div>
+                </div>
+
+                <div
+                  class="year-controls"
+                  style="
+                    display: flex;
+                    justify-content: center;
+                    gap: 0.75rem;
+                    align-items: center;
+                    flex-wrap: wrap;
+                    margin-top: 0;
+                  "
+                >
+                  <label style="font-size: 14px">Year Range:</label>
+                  <input
+                    type="number"
+                    id="yearStartInput"
+                    placeholder="Start"
+                    style="
+                      padding: 0.4rem;
+                      border: 1px solid #ddd;
+                      border-radius: 4px;
+                      width: 100px;
+                      font-size: 14px;
+                    "
+                  />
+                  <span style="font-size: 14px">to</span>
+                  <input
+                    type="number"
+                    id="yearEndInput"
+                    placeholder="End"
+                    style="
+                      padding: 0.4rem;
+                      border: 1px solid #ddd;
+                      border-radius: 4px;
+                      width: 100px;
+                      font-size: 14px;
+                    "
+                  />
+                  <button
+                    id="applyYearBtn"
+                    style="
+                      background: #2e86ab;
+                      color: white;
+                      border: none;
+                      padding: 0.4rem 1rem;
+                      border-radius: 4px;
+                      cursor: pointer;
+                      font-size: 14px;
+                    "
+                  >
+                    Apply
+                  </button>
+                  <button
+                    id="resetYearBtn"
+                    style="
+                      background: #999;
+                      color: white;
+                      border: none;
+                      padding: 0.4rem 1rem;
+                      border-radius: 4px;
+                      cursor: pointer;
+                      font-size: 14px;
+                    "
+                  >
+                    Reset
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="invisible-separator"></div>
+        </div>
+
+        <!-- Tooltip -->
+        <div
+          id="tooltip"
+          style="
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            font-size: 12px;
+            z-index: 1000;
+          "
+        ></div>
+      </div>
+
+      <!-- Slide 4: Impact comparison (High vs Low) -->
+      <div
+        class="slide scrollable impact-choices-slide"
+        id="impact-choices-slide"
+      >
+        <div class="slide-content impact-choices-content">
+          <div class="slide-text">
+            <h2>Emissions Choices: Who Bears the Impact?</h2>
+            <p>
+              Compare how many farms, people, and dollars are exposed under low
+              vs. high emissions. The gap shows what we avoid by choosing the
+              low-emission pathway.
+            </p>
+          </div>
+          <div id="impact-comparison-chart" class="impact-chart-shell"></div>
+        </div>
+      </div>
+
+      <!-- Slide 5: Climate Choices Game -->
       <div class="slide">
         <div class="game-slide-content">
           <div class="game-container">
@@ -128,11 +383,71 @@
           </div>
         </div>
       </div>
+
+      <!-- Slide 6: Final Takeaways -->
+      <div class="slide" id="takeaways-slide">
+        <div class="takeaways-container">
+          <div class="takeaways-header">
+            <h1>Key Takeaways</h1>
+            <div class="takeaways-divider"></div>
+          </div>
+
+          <div class="takeaways-main-message">
+            <div class="message-icon">🌧️</div>
+            <p class="main-message-text">
+              <strong
+                >Rainfall across the United States is projected to
+                increase</strong
+              >, but
+              <strong
+                >how intense those changes become depends on the choices we make
+                now</strong
+              >. Under high-emission pathways, many regions see much larger
+              jumps in future rainfall. Under lower emissions, those increases
+              are noticeably smaller and more manageable.
+            </p>
+          </div>
+
+          <div class="takeaways-key-points">
+            <div class="key-point">
+              <div class="key-point-icon">📊</div>
+              <div class="key-point-text">
+                Historical data reveals increasing variability
+              </div>
+            </div>
+            <div class="key-point">
+              <div class="key-point-icon">🗺️</div>
+              <div class="key-point-text">
+                Regional impacts vary significantly
+              </div>
+            </div>
+            <div class="key-point">
+              <div class="key-point-icon">🌱</div>
+              <div class="key-point-text">
+                Individual choices make a difference
+              </div>
+            </div>
+          </div>
+
+          <div class="takeaways-action">
+            <h3>The Choice is Ours</h3>
+            <p>
+              Our visualization makes this difference clear: human decisions
+              today shape the precipitation patterns communities will face
+              tomorrow. Lower emissions mean more manageable rainfall increases
+              and better protection for our communities, farms, and
+              infrastructure.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Navigation -->
-    <div class="slide-indicator" id="slide-indicator"></div>
+    <div id="slide-indicator" class="slide-indicator"></div>
 
     <script src="main.js"></script>
+    <script src="rain-canvas.js"></script>
+    <script src="industrial-precipitation.js"></script>
+    <script src="regional-precipitation.js"></script>
   </body>
 </html>
