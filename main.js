@@ -28,6 +28,7 @@ function updateNavigationButtons() {
 function updateSlide() {
   slides.forEach((slide, index) => {
     slide.classList.remove("active", "prev", "next");
+    resetTypewriters(slide);
     if (index === currentSlide) {
       slide.classList.add("active");
       triggerTypewriterInSlide(slide);
@@ -279,22 +280,40 @@ if (insightsContainer) {
 
 // typewriter
 function typewriterEffect(element, speed = 50) {
-  const text = element.getAttribute('data-text');
-  const textElement = element.querySelector('.typewriter-text');
+  const text = element.getAttribute("data-text");
+  const textElement = element.querySelector(".typewriter-text");
+
+  // ✅ Cancel any ongoing typing
+  if (element._typingTimeout) {
+    clearTimeout(element._typingTimeout);
+    element._typingTimeout = null;
+  }
 
   textElement.textContent = "";
-
   let index = 0;
 
   function type() {
     if (index < text.length) {
       textElement.textContent += text.charAt(index);
       index++;
-      setTimeout(type, speed);
+
+      // ✅ SAVE the timeout ID
+      element._typingTimeout = setTimeout(type, speed);
     }
   }
 
   type();
+}
+
+function resetTypewriters(slide) {
+  slide.querySelectorAll(".typewriter").forEach(el => {
+    if (el._typingTimeout) {
+      clearTimeout(el._typingTimeout);
+      el._typingTimeout = null;
+    }
+    const textElement = el.querySelector(".typewriter-text");
+    if (textElement) textElement.textContent = "";
+  });
 }
 
 function triggerTypewriterInSlide(slide) {
