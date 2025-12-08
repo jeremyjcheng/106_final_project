@@ -571,7 +571,7 @@ function showTotalEmissions() {
   let classification = "";
   let classColor = "";
 
-  if (total < 1100) {
+  if (total <= 4000) {
     classification = "Low Emissions 🌱";
     classColor = "#2e8b57";
   } else {
@@ -710,22 +710,24 @@ function showTotalEmissions() {
 }
 function getExtremeRainfallDays(total) {
   let current, lowEmission;
-
-  if (total < 1100) {
-    // Low emissions
+  
+  if (total <= 4000) {  // ≤4 tonnes CO2/year
+    // Low Emission Scenario (SSP1-2.6)
+    // User is on track with 2030 targets
     current = 15;
     lowEmission = 10;
   } else {
-    // High emissions
-    current = 25;
+    // High Emission Scenario (SSP5-8.5)
+    // User exceeds sustainable pathway
+    current = 30;
     lowEmission = 10;
   }
-
+  
   return { current, lowEmission };
 }
 
 function getLowEmissionImpact(total) {
-  if (total < 1100) {
+  if (total <= 4000) {
     return "Great job! Your low carbon footprint helps keep global temperatures stable. This means precipitation patterns remain more predictable, with fewer extreme weather events. Warmer air holds more moisture, so by keeping emissions low, we prevent the atmosphere from supercharging with excess water vapor that leads to intense rainfall and flooding.";
   } else {
     return "Your high emissions significantly contribute to global warming. As carbon dioxide traps heat in the atmosphere, global temperatures rise, causing the air to hold more moisture (about 7% more per degree Celsius). This leads to more intense precipitation events and an increase in extreme rainfall days, resulting in increased flooding, erosion, and infrastructure damage. Reducing your carbon footprint can help slow this trend.";
