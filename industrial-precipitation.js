@@ -757,7 +757,7 @@ function createImpactComparisonChart() {
   summarySection
     .append("div")
     .attr("class", "impact-info-label")
-    .text("Avoided Impact");
+    .text("Additional Impact");
   const summaryValue = summarySection
     .append("div")
     .attr("class", "impact-info-value");
@@ -1024,10 +1024,10 @@ function createImpactComparisonChart() {
     valueLabels.exit().remove();
 
     // Callout aggregate + summary (moved outside SVG to avoid overlap)
-    const avoidedLabel = `+${formatValue(totalGap, metricDef.type)} (${(
-      (totalGap / totalLow) *
-      100
-    ).toFixed(0)}% vs low)`;
+    const pctIncrease = totalLow > 0 
+      ? ((totalGap / totalLow) * 100).toFixed(0) 
+      : "0";
+    const avoidedLabel = `+${formatValue(totalGap, metricDef.type)} (${pctIncrease}% more than low emissions)`;
     summaryValue.text(avoidedLabel);
 
     
@@ -1040,10 +1040,10 @@ function createImpactComparisonChart() {
       totalLow > 0 ? ((totalGap / totalLow) * 100).toFixed(0) : "—";
     calloutText
     .text(
-      `Low emissions avoid ${formatValue(
+      `By choosing low emissions instead of high emissions, we avoid ${formatValue(
         totalGap,
         metricDef.type
-      )} (${pctAvoided}% reduction) across all regions. Choosing the low-emissions pathway materially shrinks exposure.`
+      )} in additional impact (a ${pctAvoided}% reduction). This represents the avoidable damage from choosing the high-emissions pathway.`
     )
     .style("font-size", "16px");
   }
