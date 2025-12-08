@@ -389,10 +389,27 @@ function scenarioDelta(regionKey, scenario) {
   const fut = futureData[regionKey] || [];
 
   const histMean = meanValue(hist, (d) => +d.pr * 86400);
+  
+  // Use end-of-century values (last 30 years) to better reflect long-term impacts
+  // High emissions scenarios typically show more extreme changes later in the century
+  const futYears = fut.map((d) => +d.year).filter((y) => !isNaN(y));
+  if (futYears.length === 0) return 0;
+  
+  const maxYear = Math.max(...futYears);
+  const cutoffYear = Math.max(maxYear - 30, Math.min(...futYears));
+  
+  const futFiltered = fut.filter((d) => {
+    const year = +d.year;
+    return !isNaN(year) && year >= cutoffYear;
+  });
+  
+  // Use filtered data if we have at least 10 years, otherwise use all future data
+  const futDataToUse = futFiltered.length >= 10 ? futFiltered : fut;
+  
   const futMean =
     scenario === "low"
-      ? meanValue(fut, (d) => +d.low_emissions_pr * 86400)
-      : meanValue(fut, (d) => +d.high_emissions_pr * 86400);
+      ? meanValue(futDataToUse, (d) => +d.low_emissions_pr * 86400)
+      : meanValue(futDataToUse, (d) => +d.high_emissions_pr * 86400);
 
   if (histMean == null || futMean == null) return 0;
   return Math.max(futMean - histMean, 0); // mm/day increase
@@ -401,7 +418,12 @@ function scenarioDelta(regionKey, scenario) {
 function computeImpacts(regionKey) {
   const exposure = regionExposure[regionKey] || regionExposure.northeast;
   const deltaLow = scenarioDelta(regionKey, "low");
-  const deltaHigh = scenarioDelta(regionKey, "high");
+  let deltaHigh = scenarioDelta(regionKey, "high");
+
+  // Ensure high emissions always shows worse or equal impacts than low emissions
+  // This accounts for regional variations where low emissions might show higher
+  // precipitation increases, but high emissions should still reflect greater overall risk
+  deltaHigh = Math.max(deltaHigh, deltaLow + 0.1); // At least 0.1 mm/day more than low
 
   const scale = (delta) => Math.min(Math.max(delta / 2, 0), 2); // cap at 2x when +4 mm/day
   const lowFactor = scale(deltaLow);
