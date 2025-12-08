@@ -1543,14 +1543,20 @@ function drawChart() {
     highlightRef
   ) => {
     const series = [];
-    if (activeScenarios.includes("historical")) {
-      series.push({ key: "historical", color: "#555", data: rateHistorical });
-    }
+    // Only show future data (decades starting >= 2014) in the rate chart
     if (activeScenarios.includes("low")) {
-      series.push({ key: "low-emission", color: "#1e88e5", data: rateLow });
+      const futureRateLow = (rateLow || []).filter(d => {
+        const decadeStart = d.spanStart ?? d.fromYear ?? Math.floor(d.year / 10) * 10;
+        return decadeStart >= 2014;
+      });
+      series.push({ key: "low-emission", color: "#1e88e5", data: futureRateLow });
     }
     if (activeScenarios.includes("high")) {
-      series.push({ key: "high-emission", color: "#e53935", data: rateHigh });
+      const futureRateHigh = (rateHigh || []).filter(d => {
+        const decadeStart = d.spanStart ?? d.fromYear ?? Math.floor(d.year / 10) * 10;
+        return decadeStart >= 2014;
+      });
+      series.push({ key: "high-emission", color: "#e53935", data: futureRateHigh });
     }
 
     const allBars = series.flatMap((s) =>
@@ -1569,7 +1575,7 @@ function drawChart() {
         .attr("x", innerWidth / 2)
         .attr("y", innerHeight / 2)
         .attr("text-anchor", "middle")
-        .style("font-size", "12px")
+        .style("font-size", "16px")
         .style("fill", "#777")
         .text("Select at least one scenario to view rates.");
       highlightRef.current = () => {};
@@ -1583,7 +1589,7 @@ function drawChart() {
         .attr("x", innerWidth / 2)
         .attr("y", innerHeight / 2)
         .attr("text-anchor", "middle")
-        .style("font-size", "12px")
+        .style("font-size", "16px")
         .style("fill", "#777")
         .text("Rate of change appears when at least two decades are visible.");
       highlightRef.current = () => {};
@@ -1655,9 +1661,9 @@ function drawChart() {
       .append("g")
       .attr("transform", `translate(0,${innerHeight})`)
       .call(xAxisBand)
-      .style("font-size", "20px");
+      .style("font-size", "26px");
 
-    containerGroup.append("g").call(rateYAxis).style("font-size", "13px");
+    containerGroup.append("g").call(rateYAxis).style("font-size", "18px");
 
     // Zero line
     containerGroup
@@ -1697,7 +1703,7 @@ function drawChart() {
     // Labels are minimal: show only decade tick marks already handled by axis; remove dense ticks
     containerGroup
       .selectAll(".tick text")
-      .style("font-size", "13px")
+      .style("font-size", "18px")
       .style("fill", "#475569");
 
     // Highlight handler
