@@ -30,6 +30,8 @@ function updateSlide() {
     slide.classList.remove("active", "prev", "next");
     if (index === currentSlide) {
       slide.classList.add("active");
+      triggerTypewriterInSlide(slide);
+
     } else if (index < currentSlide) {
       slide.classList.add("prev");
     } else {
@@ -279,6 +281,9 @@ if (insightsContainer) {
 function typewriterEffect(element, speed = 50) {
   const text = element.getAttribute('data-text');
   const textElement = element.querySelector('.typewriter-text');
+
+  textElement.textContent = "";
+
   let index = 0;
 
   function type() {
@@ -292,7 +297,9 @@ function typewriterEffect(element, speed = 50) {
   type();
 }
 
-// Apply to all typewriter elements
-document.querySelectorAll('.typewriter').forEach(el => {
-  typewriterEffect(el, 50);
-});
+function triggerTypewriterInSlide(slide) {
+  slide.querySelectorAll(".typewriter").forEach(el => {
+    typewriterEffect(el, 50);
+  });
+}
+
