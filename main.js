@@ -2,6 +2,29 @@ let currentSlide = 0;
 let slides;
 let totalSlides;
 
+// Get navigation buttons
+const prevSlideBtn = document.getElementById('prevSlideBtn');
+const nextSlideBtn = document.getElementById('nextSlideBtn');
+
+// Add click handlers
+prevSlideBtn.addEventListener('click', () => {
+  if (currentSlide > 0) {
+    goToSlide(currentSlide - 1);
+  }
+});
+
+nextSlideBtn.addEventListener('click', () => {
+  if (currentSlide < slides.length - 1) {
+    goToSlide(currentSlide + 1);
+  }
+});
+
+// Update button states function
+function updateNavigationButtons() {
+  prevSlideBtn.disabled = currentSlide === 0;
+  nextSlideBtn.disabled = currentSlide === slides.length - 1;
+}
+
 function updateSlide() {
   slides.forEach((slide, index) => {
     slide.classList.remove("active", "prev", "next");
@@ -57,6 +80,7 @@ function goToSlide(index) {
       isTransitioning = false;
     }, 250);
   }
+  updateNavigationButtons();
 }
 
 // Keyboard navigation
