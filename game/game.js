@@ -105,7 +105,7 @@ function createTitleSlide() {
   // Title
   titleSlide
     .append("h1")
-    .html("Climate Choices Game ")
+    .html("Climate Choices Game 🌍 ")
     .style("font-size", "4rem")
     .style("font-weight", "800")
     .style("color", "white")
@@ -215,16 +215,38 @@ function restoreSelectedState() {
     }
   }
 }
-// 1️⃣ Create the title slide first
-createTitleSlide();
+// Initialize the game
+function initGame() {
+  // Clear container
+  d3.select(".slides-container").selectAll("*").remove();
+  
+  // Create title slide
+  createTitleSlide();
+  
+  // Create all question slides
+  createSlides();
+  
+  // Update slides array to include ALL slides (title + questions + results)
+  slides = document.querySelectorAll(".slide");
+  
+  // Ensure title slide is active
+  updateSlide();
+}
 
-// 2️⃣ Then create all question slides (they stay hidden until navigated)
-createSlides();
+// Start the game
+initGame();
 
-// 3️⃣ Select the Start Game button from the title slide and attach click
-d3.select("#start-game").on("click", () => {
-  nextSlide(); // go to the first question slide
-});
+// Add keyboard navigation (only needs to be attached once)
+document.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowRight") {
+    nextSlide();
+  } else if (e.key === "ArrowLeft") {
+    // Prevent going back from title slide (index 0)
+    if (currentSlide > 0) {
+      prevSlide();
+    }
+  }
+})
 
 
 // Generate slides for each category
@@ -318,7 +340,8 @@ function createSlides() {
       const backBtn = slide
         .append("button")
         .attr("class", "back-button")
-        .text("← Back");
+        .text("← Back")    .style("background", "white")
+        .style("color", "#1f2937");
 
       backBtn.on("click", () => {
         prevSlide();
@@ -353,7 +376,9 @@ function createSlides() {
   const backBtn = buttonContainer
     .append("button")
     .attr("class", "back-button")
-    .text("← Back");
+    .text("← Back")
+    .style("background", "white")
+    .style("color", "#1f2937");
 
   backBtn.on("click", () => {
     prevSlide();
@@ -364,7 +389,9 @@ function createSlides() {
     .append("button")
     .attr("class", "start-over-button")
     .attr("id", "start-over-btn")
-    .text("Start Over");
+    .text("Start Over")
+    .style("background", "white")
+    .style("color", "#1f2937");
 
   startOverBtn.on("click", () => {
     resetGame();
@@ -563,10 +590,10 @@ function showTotalEmissions() {
         <div style="background: #f0f9ff; border: 3px solid #3b82f6; border-radius: 20px; padding: 40px; margin-bottom: 60px;">
           <div style="text-align: center; margin-bottom: 30px;">
             <div style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; border-radius: 30px; font-size: 1.3em; font-weight: bold; margin-bottom: 15px;">
-              📊 YOUR ANNUAL EMISSIONS
+               YOUR ANNUAL EMISSIONS
             </div>
             <p style="color: #1e40af; font-size: 1.1em; margin: 15px 0 0 0;">
-              This represents your emissions <strong>per year</strong> — let's see how you compare to others
+              Let's see how your yearly emissions compare to others <strong>per year</strong> 
             </p>
           </div>
           
@@ -587,7 +614,7 @@ function showTotalEmissions() {
         <div style="display: flex; align-items: center; gap: 20px; margin: 60px 0; color: #6b7280;">
           <div style="flex: 1; height: 2px; background: #cbd5e0;"></div>
           <div style="font-size: 1.5em; font-weight: bold; padding: 10px 20px; background: #f3f4f6; border-radius: 30px;">
-            ⏰ FAST FORWARD TO 2100
+            FAST FORWARD TO 2100
           </div>
           <div style="flex: 1; height: 2px; background: #cbd5e0;"></div>
         </div>
@@ -596,7 +623,7 @@ function showTotalEmissions() {
         <div style="background: #fef3c7; border: 3px solid #f59e0b; border-radius: 20px; padding: 40px; margin-bottom: 40px;">
           <div style="text-align: center; margin-bottom: 30px;">
             <div style="display: inline-block; background: #f59e0b; color: white; padding: 12px 30px; border-radius: 30px; font-size: 1.3em; font-weight: bold; margin-bottom: 15px;">
-              🌍 YOUR LIFETIME IMPACT (BY 2100)
+               YOUR LIFETIME IMPACT (BY 2100)
             </div>
             <p style="color: #92400e; font-size: 1.1em; margin: 15px 0 0 0;">
               If you maintain these habits for <strong>75 years</strong>, here's your total environmental impact
@@ -622,9 +649,9 @@ function showTotalEmissions() {
           <div id="co2-equivalency" style="margin-top: 30px;"></div>
         </div>
 
-        <div class="results-info-box" style="background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-left: 5px solid #3b82f6;">
-          <h4 style="margin: 0 0 15px 0; font-size: 1.2em; color: #2d3748;">🌍 How Carbon Emissions Affect Precipitation</h4>
-          <p style="line-height: 1.8; color: rgb(0, 1, 2); margin: 0; font-size: 20px;">
+        <div class="results-info-box" style="background:rgb(230, 245, 255); padding: 30px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-left: 5px solid #3b82f6;">
+          <h4 style="margin: 0 0 15px 0; font-size: 1.2em; color: #1e40af;"> How Carbon Emissions Affect Precipitation</h4>
+          <p style="line-height: 1.8; color: #1e40af; margin: 0; font-size: 20px;">
             Carbon dioxide traps heat in Earth's atmosphere. Warmer air holds approximately 7% more moisture 
             per degree Celsius of warming. This extra moisture leads to more intense precipitation events 
             and increases the frequency of extreme rainfall days, resulting in flooding, erosion, and 
@@ -633,18 +660,18 @@ function showTotalEmissions() {
         </div>
         
         <div class="results-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-bottom: 30px;">
-          <div class="results-box" style="background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-            <h4 style="margin: 0 0 20px 0; font-size: 1.6em; color: #2d3748;">🌧️ Your Precipitation Impact</h4>
+          <div class="results-box" style="background:rgb(230, 245, 255); padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px #f0f9ff;">
+            <h4 style="margin: 0 0 20px 0; font-size: 1.2em; color: #1e40af;"> Your Precipitation Impact</h4>
             <div id="precipitation-chart"></div>
           </div>
       
           
-          <div class="results-box" style="background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-            <h4 style="margin: 0 0 20px 0; font-size: 1.2em; color: #2d3748;">⚠️ Extreme Weather Events</h4>
+          <div class="results-box" style="background: rgb(230, 245, 255); padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <h4 style="margin: 0 0 20px 0; font-size: 1.2em; color: #1e40af;">Extreme Weather Events</h4>
             <div style="background: #fef3c7; padding: 20px; border-radius: 12px; margin-bottom: 15px; border-left: 4px solid #f59e0b;">
               <div style="font-size: 0.9em; color: #92400e; margin-bottom: 5px;">Your Scenario</div>
               <div style="font-size: 2.5em; font-weight: bold; color: #d97706;">${extremeRainfallDays.current}</div>
-              <div style="font-size: 0.9em; color: #92400e;">extreme rainfall days/year</div>
+              <div style="font-size: 0.9em; color:rgb(171, 168, 166);">extreme rainfall days/year</div>
             </div>
             <div style="background: #d1fae5; padding: 20px; border-radius: 12px; border-left: 4px solid #10b981;">
               <div style="font-size: 0.9em; color: #065f46; margin-bottom: 5px;">Low Emission Goal</div>
@@ -716,19 +743,21 @@ function resetGame() {
     housing: null,
   };
 
-  // Reset slide index
+  // Reset slide index to title slide
   currentSlide = 0;
 
-  // Remove all dynamically created slides (keep only the title slide)
+  // Remove all slides except title slide
   const container = d3.select(".slides-container");
   container.selectAll(".slide:not(.title-slide)").remove();
 
   // Clear slides array
   slides = [];
 
-  // Show title slide and hide all other slides
-  d3.selectAll(".slide").classed("active", false);
-  d3.select(".title-slide").classed("active", true);
+  // Recreate all question slides
+  createSlides();
+
+  // Show title slide
+  updateSlide();
 }
 
 function showCO2Equivalencies(total, total2100) {
