@@ -330,6 +330,12 @@
       .step[data-step="7"] .rain-container {
         display: none;
       }
+
+      .font-red {
+        color: #e74c3c;
+        font-weight: bold;
+      } 
+
     </style>
   </head>
   <body>
@@ -460,8 +466,8 @@
         <div class="step" data-step="6">
           <div class="step-content">
             <p>
-              The difference in precipitation level under two different
-              scenarios is 0.36mm/day. It may not seem a lot at first glance.
+              The <b>difference</b> in precipitation level under two different
+              scenarios is <span class="font-red">0.36mm/day</span>. It may not seem a lot at first glance.
             </p>
           </div>
           <div class="rain-container">
@@ -477,8 +483,8 @@
         <div class="step" data-step="7">
           <div class="step-content">
             <p>
-              But if we convert to annual global water volume, that's 74
-              trillion cubic meters of extra rainfall per year.
+              But if we convert to annual global water volume, that's <span class="font-red">1.4
+              trillion cubic meters</span> of extra rainfall per year.
             </p>
           </div>
           <div class="rain-container">
@@ -496,10 +502,10 @@
         <svg id="lineChart"></svg>
         <div id="bathtub-animation">
           <div class="bathtub-container" id="bathtub-emojis">🛁</div>
-          <div class="volume-text">74 trillion m³ of extra rainfall</div>
+          <div class="volume-text">1.4 trillion m³ of extra rainfall</div>
           <div class="counter" id="bathtub-counter">0 trillion bathtubs</div>
           <div class="description">
-            That's enough water to fill 500 trillion bathtubs every year
+            That's enough water to fill 10 trillion bathtubs every year
           </div>
         </div>
       </div>
@@ -1526,7 +1532,7 @@
             svg.selectAll(".diff-annotation").transition().duration(500).style("opacity", 0);
 
             // Animate bathtub counter
-            const targetCount = 500;
+            const targetCount = 10;
             const duration = 3000;
             const steps = 60;
             const increment = targetCount / steps;
