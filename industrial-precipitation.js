@@ -882,17 +882,21 @@ function createImpactComparisonChart() {
     summaryValue.text(avoidedLabel);
 
     
-    contextBody.text( "Higher emissions mean more farms, people, and dollars are exposed to heavy summer rainfall and flooding.");
+    contextBody
+    .text( "Higher emissions mean more farms, people, and dollars are exposed to heavy summer rainfall and flooding.")
+    .style("font-size", "16px");
     
 
     const pctAvoided =
       totalLow > 0 ? ((totalGap / totalLow) * 100).toFixed(0) : "—";
-    calloutText.text(
+    calloutText
+    .text(
       `Low emissions avoid ${formatValue(
         totalGap,
         metricDef.type
       )} (${pctAvoided}% reduction) across all regions. Choosing the low-emissions pathway materially shrinks exposure.`
-    );
+    )
+    .style("font-size", "16px");
   }
 
   update();
