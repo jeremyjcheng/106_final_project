@@ -343,6 +343,55 @@
         justify-items: center;
       }
 
+      .final-text {
+        position: relative;
+        display: inline-block;              /* So the cloud hugs the text */
+        padding: 1.75rem 2.5rem;
+        background: radial-gradient(
+          circle at 30% 30%,
+          #ffffff 0%,
+          #f6fbff 40%,
+          #dbeeff 100%
+        );                                  /* Soft blue-white cloud gradient */
+        border-radius: 40px 70px 55px 80px;  /* Asymmetric, organic cloud shape */
+        box-shadow:
+          0 12px 30px rgba(15, 35, 95, 0.18),
+          0 0 0 1px rgba(255, 255, 255, 0.7); /* Soft depth and glow */
+        animation: cloudFloat 4.5s ease-in-out infinite;
+      }
+
+      /* Little puff on the left side */
+      .final-text::after {
+        content: "";
+        position: absolute;
+        left: -38px;            /* How far the puff sticks out */
+        bottom: 10px;
+        width: 70px;
+        height: 50px;
+        background: inherit;    /* Same gradient as the main cloud */
+        border-radius: 50px;    /* Round puff */
+        box-shadow:
+          0 10px 20px rgba(15, 35, 95, 0.12);
+        opacity: 0.95;
+      }
+
+      /* Gentle bobbing animation */
+      @keyframes cloudFloat {
+        0%, 100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-6px);
+        }
+      }
+
+      /* Optional: tidy up the text inside */
+      .final-text p {
+        margin: 0;
+        text-align: center;
+      }
+
+
     </style>
   </head>
   <body>
