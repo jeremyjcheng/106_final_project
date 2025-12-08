@@ -335,6 +335,13 @@
         color: #e74c3c;
         font-weight: bold;
       } 
+      
+      #bathtub-emojis {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr); /* Exactly 5 columns */
+        gap: 10px;
+        justify-items: center;
+      }
 
     </style>
   </head>
@@ -1534,37 +1541,30 @@
             // Animate bathtub counter
             const targetCount = 10;
             const duration = 3000;
-            const steps = 60;
-            const increment = targetCount / steps;
-            let currentCount = 0;
+            const steps = 10;
+
+            let currentCount = 0;  // ← Only need ONE counter
 
             const bathtubEmojis = d3.select("#bathtub-emojis");
             const counter = d3.select("#bathtub-counter");
 
             // Reset
-            bathtubEmojis.html("🛁");
+            bathtubEmojis.html("");
             counter.text("0 trillion bathtubs");
 
             const interval = setInterval(() => {
-              currentCount += increment;
-              if (currentCount >= targetCount) {
-                currentCount = targetCount;
+              if (currentCount >= targetCount) {  // ← Check before incrementing
                 clearInterval(interval);
+                return;
               }
 
-              counter.text(`${Math.round(currentCount)} trillion bathtubs`);
+              currentCount += 1;
 
-              // Add more bathtub emojis as count increases
-              const numEmojis = Math.min(Math.floor(currentCount / 50) + 1, 15);
-              let emojiString = "";
-              for (let i = 0; i < numEmojis; i++) {
-                emojiString += "🛁";
-                // Add line breaks every 5 emojis for better display
-                if ((i + 1) % 5 === 0 && i < numEmojis - 1) {
-                  emojiString += "<br>";
-                }
-              }
-              bathtubEmojis.html(emojiString);
+              // Update counter
+              counter.text(`${currentCount} trillion bathtubs`);
+
+              // Add emoji
+              bathtubEmojis.append("span").text("🛁");
             }, duration / steps);
           }
         }
