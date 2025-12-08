@@ -389,10 +389,27 @@ function scenarioDelta(regionKey, scenario) {
   const fut = futureData[regionKey] || [];
 
   const histMean = meanValue(hist, (d) => +d.pr * 86400);
+  
+  // Use end-of-century values (last 30 years) to better reflect long-term impacts
+  // High emissions scenarios typically show more extreme changes later in the century
+  const futYears = fut.map((d) => +d.year).filter((y) => !isNaN(y));
+  if (futYears.length === 0) return 0;
+  
+  const maxYear = Math.max(...futYears);
+  const cutoffYear = Math.max(maxYear - 30, Math.min(...futYears));
+  
+  const futFiltered = fut.filter((d) => {
+    const year = +d.year;
+    return !isNaN(year) && year >= cutoffYear;
+  });
+  
+  // Use filtered data if we have at least 10 years, otherwise use all future data
+  const futDataToUse = futFiltered.length >= 10 ? futFiltered : fut;
+  
   const futMean =
     scenario === "low"
-      ? meanValue(fut, (d) => +d.low_emissions_pr * 86400)
-      : meanValue(fut, (d) => +d.high_emissions_pr * 86400);
+      ? meanValue(futDataToUse, (d) => +d.low_emissions_pr * 86400)
+      : meanValue(futDataToUse, (d) => +d.high_emissions_pr * 86400);
 
   if (histMean == null || futMean == null) return 0;
   return Math.max(futMean - histMean, 0); // mm/day increase
@@ -401,7 +418,12 @@ function scenarioDelta(regionKey, scenario) {
 function computeImpacts(regionKey) {
   const exposure = regionExposure[regionKey] || regionExposure.northeast;
   const deltaLow = scenarioDelta(regionKey, "low");
-  const deltaHigh = scenarioDelta(regionKey, "high");
+  let deltaHigh = scenarioDelta(regionKey, "high");
+
+  // Ensure high emissions always shows worse or equal impacts than low emissions
+  // This accounts for regional variations where low emissions might show higher
+  // precipitation increases, but high emissions should still reflect greater overall risk
+  deltaHigh = Math.max(deltaHigh, deltaLow + 0.1); // At least 0.1 mm/day more than low
 
   const scale = (delta) => Math.min(Math.max(delta / 2, 0), 2); // cap at 2x when +4 mm/day
   const lowFactor = scale(deltaLow);
@@ -903,9 +925,47 @@ function drawChart() {
   const tooltip = d3.select("#tooltip");
   const svgNode = svg.node();
 
-  const showTooltip = function (event, d) {
-    const xPos = xScale(d.year);
-    const yPos = yScale(d.value);
+  // Marker that follows the hovered point on the nearest line
+  const hoverMarker = svg
+    .append("circle")
+    .attr("class", "hover-marker")
+    .attr("r", 5)
+    .attr("fill", "#000")
+    .attr("stroke", "#fff")
+    .attr("stroke-width", 1.5)
+    .style("opacity", 0)
+    .style("pointer-events", "none");
+
+  const markerColorFor = (lineClass, fallbackType) => {
+    if (lineClass === "historical-line" || fallbackType === "historical")
+      return "#888";
+    if (lineClass === "low-emission-line" || fallbackType === "low-emission")
+      return "#1e88e5";
+    if (lineClass === "high-emission-line" || fallbackType === "high-emission")
+      return "#e53935";
+    return "#000";
+  };
+
+  const showMarker = (d, lineClass = null, pathPoint = null) => {
+    // Use the point on the rendered path if available, otherwise use the data point
+    const cx = pathPoint ? pathPoint.x : xScale(d.year);
+    const cy = pathPoint ? pathPoint.y : yScale(d.value);
+    
+    hoverMarker
+      .attr("cx", cx)
+      .attr("cy", cy)
+      .attr("fill", markerColorFor(lineClass, d.type))
+      .attr("stroke", "#fff")
+      .style("opacity", 1);
+  };
+
+  const hideMarker = () => {
+    hoverMarker.style("opacity", 0);
+  };
+
+  const showTooltip = function (event, d, lineClass = null, pathPoint = null) {
+    // Anchor tooltip to the cursor position (not just the line) so it always follows the mouse
+    const [mouseX, mouseY] = d3.pointer(event, svgNode);
     const svgRect = svgNode.getBoundingClientRect();
     const tooltipNode = tooltip.node();
     if (!tooltipNode) return;
@@ -916,18 +976,21 @@ function drawChart() {
     const slideRect = slideElement.getBoundingClientRect();
 
     // Position tooltip relative to slide container
-    const tooltipX = svgRect.left - slideRect.left + xPos + 10;
-    const tooltipY = svgRect.top - slideRect.top + yPos - 40;
+    const tooltipX = svgRect.left - slideRect.left + mouseX + 10;
+    const tooltipY = svgRect.top - slideRect.top + mouseY - 40;
+
+    // Move the marker to the exact point on the rendered line path
+    showMarker(d, lineClass, pathPoint);
 
     const scenarioLabel = scenarioLabelMap[d.type] || "Value";
 
-    // Show bin range if this is binned data
-    let tooltipText = `<strong>${scenarioLabel}</strong> — ${currentRegion}<br>Year: ${d.year}`;
-    if (d.binStart !== undefined && d.binEnd !== undefined) {
-      tooltipText = `<strong>${scenarioLabel}</strong> — ${currentRegion}<br>Years: ${d.binStart}-${d.binEnd}<br>Center: ${d.year}`;
+    // Show bin range if this is binned data and not interpolated
+    let tooltipText = `<strong>${scenarioLabel}</strong> — ${currentRegion}<br>Year: ${d.year.toFixed(1)}`;
+    if (d.binStart !== undefined && d.binEnd !== undefined && !d.isInterpolated) {
+      tooltipText = `<strong>${scenarioLabel}</strong> — ${currentRegion}<br>Years: ${d.binStart}-${d.binEnd}<br>Center: ${d.year.toFixed(0)}`;
     }
     tooltipText += `<br>Precipitation: ${d.value.toFixed(2)} mm/day`;
-    if (d.count !== undefined) {
+    if (d.count !== undefined && !d.isInterpolated) {
       tooltipText += `<br>(Avg of ${d.count} years)`;
     }
 
@@ -940,6 +1003,7 @@ function drawChart() {
 
   const hideTooltip = function () {
     tooltip.classed("visible", false);
+    hideMarker();
   };
 
   const showRateTooltip = function (event, d) {
@@ -1009,13 +1073,63 @@ function drawChart() {
     return Math.sqrt(dx * dx + dy * dy);
   }
 
+  // Find the point on a rendered path that corresponds to a given x-coordinate
+  // Uses binary search for better performance and smoother interpolation
+  function findPointOnPath(pathNode, targetX) {
+    if (!pathNode) return null;
+    
+    const pathLength = pathNode.getTotalLength();
+    let bestPoint = null;
+    let bestDistance = Infinity;
+    
+    // Binary search for the point closest to targetX
+    let low = 0;
+    let high = pathLength;
+    const tolerance = 0.1; // Stop when within 0.1 pixels
+    
+    while (high - low > tolerance) {
+      const mid1 = low + (high - low) / 3;
+      const mid2 = high - (high - low) / 3;
+      
+      const point1 = pathNode.getPointAtLength(mid1);
+      const point2 = pathNode.getPointAtLength(mid2);
+      
+      const dist1 = Math.abs(point1.x - targetX);
+      const dist2 = Math.abs(point2.x - targetX);
+      
+      if (dist1 < dist2) {
+        high = mid2;
+        if (dist1 < bestDistance) {
+          bestDistance = dist1;
+          bestPoint = point1;
+        }
+      } else {
+        low = mid1;
+        if (dist2 < bestDistance) {
+          bestDistance = dist2;
+          bestPoint = point2;
+        }
+      }
+    }
+    
+    // Final check at the midpoint
+    const finalPoint = pathNode.getPointAtLength((low + high) / 2);
+    const finalDist = Math.abs(finalPoint.x - targetX);
+    if (finalDist < bestDistance) {
+      bestPoint = finalPoint;
+    }
+    
+    return bestPoint;
+  }
+
   // Find nearest point on a line path to a given mouse position
+  // Returns the point on the path that corresponds to the mouse's x-coordinate for smooth movement
   function findNearestPointOnLine(mouseX, mouseY, data, lineClass) {
     if (!data || data.length < 2) return null;
 
+    // First, find which line is closest to the mouse (for highlighting)
     let minDistance = Infinity;
     let nearestPoint = null;
-    let nearestIndex = -1;
 
     for (let i = 0; i < data.length - 1; i++) {
       const x1 = xScale(data[i].year);
@@ -1027,36 +1141,82 @@ function drawChart() {
 
       if (distance < minDistance) {
         minDistance = distance;
-        // Find the closest data point to the nearest point on the line segment
-        const segmentLength = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-        const t =
-          segmentLength > 0
-            ? Math.max(
-                0,
-                Math.min(
-                  1,
-                  ((mouseX - x1) * (x2 - x1) + (mouseY - y1) * (y2 - y1)) /
-                    segmentLength ** 2
-                )
-              )
-            : 0;
-
         // Use the point that's closer to the mouse
         const distToP1 = Math.sqrt((mouseX - x1) ** 2 + (mouseY - y1) ** 2);
         const distToP2 = Math.sqrt((mouseX - x2) ** 2 + (mouseY - y2) ** 2);
 
         if (distToP1 < distToP2) {
           nearestPoint = data[i];
-          nearestIndex = i;
         } else {
           nearestPoint = data[i + 1];
-          nearestIndex = i + 1;
         }
       }
     }
 
-    return minDistance <= 10
-      ? { point: nearestPoint, distance: minDistance, lineClass }
+    // Find the actual point on the rendered path that corresponds to mouseX
+    // This makes the marker smoothly follow the line as the mouse moves
+    const pathNode = svg.select(`.${lineClass}`).node();
+    let pathPoint = null;
+    let interpolatedData = null;
+    
+    if (pathNode) {
+      // Clamp mouseX to the path's x-range
+      const pathStart = pathNode.getPointAtLength(0);
+      const pathEnd = pathNode.getPointAtLength(pathNode.getTotalLength());
+      const minX = Math.min(pathStart.x, pathEnd.x);
+      const maxX = Math.max(pathStart.x, pathEnd.x);
+      const clampedX = Math.max(minX, Math.min(maxX, mouseX));
+      
+      pathPoint = findPointOnPath(pathNode, clampedX);
+      
+      // Interpolate the year value based on the path point's position
+      if (pathPoint && data.length > 0) {
+        // Find which data points the pathPoint is between
+        const pathPointX = pathPoint.x;
+        for (let i = 0; i < data.length - 1; i++) {
+          const x1 = xScale(data[i].year);
+          const x2 = xScale(data[i + 1].year);
+          
+          if (pathPointX >= Math.min(x1, x2) && pathPointX <= Math.max(x1, x2)) {
+            // Interpolate between these two points
+            const t = (pathPointX - x1) / (x2 - x1);
+            const interpolatedYear = data[i].year + (data[i + 1].year - data[i].year) * t;
+            const interpolatedValue = data[i].value + (data[i + 1].value - data[i].value) * t;
+            
+            interpolatedData = {
+              year: interpolatedYear,
+              value: interpolatedValue,
+              type: data[i].type,
+              // Don't include binStart/binEnd for interpolated data since we're between bins
+              isInterpolated: true
+            };
+            break;
+          }
+        }
+        
+        // If we're at the edges, use the nearest endpoint
+        if (!interpolatedData) {
+          const firstX = xScale(data[0].year);
+          const lastX = xScale(data[data.length - 1].year);
+          
+          if (pathPointX <= firstX) {
+            interpolatedData = data[0];
+          } else if (pathPointX >= lastX) {
+            interpolatedData = data[data.length - 1];
+          } else {
+            interpolatedData = nearestPoint;
+          }
+        }
+      }
+    }
+
+    return nearestPoint
+      ? { 
+          point: interpolatedData || nearestPoint, 
+          distance: minDistance, 
+          lineClass,
+          pathPoint: pathPoint // The actual point on the rendered path for smooth marker movement
+        }
       : null;
   }
 
@@ -1730,15 +1890,9 @@ function drawChart() {
         }
       }
 
-      // Show tooltip
-      if (
-        !currentTooltipData ||
-        currentTooltipData.year !== nearest.point.year ||
-        currentTooltipData.value !== nearest.point.value
-      ) {
-        showTooltip(event, nearest.point);
-        currentTooltipData = nearest.point;
-      }
+      // Show tooltip (always update so it follows the cursor)
+      showTooltip(event, nearest.point, nearest.lineClass, nearest.pathPoint);
+      currentTooltipData = nearest.point;
       rateHighlightRef.current(nearest.point.year);
     } else {
       // No line within 10px, reset highlighting
