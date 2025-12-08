@@ -695,6 +695,8 @@
 
       // Main visualization
       async function init() {
+        let bathtubInterval = null;
+
         const { hist, low, high } = await loadData();
 
         const width = 800;
@@ -1288,6 +1290,13 @@
             pollutionAnnotation.transition().duration(500).style("opacity", 0);
             transitionLineGroup.transition().duration(500).style("opacity", 1);
           } else if (step === 5) {
+            // Reset chart visibility and hide bathtub animation
+            svg.style("display", "block");
+            d3.select("#bathtub-animation").classed("active", false);
+            
+            // COMPLETELY REMOVE diff annotation from step 6
+            svg.selectAll(".diff-annotation").remove();
+            
             const allData = [...hist, ...high, ...low];
             xScale.domain(d3.extent(allData, (d) => d.year));
             yScale.domain(d3.extent(allData, (d) => d.pr));
@@ -1302,65 +1311,92 @@
             yAxisGroup
               .transition()
               .duration(1000)
-              .call(d3.axisLeft(yScale).tickFormat(d3.format(".2f")))
-              .on("end", () => {
-                yAxisGroup
-                  .selectAll("text")
-                  .style("font-family", "Georgia, serif");
-                const lastHigh2 = high[high.length - 1];
-                highEndDot
-                  .attr("cx", xScale(lastHigh2.year))
-                  .attr("cy", yScale(lastHigh2.pr))
-                  .transition()
-                  .duration(500)
-                  .style("opacity", 0.3);
+              .call(d3.axisLeft(yScale).tickFormat(d3.format(".2f")));
 
-                lowLine.attr("d", line).style("opacity", 1);
+            yAxisGroup.selectAll("text").style("font-family", "Georgia, serif");
 
-                const lastLow = low[low.length - 1];
-                lowEndDot
-                  .attr("cx", xScale(lastLow.year))
-                  .attr("cy", yScale(lastLow.pr))
-                  .transition()
-                  .delay(500)
-                  .duration(500)
-                  .style("opacity", 1);
+            setTimeout(() => {
+              // Reposition and show historical line with the new scale
+              histLine
+                .attr("d", line)
+                .attr("stroke-dashoffset", 0)
+                .transition()
+                .duration(500)
+                .style("opacity", 1);
+              // Reposition 2014 transition line
+              const transitionYear = 2014;
+              transitionLineGroup
+                .select("line")
+                .attr("x1", xScale(transitionYear))
+                .attr("x2", xScale(transitionYear));
 
-                const lowLen = lowLine.node().getTotalLength();
-                lowLine
-                  .attr("stroke-dasharray", lowLen + " " + lowLen)
-                  .attr("stroke-dashoffset", lowLen)
-                  .transition()
-                  .duration(500)
-                  .ease(d3.easeLinear)
-                  .attr("stroke-dashoffset", 0);
+              transitionLineGroup
+                .transition()
+                .duration(500)
+                .style("opacity", 1);
+              
+              // Reposition high line
+              highLine
+                .interrupt()
+                .attr("d", line)
+                .attr("stroke-dashoffset", 0)
+                .transition()
+                .duration(500)
+                .style("opacity", 0.3);
 
-                // Show low emissions in legend
-                legend
-                  .select(".legend-low-text")
-                  .transition()
-                  .duration(500)
-                  .style("opacity", 1);
-                legend
-                  .select("line:nth-of-type(3)")
-                  .transition()
-                  .duration(500)
-                  .style("opacity", 1);
-              });
+              // Reposition and animate low line
+              lowLine
+                .attr("d", line)
+                .style("opacity", 1);
 
-            histLine
-              .transition()
-              .duration(1000)
-              .attr("d", line)
-              .attr("stroke-dashoffset", 0);
+              const lastHigh2 = high[high.length - 1];
+              highEndDot
+                .attr("cx", xScale(lastHigh2.year))
+                .attr("cy", yScale(lastHigh2.pr))
+                .transition()
+                .duration(500)
+                .style("opacity", 0.3);
 
-            highLine
-              .interrupt()
-              .attr("d", line)
-              .attr("stroke-dashoffset", 0)
-              .transition()
-              .duration(1000)
-              .style("opacity", 0.3);
+              const lastLow = low[low.length - 1];
+              lowEndDot
+                .attr("cx", xScale(lastLow.year))
+                .attr("cy", yScale(lastLow.pr))
+                .transition()
+                .delay(500)
+                .duration(500)
+                .style("opacity", 1);
+
+              const lowLen = lowLine.node().getTotalLength();
+              lowLine
+                .attr("stroke-dasharray", lowLen + " " + lowLen)
+                .attr("stroke-dashoffset", lowLen)
+                .transition()
+                .duration(500)
+                .ease(d3.easeLinear)
+                .attr("stroke-dashoffset", 0);
+
+              // Show low emissions in legend
+              legend
+                .select(".legend-high-text")
+                .transition()
+                .duration(500)
+                .style("opacity", 1);
+              legend
+                .select("line:nth-of-type(2)")
+                .transition()
+                .duration(500)
+                .style("opacity", 1);
+              legend
+                .select(".legend-low-text")
+                .transition()
+                .duration(500)
+                .style("opacity", 1);
+              legend
+                .select("line:nth-of-type(3)")
+                .transition()
+                .duration(500)
+                .style("opacity", 1);
+            }, 1000);
 
             dustBowlAnnotation.transition().duration(500).style("opacity", 0);
             pollutionAnnotation.transition().duration(500).style("opacity", 0);
@@ -1399,7 +1435,7 @@
 
             setTimeout(() => {
               // Hide historical line
-              histLine.transition().duration(500).style("opacity", 0);
+              histLine.transition().duration(50).style("opacity", 0);
 
               // 1️⃣ SNAP path to new scale (NO transition)
               highLine
@@ -1411,7 +1447,7 @@
               // 2️⃣ THEN fade it in
               highLine
                 .transition()
-                .duration(500)
+                .duration(200)
                 .style("opacity", 1);
 
               lowLine
@@ -1422,7 +1458,7 @@
 
               lowLine
                 .transition()
-                .duration(500)
+                .duration(200)
                 .style("opacity", 1);
 
 
@@ -1432,14 +1468,14 @@
               // Show endpoint dots with new scale positions
               highEndDot
                 .transition()
-                .duration(1000)
+                .duration(200)
                 .attr("cx", xScale(lastHigh.year))
                 .attr("cy", yScale(lastHigh.pr))
                 .style("opacity", 1);
 
               lowEndDot
                 .transition()
-                .duration(1000)
+                .duration(200)
                 .attr("cx", xScale(lastLow.year))
                 .attr("cy", yScale(lastLow.pr))
                 .style("opacity", 1);
@@ -1499,8 +1535,8 @@
                   .attr("fill", "#e74c3c")
                   .text(`Δ = ${diff.toFixed(2)} mm/day`);
 
-                diffGroup.style("opacity", 0).transition().duration(500).style("opacity", 1);
-              }, 1000);
+                diffGroup.style("opacity", 0).transition().duration(100).style("opacity", 1);
+              }, 100);
 
               // Show legends
               legend
@@ -1537,10 +1573,13 @@
 
             // Hide any diff annotations from previous step
             svg.selectAll(".diff-annotation").transition().duration(500).style("opacity", 0);
-
+            // Clear any existing interval first!
+            if (bathtubInterval) {
+                clearInterval(bathtubInterval);
+            }
             // Animate bathtub counter
             const targetCount = 10;
-            const duration = 3000;
+            const duration = 1000;
             const steps = 10;
 
             let currentCount = 0;  // ← Only need ONE counter
@@ -1555,6 +1594,7 @@
             const interval = setInterval(() => {
               if (currentCount >= targetCount) {  // ← Check before incrementing
                 clearInterval(interval);
+                bathtubInterval = null;
                 return;
               }
 
