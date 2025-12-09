@@ -475,7 +475,7 @@ function createPrecipitationChart(containerId, totalEmissions) {
   const currentPrecipitation = 3.0;
   let projected2100;
 
-  if (totalEmissions < 1100) {
+  if (totalEmissions < 2300) {
     projected2100 = 3.8;
   } else {
     projected2100 = 4.5;
