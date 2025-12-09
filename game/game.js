@@ -630,7 +630,7 @@ function showTotalEmissions() {
   let classification = "";
   let classColor = "";
 
-  if (total <= 2000) {
+  if (total <= 2300) {
     classification = "🌱 Low Emissions Pathway";
     classColor = "#2e8b57";
   } else {
@@ -770,7 +770,7 @@ function showTotalEmissions() {
 function getExtremeRainfallDays(total) {
   let current, lowEmission;
   
-  if (total <= 2000) {  // ≤2 tonnes CO2/year
+  if (total <= 2300) {  // ≤2 tonnes CO2/year
     // Low Emission Scenario (SSP1-2.6)
     // User is on track with 2030 targets
     current = 15;
@@ -786,7 +786,7 @@ function getExtremeRainfallDays(total) {
 }
 
 function getLowEmissionImpact(total) {
-  if (total > 2000) {
+  if (total > 2300) {
     return "Your current emissions exceed sustainable levels and contribute to a 4°C+ warming scenario. This pathway leads to dramatically increased extreme weather events, including severe flooding and precipitation extremes. Small changes in your habits can make a significant difference.";
   } else {
     return "You're aligned with the global climate target to limit warming to 1.5-2°C. Your lifestyle choices help prevent the worst impacts of climate change, including extreme rainfall events and flooding.";
@@ -1129,44 +1129,8 @@ contextBox
     <strong>📊 Context:</strong><br>
     • Global average: ~4,000 kg CO₂/year<br>
     • US average: ~16,000 kg CO₂/year<br>
-    • Paris Agreement target: ~2,000 kg CO₂/year by 2050
+    • Low emissions pathway target (SSP1-2.6): ~2,300 kg CO₂/year by 2070
   `);
-
-// Collapsible Paris Agreement dropdown
-const parisContainer = contextBox
-  .append("div")
-  .style("margin-top", "12px");
-
-const parisHeader = parisContainer
-  .append("div")
-  .style("cursor", "pointer")
-  .style("padding", "10px")
-  .style("background", "#eff6ff")
-  .style("border-left", "4px solid #3b82f6")
-  .style("border-radius", "6px")
-  .style("font-weight", "bold")
-  .style("color", "#1e40af")
-  .style("font-size", "17px")
-  .text("🌍 What is the Paris Agreement? (click to expand)");
-
-const parisContent = parisContainer
-  .append("div")
-  .style("font-size", "17px")
-  .style("color", "#1e40af")
-  .style("line-height", "1.4")
-  .style("margin-top", "6px")
-  .style("display", "none") // hidden by default
-  .html(`
-    A global treaty signed by 196 countries in 2015 to limit global warming to 1.5–2°C above pre-industrial levels. 
-    This requires reducing individual emissions to around 2 tonnes (2,000 kg) CO₂ per year by 2050.
-  `);
-
-// Toggle function
-parisHeader.on("click", () => {
-  const currentlyVisible = parisContent.style("display") === "block";
-  parisContent.style("display", currentlyVisible ? "none" : "block");
-});
-
 
   // Progress bar showing where user falls
   const progressContainer = card
