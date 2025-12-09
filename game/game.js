@@ -1103,26 +1103,63 @@ function createPercentileViz(containerId, totalEmissions) {
     .style("border-top", "1px solid #e5e7eb")
     .style("margin", "25px 0");
   
-  // Context information
-  const contextBox = card
-    .append("div")
-    .style("background", "#f9fafb")
-    .style("border-radius", "8px")
-    .style("padding", "15px")
-    .style("margin-top", "20px");
-  
-  contextBox
-    .append("div")
-    .style("font-size", "20px")
-    .style("color", "#374151")
-    .style("line-height", "1.6")
-    .html(`
-      <strong>📊 Context:</strong><br>
-      • Global average: ~4,000 kg CO₂/year<br>
-      • US average: ~16,000 kg CO₂/year<br>
-      • Paris Agreement target: ~2,000 kg CO₂/year by 2050
-    `);
-  
+// Context information container
+const contextBox = card
+  .append("div")
+  .style("background", "#f9fafb")
+  .style("border-radius", "8px")
+  .style("padding", "15px")
+  .style("margin-top", "20px");
+
+// Basic stats
+contextBox
+  .append("div")
+  .style("font-size", "16px") // smaller font
+  .style("color", "#374151")
+  .style("line-height", "1.5")
+  .html(`
+    <strong>📊 Context:</strong><br>
+    • Global average: ~4,000 kg CO₂/year<br>
+    • US average: ~16,000 kg CO₂/year<br>
+    • Paris Agreement target: ~2,000 kg CO₂/year by 2050
+  `);
+
+// Collapsible Paris Agreement dropdown
+const parisContainer = contextBox
+  .append("div")
+  .style("margin-top", "12px");
+
+const parisHeader = parisContainer
+  .append("div")
+  .style("cursor", "pointer")
+  .style("padding", "10px")
+  .style("background", "#eff6ff")
+  .style("border-left", "4px solid #3b82f6")
+  .style("border-radius", "6px")
+  .style("font-weight", "bold")
+  .style("color", "#1e40af")
+  .style("font-size", "17px")
+  .text("🌍 What is the Paris Agreement? (click to expand)");
+
+const parisContent = parisContainer
+  .append("div")
+  .style("font-size", "17px")
+  .style("color", "#1e40af")
+  .style("line-height", "1.4")
+  .style("margin-top", "6px")
+  .style("display", "none") // hidden by default
+  .html(`
+    A global treaty signed by 196 countries in 2015 to limit global warming to 1.5–2°C above pre-industrial levels. 
+    This requires reducing individual emissions to around 2 tonnes (2,000 kg) CO₂ per year by 2050.
+  `);
+
+// Toggle function
+parisHeader.on("click", () => {
+  const currentlyVisible = parisContent.style("display") === "block";
+  parisContent.style("display", currentlyVisible ? "none" : "block");
+});
+
+
   // Progress bar showing where user falls
   const progressContainer = card
     .append("div")
