@@ -475,7 +475,7 @@ function createPrecipitationChart(containerId, totalEmissions) {
   const currentPrecipitation = 3.0;
   let projected2100;
 
-  if (totalEmissions < 2300) {
+  if (totalEmissions <= 2300) {
     projected2100 = 3.8;
   } else {
     projected2100 = 4.5;
@@ -557,14 +557,20 @@ function createPrecipitationChart(containerId, totalEmissions) {
     .delay(300)
     .style("opacity", 1);
 
+
+  
+
   const projectedY = yScale(projected2100);
+  const projectedColor = totalEmissions < 1100 ? "#10b981" : "#dc2626"; // Green for low, Red for high
+  const projectedLabel = totalEmissions < 1100 ? "2100 Low Emissions" : "2100 High Emissions";
+  
   svg
     .append("line")
     .attr("x1", 0)
     .attr("x2", width)
     .attr("y1", projectedY)
     .attr("y2", projectedY)
-    .attr("stroke", "#14b8a6")
+    .attr("stroke", projectedColor)
     .attr("stroke-width", 4)
     .attr("stroke-dasharray", "5,5")
     .style("opacity", 0)
@@ -572,7 +578,7 @@ function createPrecipitationChart(containerId, totalEmissions) {
     .duration(1000)
     .delay(800)
     .style("opacity", 0.8);
-
+  
   svg
     .append("text")
     .attr("x", width / 2)
@@ -581,9 +587,9 @@ function createPrecipitationChart(containerId, totalEmissions) {
     .style("font-family", "Georgia, serif")
     .style("font-size", "14px")
     .style("font-weight", "700")
-    .style("fill", "#14b8a6")
+    .style("fill", projectedColor)
     .style("opacity", 0)
-    .text(`2100: ${projected2100.toFixed(1)}`)
+    .text(`${projectedLabel}: ${projected2100.toFixed(1)}`)
     .transition()
     .duration(1000)
     .delay(800)
