@@ -561,8 +561,8 @@ function createPrecipitationChart(containerId, totalEmissions) {
   
 
   const projectedY = yScale(projected2100);
-  const projectedColor = totalEmissions < 1100 ? "#10b981" : "#dc2626"; // Green for low, Red for high
-  const projectedLabel = totalEmissions < 1100 ? "2100 Low Emissions" : "2100 High Emissions";
+  const projectedColor = totalEmissions <= 2300 ? "#10b981" : "#dc2626"; // Green for low, Red for high
+  const projectedLabel = totalEmissions <= 2300 ? "2100 Low Emissions" : "2100 High Emissions";
   
   svg
     .append("line")
