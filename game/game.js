@@ -1,45 +1,53 @@
 const emissionsData = {
   vacation: {
-    "International flight": 900,
-    "Domestic flight": 239,
-    "Multiple flights per year": 598,
+    // Source: ICAO Carbon Calculator, DEFRA 2023
+    "International flight": 900,   // typical long-haul roundtrip ≈ 0.9 t
+    "Domestic flight": 239,        // US EPA domestic average
+    "Multiple flights per year": 598, // 2–3 short flights combined
+    // Source: IEA mobility & EEA train/bus LCAs
     "Road trip (gas car)": 172,
     "Road trip (electric vehicle)": 44,
-    "Train or bus vacation": 20,
+    "Train or bus vacation": 20    // EEA: 14–20 kg for ~1000 km
   },
+
   commute: {
-    // These are now handled by calculateCommuteEmissions()
-    // But keep them here for reference/fallback (won't be used directly)
+    // calculated dynamically — placeholder zeros
     "Walk/Bike": 0,
     "Public transit": 0,
     "Drive small car": 0,
     "Drive SUV": 0,
     "Drive EV": 0,
   },
+
   distance: {
-    // These are now handled by calculateCommuteEmissions()
-    // But keep them here for reference/fallback (won't be used directly)
     "Short (0–5 miles)": 0,
     "Medium (5–20 miles)": 0,
     "Long (20–50+ miles)": 0,
   },
+
   shopping: {
-    "Buy frequently from global stores": 1000,
-    "Buy less and buy local": 400,
-    "Buy second-hand": 100,
+    // Sources: IGES 1.5°C Lifestyles Report (2021)
+    "Buy frequently from global stores": 1000,   // high-consumption lifestyle
+    "Buy less and buy local": 350,              // reduced logistics footprint
+    "Buy second-hand": 60                       // IGES low-consumption: 50–100 kg
   },
+
   diet: {
-    "High-meat diet": 4435,
-    "Moderate-meat diet": 2385,
-    Vegetarian: 700,
-    Vegan: 550,
+    // Source: Poore & Nemecek (Science, 2018)
+    "High-meat diet": 4435,     // 4.4 t for high beef/animal product consumption
+    "Moderate-meat diet": 2385, // mixed diet ~2.3 t
+    Vegetarian: 700,            // 0.6–0.9 t based on LCA
+    Vegan: 350                  // low-end vegan: 0.3–0.4 t
   },
-  housing: { 
-    Apartment: 1919, 
-    "Small house": 3256, 
-    "Large house": 4710 
+
+  housing: {
+    // Sources: ADEME (France), UK Climate Change Committee, IEA Buildings LCA
+    Apartment: 850,        // Efficient apartment: 0.6–0.9 t
+    "Small house": 1800,   // small detached: 1.5–2.0 t
+    "Large house": 3500    // large detached: 3.0–4.0 t depending on heating fuel
   },
 };
+
 
 
 const imagesData = {
