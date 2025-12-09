@@ -8,16 +8,20 @@ const emissionsData = {
     "Train or bus vacation": 20,
   },
   commute: {
+    // These are now handled by calculateCommuteEmissions()
+    // But keep them here for reference/fallback (won't be used directly)
     "Walk/Bike": 0,
-    "Public transit": 196,
-    "Drive small car": 378,
-    "Drive SUV": 550,
-    "Drive EV": 97,
+    "Public transit": 0,
+    "Drive small car": 0,
+    "Drive SUV": 0,
+    "Drive EV": 0,
   },
   distance: {
-    "Short (0–5 miles)": 303,
-    "Medium (5–20 miles)": 605,
-    "Long (20–50+ miles)": 1514,
+    // These are now handled by calculateCommuteEmissions()
+    // But keep them here for reference/fallback (won't be used directly)
+    "Short (0–5 miles)": 0,
+    "Medium (5–20 miles)": 0,
+    "Long (20–50+ miles)": 0,
   },
   shopping: {
     "Buy frequently from global stores": 1000,
@@ -30,8 +34,13 @@ const emissionsData = {
     Vegetarian: 700,
     Vegan: 550,
   },
-  housing: { Apartment: 1919, "Small house": 3256, "Large house": 4710 },
+  housing: { 
+    Apartment: 1919, 
+    "Small house": 3256, 
+    "Large house": 4710 
+  },
 };
+
 
 const imagesData = {
   "International flight": "../assets/flight.png",
@@ -86,6 +95,31 @@ const categories = {
 
 let currentSlide = 0;
 let slides = [];
+
+function calculateCommuteEmissions(commuteChoice, distanceChoice) {
+  // Emission intensities (kg CO₂ per mile)
+  const intensity_kg_per_mile = {
+    "Walk/Bike": 0,            // no fuel, 0 emissions
+    "Public transit": 0.150,   // 150 g/mile → 0.150 kg/mile
+    "Drive small car": 0.404,  // 404 g/mile → 0.404 kg/mile
+    "Drive SUV": 0.650,        // 650 g/mile → 0.650 kg/mile
+    "Drive EV": 0.100          // 100 g/mile → 0.100 kg/mile (US grid average)
+  };
+
+  // Annual miles for each distance tier (miles per year)
+  const annualMiles = {
+    "Short (0–5 miles)": 1000,   // ~4 miles/day × 250 days
+    "Medium (5–20 miles)": 4000, // ~16 miles/day × 250 days
+    "Long (20–50+ miles)": 10000 // ~40 miles/day × 250 days
+  };
+
+  // Get intensity and annual miles
+  const intensity = intensity_kg_per_mile[commuteChoice] || 0;
+  const miles = annualMiles[distanceChoice] || 0;
+
+  // Calculate: kg CO₂ per mile × miles per year = kg CO₂ per year
+  return intensity * miles;
+}
 
 function createTitleSlide() {
   const container = d3.select(".slides-container");
@@ -560,8 +594,25 @@ function createPrecipitationChart(containerId, totalEmissions) {
 
 function showTotalEmissions() {
   let total = 0;
+  
+  // Calculate emissions for each category
   for (const cat in userChoices) {
-    if (userChoices[cat]) total += emissionsData[cat][userChoices[cat]];
+    if (userChoices[cat]) {
+      // Special handling for commute + distance
+      if (cat === 'commute' || cat === 'distance') {
+        continue; // Skip these, we'll handle them together below
+      }
+      total += emissionsData[cat][userChoices[cat]];
+    }
+  }
+  
+  // Handle commute + distance together
+  if (userChoices.commute && userChoices.distance) {
+    const commuteEmissions = calculateCommuteEmissions(
+      userChoices.commute, 
+      userChoices.distance
+    );
+    total += commuteEmissions;
   }
 
   // Calculate 2100 total (75 years of emissions)
@@ -571,11 +622,11 @@ function showTotalEmissions() {
   let classification = "";
   let classColor = "";
 
-  if (total < 1100) {
-    classification = "Low Emissions 🌱";
+  if (total <= 4000) {
+    classification = "🌱 Low Emissions Pathway";
     classColor = "#2e8b57";
   } else {
-    classification = "High Emissions ⚠️";
+    classification = "⚠️ High Emissions Pathway";
     classColor = "#d9534f";
   }
 
@@ -710,25 +761,27 @@ function showTotalEmissions() {
 }
 function getExtremeRainfallDays(total) {
   let current, lowEmission;
-
-  if (total < 1100) {
-    // Low emissions
+  
+  if (total <= 4000) {  // ≤4 tonnes CO2/year
+    // Low Emission Scenario (SSP1-2.6)
+    // User is on track with 2030 targets
     current = 15;
     lowEmission = 10;
   } else {
-    // High emissions
-    current = 25;
+    // High Emission Scenario (SSP5-8.5)
+    // User exceeds sustainable pathway
+    current = 30;
     lowEmission = 10;
   }
-
+  
   return { current, lowEmission };
 }
 
 function getLowEmissionImpact(total) {
-  if (total < 1100) {
-    return "Great job! Your low carbon footprint helps keep global temperatures stable. This means precipitation patterns remain more predictable, with fewer extreme weather events. Warmer air holds more moisture, so by keeping emissions low, we prevent the atmosphere from supercharging with excess water vapor that leads to intense rainfall and flooding.";
+  if (total > 4000) {
+    return "Your current emissions exceed sustainable levels and contribute to a 4°C+ warming scenario. This pathway leads to dramatically increased extreme weather events, including severe flooding and precipitation extremes. Small changes in your habits can make a significant difference.";
   } else {
-    return "Your high emissions significantly contribute to global warming. As carbon dioxide traps heat in the atmosphere, global temperatures rise, causing the air to hold more moisture (about 7% more per degree Celsius). This leads to more intense precipitation events and an increase in extreme rainfall days, resulting in increased flooding, erosion, and infrastructure damage. Reducing your carbon footprint can help slow this trend.";
+    return "You're aligned with the global climate target to limit warming to 1.5-2°C. Your lifestyle choices help prevent the worst impacts of climate change, including extreme rainfall events and flooding.";
   }
 }
 
@@ -921,32 +974,31 @@ function showCO2Equivalencies(total, total2100) {
 
 // Function to calculate percentile based on emissions
 function getEmissionsPercentile(totalEmissions) {
-  // Real-world benchmarks (kg CO2 per year)
+  // Updated real-world global distribution (kg CO2 per year per person)
+  // Based on Global Carbon Project + OWID
   const benchmarks = [
-    { percentile: 1, emissions: 500, label: "Ultra Low", description: "bottom 1%" },
-    { percentile: 5, emissions: 1500, label: "Very Low", description: "bottom 5%" },
-    { percentile: 10, emissions: 2500, label: "Low", description: "bottom 10%" },
-    { percentile: 25, emissions: 4000, label: "Below Average", description: "bottom 25%" },
-    { percentile: 50, emissions: 8000, label: "Average", description: "middle 50%" },
-    { percentile: 75, emissions: 12000, label: "Above Average", description: "top 25%" },
-    { percentile: 90, emissions: 16000, label: "High", description: "top 10%" },
-    { percentile: 95, emissions: 20000, label: "Very High", description: "top 5%" },
-    { percentile: 99, emissions: 25000, label: "Ultra High", description: "top 1%" }
+    { percentile: 1,  emissions: 700,    label: "Ultra Low",      description: "bottom 1% globally" },
+    { percentile: 5,  emissions: 1200,   label: "Very Low",       description: "bottom 5% globally" },
+    { percentile: 10, emissions: 2000,   label: "Low",            description: "bottom 10% globally" },
+    { percentile: 25, emissions: 3000,   label: "Below Average",  description: "bottom 25% globally" },
+    { percentile: 50, emissions: 4700,   label: "Average",        description: "global median" },
+    { percentile: 75, emissions: 8000,   label: "Above Average",  description: "top 25% globally" },
+    { percentile: 90, emissions: 10000,  label: "High",           description: "top 10% globally" },
+    { percentile: 95, emissions: 15000,  label: "Very High",      description: "top 5% globally" },
+    { percentile: 99, emissions: 25000,  label: "Ultra High",     description: "top 1% globally" }
   ];
   
-  // Find where user falls
   for (let i = 0; i < benchmarks.length; i++) {
     if (totalEmissions <= benchmarks[i].emissions) {
       return benchmarks[i];
     }
   }
-  
-  // If higher than top 1%
+
   return { 
-    percentile: 99.9, 
-    emissions: totalEmissions, 
-    label: "Extreme", 
-    description: "top 0.1%" 
+    percentile: 99.9,
+    emissions: totalEmissions,
+    label: "Extreme",
+    description: "top 0.1% globally"
   };
 }
 
