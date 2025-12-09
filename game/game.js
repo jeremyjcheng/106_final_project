@@ -622,7 +622,7 @@ function showTotalEmissions() {
   let classification = "";
   let classColor = "";
 
-  if (total <= 4000) {
+  if (total <= 2000) {
     classification = "🌱 Low Emissions Pathway";
     classColor = "#2e8b57";
   } else {
@@ -762,7 +762,7 @@ function showTotalEmissions() {
 function getExtremeRainfallDays(total) {
   let current, lowEmission;
   
-  if (total <= 4000) {  // ≤4 tonnes CO2/year
+  if (total <= 2000) {  // ≤2 tonnes CO2/year
     // Low Emission Scenario (SSP1-2.6)
     // User is on track with 2030 targets
     current = 15;
@@ -778,7 +778,7 @@ function getExtremeRainfallDays(total) {
 }
 
 function getLowEmissionImpact(total) {
-  if (total > 4000) {
+  if (total > 2000) {
     return "Your current emissions exceed sustainable levels and contribute to a 4°C+ warming scenario. This pathway leads to dramatically increased extreme weather events, including severe flooding and precipitation extremes. Small changes in your habits can make a significant difference.";
   } else {
     return "You're aligned with the global climate target to limit warming to 1.5-2°C. Your lifestyle choices help prevent the worst impacts of climate change, including extreme rainfall events and flooding.";
